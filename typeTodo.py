@@ -1,3 +1,7 @@
+#todos:
+#   1: consistency check and both sides editing - db to source
+#   2: normal db storage
+#   3: make other accepted forms of #todo
 
 import sublime, sublime_plugin
 import re, os, time

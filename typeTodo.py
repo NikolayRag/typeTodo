@@ -85,7 +85,8 @@ class TodoCommand(sublime_plugin.EventListener):
 
 
     def cfgStore(self, _id, _state, _cat, _lvl, _fileName, _comment):
-        for cfgRoot, projectName in [self.cfgFindRoot(_fileName)]:
+        projectPair= self.fileFindUpstream(os.path.dirname(_fileName), self.reRootFolderFile)
+        for cfgRoot, projectName in [projectPair]:
             break
         if projectName != '':
             _fileName= os.path.relpath(_fileName, cfgRoot)
@@ -97,23 +98,21 @@ class TodoCommand(sublime_plugin.EventListener):
 
 
 
-#   return [rootFolder, projectName] for file
-#   where rootFolder is first upstream folder with *.sublime-project file
-#   and projectName is * nameof that file
-
-    def cfgFindRoot(self, _fileName):
+#   return [folder, fileName] for file
+#   where folder is first upstream folder with _reFileMask file
+#   and projectName is .group(1) content of that file
+    def fileFindUpstream(self, _folderCheck, _reFileMask):
 #todo: make cache and check it first
-        folderNext= os.path.dirname(_fileName)
         while True:
-            for folderTest in os.listdir(folderNext):
-                fileTest= self.reRootFolderFile.match(folderTest)
+            for folderTest in os.listdir(_folderCheck):
+                fileTest= _reFileMask.match(folderTest)
                 if fileTest and fileTest.group(1):
-                    return [folderNext, fileTest.group(1)]
+                    return [_folderCheck, fileTest.group(1)]
 
-            folderUp= os.path.split(folderNext)[0]
-            if folderUp == folderNext:
+            folderUp= os.path.split(_folderCheck)[0]
+            if folderUp == _folderCheck:
                 break
-            folderNext= folderUp
+            _folderCheck= folderUp
         #defaults if not found *.sublime-project
         return [os.path.join(sublime.packages_path(),'user'), '']
 

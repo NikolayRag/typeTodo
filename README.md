@@ -42,7 +42,7 @@ typeTodo
 ~~~
 
 
--3     db format is defined by first line of .todo file.
+-3 (in progress)     db format is defined by first line of .todo file.
        To change format, edit that first line.
        Defaults are taken from from environment, if present
 ~~~
@@ -60,14 +60,16 @@ typeTodo
            editor username
            edition stamp
            comment, at second line
--3.2
+
+-3.2 (in progress)
        line= '#breef'
        Breef file format, holds:
            'done' state
            category
            id
            comment, on same line
--3.3
+
+-3.3 (in progress)
        first line= '#sql server scheme username pass'
        connection to sql db with same data
 ~~~
@@ -92,7 +94,7 @@ typeTodo
        changing //todo... to //+todo... (adding '+' sign) changes 'done' state in db
        and wipes that comment of the code
 
--4.6
+-4.6 (in progress)
        todo can be created and edited in the middle of string.
 ~~~
 

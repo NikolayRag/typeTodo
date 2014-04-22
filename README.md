@@ -12,7 +12,7 @@ typeTodo
 
 1.3.
        Most interaction is done by ordinary inline source code commenting,
-       without any menus and special shortcuts. Just type and dont look aside.
+       without any menus and special shortcuts. Just type and don't look aside.
 
 
 ###2. TODO creation and editing
@@ -31,7 +31,7 @@ typeTodo
        (for win7 it's stored in *[user]\AppData\Roaming\Sublime Text 2\Packages\User\*)
 
 2.4.
-       Futher edition of existing TODO comment will flush it to db as well, using XXXX as id.
+       Further edition of existing TODO comment will flush it to db as well, using XXXX as id.
 
 2.5.
        Changing ``//todo...`` to ``//+todo...`` (adding '+' sign) changes 'done' state in db
@@ -45,7 +45,7 @@ typeTodo
 
 * XXXX
        - **mandatory**
-       - would be sequental number, unique within project
+       - would be sequential number, unique within project
 * (category)
        - *optional*
        - default: 'blank'
@@ -70,7 +70,7 @@ typeTodo
        If no project is found, *[sublimePackage]/user* folder us used.
 
 4.3. **in progress**
-       ~~First line allways configures database itself.~~
+       ~~First line always configures database itself.~~
 
 4.4. **reserved**
        ~~If configuration omit, defaults are taken from environment variables.~~
@@ -97,7 +97,7 @@ using  following fields:
 * creationStamp
        - date and time task was created. Using **dd/mm/yy hh:mm** format
 * filename
-       - file at which task was created. If *.sublime-project is found, relative peth is stored.
+       - file at which task was created. If *.sublime-project is found, relative path is stored.
 * editorName
        - name of user which edited task last, is taken from environment variable
 * editionStamp
@@ -112,13 +112,13 @@ using  following fields:
        ~~external db connection~~
 
 
-###5. Meaningfull issues
+###5. Meaningful issues
 
 5.1.
        As TODO is created or edited, any changes are saved to db instantly.
 
 5.2.
-       If more than ONE cursor present, nothing is saved to dp as typed.
+       If more than ONE cursor present, nothing is saved to db as typed.
 
 5.3.
        NO braces/hyphens checking is performed

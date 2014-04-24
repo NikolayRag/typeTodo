@@ -33,7 +33,7 @@ class TodoDbFile():
                 if matchParse:
                     __id= int(matchParse.group(3))
                     if __id not in self.todoA:
-                        self.todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), matchParse.group(6))
+                        self.todoA[__id]= TodoFileTask(__id, self.projectName, matchParse.group(5), matchParse.group(6))
                     ctxTodo= matchParse
 
                     self.maxId= max(self.maxId, __id)
@@ -59,6 +59,7 @@ class TodoDbFile():
 
                 if not curTodo.cat: curTodo.cat= ''
 
+
                 curTodo.lvl= int(curTodo.lvl)
                 if curTodo.lvl>=0: curTodo.lvl= '+' +str(curTodo.lvl)
 
@@ -74,7 +75,7 @@ class TodoDbFile():
             self.maxId+= 1
             _id= self.maxId
         if _id not in self.todoA:
-            self.todoA[_id]= TodoTask(_id, self.projectName, self.userName, strStamp)
+            self.todoA[_id]= TodoFileTask(_id, self.projectName, self.userName, strStamp)
 
         self.todoA[_id].set(_state, _cat, _lvl, _fileName, _comment, self.userName, strStamp)
         self.flush()
@@ -115,7 +116,7 @@ class TodoFileTask():
         if _state != '': self.state= _state
         self.cat= _cat
         self.lvl= _lvl
-        self.fileName= _fileName
+        self.fileName= _fileName or ''
         self.comment= _comment
         self.editor= _editor
         self.stamp= _stamp

@@ -32,12 +32,10 @@ class TodoCommand(sublime_plugin.EventListener):
 #todo: remove '$' for new so #todo can be placed before existing text
     reTodoNew= re.compile('^\s*((?://|#)\s*)todo:$')
     reTodoExisting= re.compile('^(?:(?://|#)\s*)([\+\-])?todo\s+(\d+)(?:\s+\((.*)\))?(?:\s+([\+\-]\d+))?\s*:\s*(.*)\s*$')
-    reRootFolderFile= re.compile('(.*)\.sublime-project$')
 
 #todo: make cached stuff per-project (or not?)
     lastCat= 'blank'
     lastLvl= '+0'
-
 
     def on_modified(self, _view):
         #more than one cursors skipped for number of reasons
@@ -69,7 +67,7 @@ class TodoCommand(sublime_plugin.EventListener):
 
     #create new todo in db and return string to replace original 'todo:'
     def substNew(self, _pfx, _view, _region):
-        todoId= self.cfgStore(0, False, self.lastCat, self.lastLvl, _view.file_name(), '')
+        todoId= self.cfgStore(_view, 0, False, self.lastCat, self.lastLvl, _view.file_name(), '')
 
         todoComment= _pfx + 'todo ' +str(todoId) +' (' +self.lastCat +') ' +self.lastLvl +': '
         self.strReplace(_view, _region, todoComment)
@@ -87,7 +85,7 @@ class TodoCommand(sublime_plugin.EventListener):
         _state= _state=='+'
         if _state:
             self.strReplace(_view, _view.full_line(_region), '')
-        _id= self.cfgStore(_id, _state, _cat, _lvl or 0, _view.file_name(), _comment)
+        _id= self.cfgStore(_view, _id, _state, _cat, _lvl or 0, _view.file_name(), _comment)
 
         return _id
 
@@ -100,12 +98,16 @@ class TodoCommand(sublime_plugin.EventListener):
         self.undoMutexFree= 1
 
 
-    def cfgStore(self, _id, _state, _cat, _lvl, _fileName, _comment):
-        projectPair= self.fileFindUpstream(os.path.dirname(_fileName), self.reRootFolderFile)
+    def cfgStore(self, _view, _id, _state, _cat, _lvl, _fileName, _comment):
+        projectPair= self.getProject(_view)
+
         for cfgRoot, projectName in [projectPair]:
             break
         if projectName != '':
-            _fileName= os.path.relpath(_fileName, cfgRoot)
+            if _fileName:
+                _fileName= os.path.relpath(_fileName, cfgRoot)
+            else:
+                _fileName= ''
 
         if cfgRoot not in self.projectDbCache:
             self.projectDbCache[cfgRoot]= TodoDb(cfgRoot, projectName)
@@ -113,24 +115,16 @@ class TodoCommand(sublime_plugin.EventListener):
         return self.projectDbCache[cfgRoot].store(_id, _state, _cat, _lvl, _fileName, _comment)
 
 
-#todo 19 (general) +10: no project returned for new unsaved sourcefile
+#todo 21 (general) +0: handle filename change, basically for new unsaved file
 
-#   return [folder, fileName] for file
-#   where folder is first upstream folder with _reFileMask file
-#   and projectName is .group(1) content of that file
-    def fileFindUpstream(self, _folderCheck, _reFileMask):
-#todo: make cache and check it first
-        while True:
-            for folderTest in os.listdir(_folderCheck):
-                fileTest= _reFileMask.match(folderTest)
-                if fileTest and fileTest.group(1):
-                    return [_folderCheck, fileTest.group(1)]
+#   return [folder, projectName] where
+#       folder is full path used for project first
+#       projectName name ot that folder itself
+    def getProject(self, _view):
+        firstFolderA= _view.window().folders()
+        if len(firstFolderA) and (firstFolderA[0] != ''):
+            return [firstFolderA[0], os.path.split(firstFolderA[0])[1]]
 
-            folderUp= os.path.split(_folderCheck)[0]
-            if folderUp == _folderCheck:
-                break
-            _folderCheck= folderUp
-        #defaults if not found *.sublime-project
         return [os.path.join(sublime.packages_path(),self.packageName), '']
 
 
@@ -151,6 +145,7 @@ class TodoDb():
     def __init__(self, _root, _name):
 
         cfgPath= os.path.join(_root, _name +'.todo')
+#todo 23 (bug) +0: handle unexistent config file
         with open(cfgPath, 'r') as f:
             f.readline() #db config be here
             f.readline()

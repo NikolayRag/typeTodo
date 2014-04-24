@@ -1,0 +1,71 @@
+#db: file
+
+-db 1: +0 ki 14/04/22 11:40 "typeTodo.py" ki 14/04/24 06:45
+	
+
+-interaction 2: -1 ki 14/04/22 11:44 "typeTodo.py" ki 14/04/24 05:54
+	midline TODO
+
+-consistency 3: +0 ki 14/04/22 11:45 "typeTodo.py" ki 14/04/22 11:46
+	check at start
+
+-consistency 4: +0 ki 14/04/22 11:46 "typeTodo.py" ki 14/04/22 11:50
+	check as source edited
+
+-consistency 5: +0 ki 14/04/22 11:47 "typeTodo.py" ki 14/04/22 11:47
+	check as db edited (saved)
+
+-db 6: +0 ki 14/04/22 11:47 "dbSql.py" ki 14/04/24 08:36
+	engine: sql
+
+-db 7: +0 ki 14/04/22 11:47 "dbHttp.py" ki 14/04/24 08:39
+	engine: httpdb
+
+-interaction 8: +0 ki 14/04/22 11:48 "typeTodo.py" ki 14/04/22 11:48
+	category auto-complete
+
+-interaction 9: -1 ki 14/04/22 11:49 "typeTodo.py" ki 14/04/22 17:24
+	using snippets
+
+-interaction 10: +0 ki 14/04/22 11:49 "typeTodo.py" ki 14/04/24 08:35
+	colorizing
+
+-interaction 11: -2 ki 14/04/22 11:53 "typeTodo.py" ki 14/04/22 20:52
+	make more TODO formats available
+
+-doc 12: +0 ki 14/04/22 11:56 "typeTodo.py" ki 14/04/24 08:37
+	removing TODO from code - dont remove it from db
+
+-interaction 13: +0 ki 14/04/22 22:56 "typeTodo.py" ki 14/04/22 22:58
+	make 'done' state be dedicated '', '-', '!', 'x' add probably others
+
++org 14: +0 ki 14/04/24 05:55 "typeTodo.py" ki 14/04/24 06:02
+	default .todo save path is [package]
+
+-db 15: +0 ki 14/04/24 06:31 "typeTodo.py" ki 14/04/24 09:55
+	read db settings and use proper db engine
+
++db 16: +0 ki 14/04/24 06:43 "typeTodo.py" ki 14/04/24 07:55
+	introduce db engine
+
++double 17: +0 ki 14/04/24 07:58 "dbSql.py" ki 14/04/24 08:36
+	sql engine. NOT READY
+
+-config 18: +0 ki 14/04/24 08:50 "dbHttp.py" ki 14/04/24 08:51
+	assign default unique http id at very start
+
++general 19: +10 ki 14/04/24 08:52 "typeTodo.py" ki 14/04/24 09:26
+	fix:no project returned for new unsaved sourcefile
+
+-blank 20: +0 ki 14/04/24 09:26 "" ki 14/04/24 09:26
+	
+
+-general 21: +0 ki 14/04/24 09:26 "typeTodo.py" ki 14/04/24 09:27
+	handle filename change, basically for new unsaved file
+
++bug 22: +0 ki 14/04/24 09:49 "dbFile.py" ki 14/04/24 09:50
+	error was thrown if writing TODO in new unsaved file for new unsaved project
+
+-bug 23: +0 ki 14/04/24 09:55 "typeTodo.py" ki 14/04/24 09:56
+	handle unexistent config file
+

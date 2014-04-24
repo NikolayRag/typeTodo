@@ -1,15 +1,31 @@
-#todos:
-#   1: consistency check and both sides editing - db to source
-#   2: normal db storage
-#   3: make other accepted forms of #todo
+#todo 2 (interaction) -1: midline TODO
+#todo 1 (interaction) -1: multiline TODO
+#todo 8 (interaction) +0: category auto-complete
+#todo 9 (interaction) -1: using snippets
+#todo 10 (interaction) +0: colorizing
+#todo 11 (interaction) -2: make more TODO formats available
+
+#todo 3 (consistency) +0: check at start
+#todo 4 (consistency) +0: check as source edited
+#todo 5 (consistency) +0: check as db edited (saved)
+
+#todo 13 (interaction) +0: make 'done' state be dedicated '', '-', '!', 'x' add probably others
+
+#todo 12 (doc) +0: removing TODO from code - dont remove it from db
+
 
 import sublime, sublime_plugin
 import re, os, time
 
+from dbFile import *
+from dbSql import *
+from dbHttp import *
 
 class TodoCommand(sublime_plugin.EventListener):
-    #folder: TodoSet
-    cfgA= {}
+    packageName= 'typeTodo'
+
+    #{projectFolder: TodoDb} cache
+    projectDbCache= {}
 
     undoMutexFree= 1
     prevTxt= ''
@@ -91,12 +107,13 @@ class TodoCommand(sublime_plugin.EventListener):
         if projectName != '':
             _fileName= os.path.relpath(_fileName, cfgRoot)
 
-        if cfgRoot not in self.cfgA:
-            self.cfgA[cfgRoot]= TodoSet(cfgRoot, projectName)
+        if cfgRoot not in self.projectDbCache:
+            self.projectDbCache[cfgRoot]= TodoDb(cfgRoot, projectName)
 
-        return self.cfgA[cfgRoot].store(_id, _state, _cat, _lvl, _fileName, _comment)
+        return self.projectDbCache[cfgRoot].store(_id, _state, _cat, _lvl, _fileName, _comment)
 
 
+#todo 19 (general) +10: no project returned for new unsaved sourcefile
 
 #   return [folder, fileName] for file
 #   where folder is first upstream folder with _reFileMask file
@@ -114,7 +131,7 @@ class TodoCommand(sublime_plugin.EventListener):
                 break
             _folderCheck= folderUp
         #defaults if not found *.sublime-project
-        return [os.path.join(sublime.packages_path(),'user'), '']
+        return [os.path.join(sublime.packages_path(),self.packageName), '']
 
 
 
@@ -124,143 +141,29 @@ class TodoCommand(sublime_plugin.EventListener):
 
 
 
-class TodoTask():
-    #static, defined at creation
-    id= 0
-    project= ''
-    creator= ''
-    cStamp= ''
 
-    #updatable
-    state= False
-    cat= ''
-    lvl= ''
-    fileName= ''
-    comment= ''
-    editor= ''
-    eStamp= ''
+#   Project-assigned set
+#   Read config and set up db engine
 
-    saved= False
-
-
-    def __init__(self, _id, _project, _creator, _stamp):
-        self.id= _id
-        self.project= _project
-        self.creator= _creator
-        self.cStamp= _stamp
-
-
-    def set(self, _state, _cat, _lvl, _fileName, _comment, _editor, _stamp):
-        if _state != '': self.state= _state
-        self.cat= _cat
-        self.lvl= _lvl
-        self.fileName= _fileName
-        self.comment= _comment
-        self.editor= _editor
-        self.stamp= _stamp
-
-
-    def get(self):
-        return
-
-
-
-
-class TodoSet():
-    projectRoot= ''
-    projectName= ''
-    projectCfg= ''
-
-    strUname= '*Anon'
-
-    #db: sql
-#    dbAddr= ''
-#    dbScheme= 'todos'
-#    dbUname= ''
-#    dbPass= ''
-
-    #db: file
-    maxId= 0
-    todoA= None
+class TodoDb():
+    db= None
 
     def __init__(self, _root, _name):
-        self.projectRoot= _root
-        self.projectName= _name
-        self.projectCfg= os.path.join(self.projectRoot, self.projectName +'.todo')
 
-
-        if 'USERNAME' in os.environ: self.strUname= os.environ['USERNAME']
-#other day, hope it will come
-#        if 'TODO_DB_ADDR' in os.environ: self.dbAddr= os.environ['TODO_DB_ADDR']
-#        if 'TODO_DB_SCHEME' in os.environ: self.dbScheme= os.environ['TODO_DB_SCHEME']
-#        if 'TODO_DB_UNAME' in os.environ: self.dbUname= os.environ['TODO_DB_UNAME']
-#        if 'TODO_DB_PASS' in os.environ: self.dbPass= os.environ['TODO_DB_PASS']
-
-        self.todoA= {}
-
-        if os.path.isfile(self.projectCfg):
-            self.fetch()
-
-
-    def fetch(self):
-        with open(self.projectCfg, 'r') as f:
-#todo: read db settings
+        cfgPath= os.path.join(_root, _name +'.todo')
+        with open(cfgPath, 'r') as f:
             f.readline() #db config be here
             f.readline()
 
-            reTodoParse= re.compile('^([+-])(.*) (\d+): ([+-]\d+) (.+) (\d\d/\d\d/\d\d \d\d:\d\d) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d)$')
-            reCommentParse= re.compile('^\t(.*)$')
-            ctxTodo= None
-            for ln in f:
-                matchParse= reTodoParse.match(ln)
-                if matchParse:
-                    __id= int(matchParse.group(3))
-                    if __id not in self.todoA:
-                        self.todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), matchParse.group(6))
-                    ctxTodo= matchParse
+#todo 15 (db) +0: read db settings and use proper db engine
+        uname= '*Anon'
+        if 'USERNAME' in os.environ: uname= os.environ['USERNAME']
 
-                    self.maxId= max(self.maxId, __id)
-                    continue
-
-                if ctxTodo:
-                    __state= False
-                    if ctxTodo.group(1)=='+': __state= True
-                    matchComment= reCommentParse.match(ln)
-                    self.todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), ctxTodo.group(9))
-                    ctxTodo= None
-
-
-    def flush(self):
-        with open(self.projectCfg, 'w+') as f:
-            f.write("#db: file\n\n")
-
-            for iT in self.todoA:
-                curTodo= self.todoA[iT]
-
-                stateSign= '-'
-                if curTodo.state: stateSign= '+'
-
-                if not curTodo.cat: curTodo.cat= ''
-
-                curTodo.lvl= int(curTodo.lvl)
-                if curTodo.lvl>=0: curTodo.lvl= '+' +str(curTodo.lvl)
-
-                f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(curTodo.lvl), curTodo.creator, curTodo.cStamp, '"'+curTodo.fileName+'"', curTodo.editor, curTodo.stamp]) +"\n\t" +curTodo.comment +"\n\n")
+        self.db= TodoDbFile(uname, _name, cfgPath)
 
 
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
-        _id= int(_id)
+        return self.db.store(_id, _state, _cat, _lvl, _fileName, _comment)
 
-        strStamp= time.strftime("%y/%m/%d %H:%M")
 
-        if not _id:
-            self.maxId+= 1
-            _id= self.maxId
-        if _id not in self.todoA:
-            self.todoA[_id]= TodoTask(_id, self.projectName, self.strUname, strStamp)
-
-        self.todoA[_id].set(_state, _cat, _lvl, _fileName, _comment, self.strUname, strStamp)
-        self.flush()
-
-        return _id
 

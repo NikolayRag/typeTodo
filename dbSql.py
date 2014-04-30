@@ -62,15 +62,13 @@ class TodoDbSql():
           `id_state` int(10) unsigned NOT NULL,\
           `id_category` int(10) unsigned NOT NULL,\
           `priority` int(11) NOT NULL DEFAULT '0',\
-          `id_cuser` int(10) unsigned NOT NULL,\
           `id_user` int(10) unsigned NOT NULL,\
-          `creation` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',\
           `stamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
           `version` int(10) unsigned NOT NULL,\
           `id_filename` int(10) unsigned NOT NULL,\
           `id_project` int(10) unsigned NOT NULL,\
           `comment` text,\
-          PRIMARY KEY (`id`)\
+          PRIMARY KEY (`id`,`version`) USING BTREE\
         "
 
     }
@@ -140,6 +138,7 @@ class TodoDbSql():
 
 
 
+#todo 39 (issue) -1: fail if tables deleted on the fly. Should fix ever?
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
         if not self.reconnect():
             return False
@@ -155,16 +154,18 @@ class TodoDbSql():
         cur.execute("INSERT INTO categories (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", (_cat, self.db_pid))
         db_catId= self.dbConn._result.insert_id
 
+#todo 40 (sql) +0: save subsequent versions as delayed save will be implemented
         if _id:
             cur.execute("SELECT id FROM tasks WHERE id=%s", _id)
             db_taskId= cur.fetchone()
             if not db_taskId:
-                cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_cuser,id_user,creation,version,id_filename,id_project) VALUES (%s,0,0,0,0,0,NOW(),0,0,0)", _id)
+                cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project) VALUES (%s,0,0,0,0,1,0,0)", _id)
 
-            cur.execute("UPDATE tasks SET id_state=%s, id_category=%s, priority=%s, id_user=%s, version=version+1, id_filename=%s, id_project=%s, comment=%s WHERE id=%s", (db_stateId, db_catId, int(_lvl), self.db_uid, db_fileId, self.db_pid, _comment, _id))
+            cur.execute("UPDATE tasks SET id_state=%s, id_category=%s, priority=%s, id_user=%s, version=version+1, id_filename=%s, id_project=%s, comment=%s WHERE id=%s AND version>0", (db_stateId, db_catId, int(_lvl), self.db_uid, db_fileId, self.db_pid, _comment, _id))
 
         else:
-            cur.execute("INSERT INTO tasks (id_state,id_category,priority,id_cuser,id_user,creation,version,id_filename,id_project,comment) VALUES (%s,%s,%s,%s,%s,NOW(),0,%s,%s,%s)", (db_stateId, db_catId, int(_lvl), self.db_uid, self.db_uid, db_fileId, self.db_pid, _comment))
+            cur.execute("INSERT INTO tasks (id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,%s,%s,%s,0,%s,%s,%s)", (db_stateId, db_catId, int(_lvl), self.db_uid, db_fileId, self.db_pid, _comment))
+            cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (LAST_INSERT_ID(),%s,%s,%s,%s,1,%s,%s,%s)", (db_stateId, db_catId, int(_lvl), self.db_uid, db_fileId, self.db_pid, _comment))
             _id= self.dbConn._result.insert_id
 
 

@@ -66,7 +66,7 @@
 +bug 22: +0 ki 14/04/24 09:49 "dbFile.py" ki 14/04/24 09:50
 	error was thrown if writing TODO in new unsaved file for new unsaved project
 
--fix 23: +0 ki 14/04/24 09:55 "typeTodo.py" ki 14/04/29 07:14
++fix 23: +0 ki 14/04/24 09:55 "typeTodo.py" ki 14/04/30 10:52
 	handle unexistent config file
 
 -fix 24: +0 ki 14/04/28 03:36 "dbFile.py" ki 14/04/28 03:37
@@ -87,7 +87,7 @@
 -db 29: +0 ki 14/04/28 22:07 "typeTodo.py" ki 14/04/29 00:45
 	New tasks Id assigning should NOT be delayed. Or yes?
 
--doc 30: +0 ki 14/04/28 22:17 "typeTodo.py" ki 14/04/28 23:54
+-doc 30: +0 ki 14/04/28 22:17 "typeTodo.py" ki 14/04/30 10:16
 	config is taken: 1. project.todo first string, (2. global .todo first string), (3. env variables), (4. hardcoded)
 
 -doc 31: +0 ki 14/04/28 22:31 "typeTodo.py" ki 14/04/28 22:36
@@ -107,4 +107,13 @@
 
 -sql 37: +0 ki 14/04/29 07:16 "dbSql.py" ki 14/04/30 01:47
 	optimize, optimize, opt
+
+-config 38: +0 ki 14/04/30 10:52 "typeTodo.py" ki 14/04/30 10:52
+	reread if changed
+
+-issue 39: -1 ki 14/04/30 11:23 "dbSql.py" ki 14/04/30 11:25
+	fail if tables deleted on the fly. Should fix ever?
+
+-sql 40: +0 ki 14/04/30 12:03 "dbSql.py" ki 14/04/30 12:41
+	save subsequent versions as delayed save will be implemented
 

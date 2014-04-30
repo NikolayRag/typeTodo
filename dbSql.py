@@ -97,7 +97,7 @@ class TodoDbSql():
             return True
 
         try:
-            self.dbConn = pymysql.connect(host=self.dbAddr, port=3306, user=self.dbUname, passwd=self.dbPass, db=self.dbScheme)
+            self.dbConn = pymysql.connect(host=self.dbAddr, port=3306, user=self.dbUname, passwd=self.dbPass, db=self.dbScheme, use_unicode=True, charset="utf8")
             self.dbConn.autocommit(True)
         except:
 #todo 35 (sql) +0: deal with connection errors: host, log, scheme

@@ -117,3 +117,6 @@
 -sql 40: +0 ki 14/04/30 12:03 "dbSql.py" ki 14/04/30 12:41
 	save subsequent versions as delayed save will be implemented
 
++sql 41: +0 ki 14/04/30 18:45 "dbSql.py" ki 14/04/30 18:45
+	unicode supported
+

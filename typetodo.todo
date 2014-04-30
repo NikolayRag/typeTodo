@@ -1,4 +1,4 @@
-#db: file
+# 
 
 -db 1: +0 ki 14/04/22 11:40 "typeTodo.py" ki 14/04/24 06:45
 	
@@ -15,8 +15,8 @@
 -consistency 5: +0 ki 14/04/22 11:47 "typeTodo.py" ki 14/04/22 11:47
 	check as db edited (saved)
 
--db 6: +0 ki 14/04/22 11:47 "dbSql.py" ki 14/04/24 08:36
-	engine: sql
++db 6: +0 ki 14/04/22 11:47 "dbSql.py" ki 14/04/29 07:14
+	engine: sql 
 
 -db 7: +0 ki 14/04/22 11:47 "dbHttp.py" ki 14/04/24 08:39
 	engine: httpdb
@@ -42,7 +42,7 @@
 +org 14: +0 ki 14/04/24 05:55 "typeTodo.py" ki 14/04/24 06:02
 	default .todo save path is [package]
 
--db 15: +0 ki 14/04/24 06:31 "typeTodo.py" ki 14/04/24 09:55
++db 15: +0 ki 14/04/24 06:31 "typeTodo.py" ki 14/04/28 23:52
 	read db settings and use proper db engine
 
 +db 16: +0 ki 14/04/24 06:43 "typeTodo.py" ki 14/04/24 07:55
@@ -66,6 +66,45 @@
 +bug 22: +0 ki 14/04/24 09:49 "dbFile.py" ki 14/04/24 09:50
 	error was thrown if writing TODO in new unsaved file for new unsaved project
 
--bug 23: +0 ki 14/04/24 09:55 "typeTodo.py" ki 14/04/24 09:56
+-fix 23: +0 ki 14/04/24 09:55 "typeTodo.py" ki 14/04/29 07:14
 	handle unexistent config file
+
+-fix 24: +0 ki 14/04/28 03:36 "dbFile.py" ki 14/04/28 03:37
+	support unicode filenames
+
+-fix 25: +0 ki 14/04/28 03:37 "dbFile.py" ki 14/04/28 03:37
+	support unicode comments
+
+-db 26: +0 ki 14/04/28 21:32 "typeTodo.py" ki 14/04/28 22:28
+	move todo array management to base TodoDb class
+
+-db 27: +0 ki 14/04/28 21:32 "typeTodo.py" ki 14/04/28 22:09
+	handle delayed update.
+
+-db 28: +0 ki 14/04/28 21:35 "typeTodo.py" ki 14/04/28 22:10
+	make cached access: read task from db as its needed
+
+-db 29: +0 ki 14/04/28 22:07 "typeTodo.py" ki 14/04/29 00:45
+	New tasks Id assigning should NOT be delayed. Or yes?
+
+-doc 30: +0 ki 14/04/28 22:17 "typeTodo.py" ki 14/04/28 23:54
+	config is taken: 1. project.todo first string, (2. global .todo first string), (3. env variables), (4. hardcoded)
+
+-doc 31: +0 ki 14/04/28 22:31 "typeTodo.py" ki 14/04/28 22:36
+	config string format: 1. '' - full, 2. 'mysql [host] [log] [pas] [scheme] [table]', (3. 'http [host] [repId] [pass]'), (4. 'breef; ...' for duplication)
+
++blank 32: +0 ki 14/04/28 22:31 "typeTodo.py" ki 14/04/28 23:29
+	
+
+-interaction 33: -10 ki 14/04/28 23:31 "typeTodo.py" ki 14/04/28 23:32
+	remove blank TODO from base if set to +
+
+-sql 35: +0 ki 14/04/29 00:43 "dbSql.py" ki 14/04/29 00:45
+	deal with connection errors: host, log, scheme
+
+-db 36: +0 ki 14/04/29 07:14 "dbSql.py" ki 14/04/29 07:14
+	check bad table and do something with it (upgrade? kill?)
+
+-sql 37: +0 ki 14/04/29 07:16 "dbSql.py" ki 14/04/30 01:47
+	optimize, optimize, opt
 

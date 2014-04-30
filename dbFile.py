@@ -1,31 +1,33 @@
 import re, os, time
 
 class TodoDbFile():
+    todoA= None
     projectName= ''
-    projectCfg= ''
     userName= ''
-
+    cfgString= ''
 
     #db related
     reTodoParse= re.compile('^([+-])(.*) (\d+): ([+-]\d+) (.+) (\d\d/\d\d/\d\d \d\d:\d\d) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d)$')
     reCommentParse= re.compile('^\t(.*)$')
 
+    projectFname= ''
     maxId= 0
-    todoA= None
 
 
-    def __init__(self, _uname, _name, _cfg):
+    def __init__(self, _todoA, _uname, _name, _fname, _cfgStr):
+        self.todoA= _todoA
         self.userName= _uname
         self.projectName= _name
-        self.projectCfg= _cfg
+        self.projectFname= _fname
+        self.cfgString= _cfgStr
 
-        self.todoA= {}
+        #{id: TodoFileTask()}
 
         self.fetch()
 
 
     def fetch(self):
-        with open(self.projectCfg, 'r') as f:
+        with open(self.projectFname, 'r') as f:
 
             ctxTodo= None
             for ln in f:
@@ -47,9 +49,13 @@ class TodoDbFile():
                     ctxTodo= None
 
 
+#todo 24 (fix) +0: support unicode filenames
+#todo 25 (fix) +0: support unicode comments
+
     def flush(self):
-        with open(self.projectCfg, 'w+') as f:
-            f.write("#db: file\n\n")
+        with open(self.projectFname, 'w+') as f:
+            f.write(self.cfgString)
+            f.write("\n")
 
             for iT in self.todoA:
                 curTodo= self.todoA[iT]
@@ -91,7 +97,7 @@ class TodoFileTask():
     id= 0
     project= ''
     creator= ''
-    cStamp= ''
+    cStamp= '' #used only for dbFile
 
     #updatable
     state= False
@@ -106,6 +112,8 @@ class TodoFileTask():
 
 
     def __init__(self, _id, _project, _creator, _stamp):
+        self.saved= False
+
         self.id= _id
         self.project= _project
         self.creator= _creator
@@ -113,6 +121,8 @@ class TodoFileTask():
 
 
     def set(self, _state, _cat, _lvl, _fileName, _comment, _editor, _stamp):
+        self.saved= False
+
         if _state != '': self.state= _state
         self.cat= _cat
         self.lvl= _lvl
@@ -121,7 +131,10 @@ class TodoFileTask():
         self.editor= _editor
         self.stamp= _stamp
 
+    def setSaved():
+        self.saved= True
 
+ 
     def get(self):
         return
 

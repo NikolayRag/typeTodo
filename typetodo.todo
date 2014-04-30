@@ -69,10 +69,10 @@
 +fix 23: +0 ki 14/04/24 09:55 "typeTodo.py" ki 14/04/30 10:52
 	handle unexistent config file
 
--fix 24: +0 ki 14/04/28 03:36 "dbFile.py" ki 14/04/28 03:37
++fix 24: +0 ki 14/04/28 03:36 "dbFile.py" ki 14/04/30 23:23
 	support unicode filenames
 
--fix 25: +0 ki 14/04/28 03:37 "dbFile.py" ki 14/04/28 03:37
++fix 25: +0 ki 14/04/28 03:37 "dbFile.py" ki 14/04/30 23:23
 	support unicode comments
 
 -db 26: +0 ki 14/04/28 21:32 "typeTodo.py" ki 14/04/28 22:28
@@ -108,7 +108,7 @@
 -sql 37: +0 ki 14/04/29 07:16 "dbSql.py" ki 14/04/30 01:47
 	optimize, optimize, opt
 
--config 38: +0 ki 14/04/30 10:52 "typeTodo.py" ki 14/04/30 10:52
+-config 38: +0 ki 14/04/30 10:52 "typeTodo.py" ki 14/04/30 23:25
 	reread if changed
 
 -issue 39: -1 ki 14/04/30 11:23 "dbSql.py" ki 14/04/30 11:25

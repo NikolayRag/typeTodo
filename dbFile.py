@@ -1,4 +1,4 @@
-import re, os, time
+import re, os, time, codecs
 
 class TodoDbFile():
     todoA= None
@@ -27,10 +27,10 @@ class TodoDbFile():
 
 
     def fetch(self):
-        with open(self.projectFname, 'r') as f:
-
+        with codecs.open(self.projectFname, 'r', 'UTF-8') as f:
             ctxTodo= None
             for ln in f:
+                ln= ln.splitlines()[0]
                 matchParse= self.reTodoParse.match(ln)
                 if matchParse:
                     __id= int(matchParse.group(3))
@@ -49,11 +49,9 @@ class TodoDbFile():
                     ctxTodo= None
 
 
-#todo 24 (fix) +0: support unicode filenames
-#todo 25 (fix) +0: support unicode comments
 
     def flush(self):
-        with open(self.projectFname, 'w+') as f:
+        with codecs.open(self.projectFname, 'w+', 'UTF-8') as f:
             f.write(self.cfgString)
             f.write("\n")
 

@@ -16,7 +16,7 @@
 
 
 import sublime, sublime_plugin
-import re, os, time
+import re, os, time, codecs
 
 from dbFile import *
 from dbSql import *
@@ -164,18 +164,19 @@ class TodoDb():
         cfgHeaderStrings= ''
 
         try:
-            with open(cfgPath, 'r') as f:
+            with codecs.open(cfgPath, 'r', 'UTF-8') as f:
                 while True:
-                    cfgString= f.readline() #db config be here
-                    if cfgString == '' or cfgString == "\n" or not cfgString: break
+                    cfgString= f.readline().splitlines()[0] #db config be here
+                    if cfgString == '' or not cfgString:
+                        break
 
-                    cfgHeaderStrings+= cfgString
+                    cfgHeaderStrings+= cfgString +"\n"
                     #catch last matched config
                     cfgFoundTry= self.reCfg.match(cfgString)
                     if cfgFoundTry:
                         cfgFound= cfgFoundTry
         except:
-            with open(cfgPath, 'w+') as f:
+            with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
                 f.write('')
 
             cfgHeaderStrings= "# uncomment and configure:\n"\

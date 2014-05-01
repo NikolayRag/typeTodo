@@ -78,7 +78,7 @@
 -db 26: +0 ki 14/04/28 21:32 "typeTodo.py" ki 14/04/28 22:28
 	move todo array management to base TodoDb class
 
--db 27: +0 ki 14/04/28 21:32 "typeTodo.py" ki 14/05/01 15:07
+-db 27: +0 ki 14/04/28 21:32 "db.py" ki 14/05/01 18:41
 	handle delayed update
 
 -db 28: +0 ki 14/04/28 21:35 "typeTodo.py" ki 14/04/28 22:10
@@ -87,7 +87,7 @@
 -db 29: +0 ki 14/04/28 22:07 "typeTodo.py" ki 14/04/29 00:45
 	New tasks Id assigning should NOT be delayed. Or yes?
 
--doc 30: +0 ki 14/04/28 22:17 "typeTodo.py" ki 14/04/30 10:16
+-doc 30: +0 ki 14/04/28 22:17 "db.py" ki 14/05/01 18:47
 	config is taken: 1. project.todo first string, (2. global .todo first string), (3. env variables), (4. hardcoded)
 
 -doc 31: +0 ki 14/04/28 22:31 "typeTodo.py" ki 14/04/28 22:36
@@ -108,8 +108,8 @@
 -sql 37: +0 ki 14/04/29 07:16 "dbSql.py" ki 14/04/30 01:47
 	optimize, optimize, opt
 
--config 38: +0 ki 14/04/30 10:52 "typeTodo.py" ki 14/05/01 15:06
-	reread if changed
+-config 38: +0 ki 14/04/30 10:52 "typeTodo.py" ki 14/05/01 18:54
+	reread if changed; notice cfg cache is up if any other Sublime active
 
 -issue 39: -1 ki 14/04/30 11:23 "dbSql.py" ki 14/04/30 11:25
 	fail if tables deleted on the fly. Should fix ever?
@@ -119,4 +119,19 @@
 
 +sql 41: +0 ki 14/04/30 18:45 "dbSql.py" ki 14/04/30 18:45
 	unicode supported
+
++config 42: +1 ki 14/05/01 16:02 "db.py" ki 14/05/01 18:53
+	check and create as project is opened
+
++errata 43: +0 ki 14/05/01 16:05 "typeTodo.py" ki 14/05/01 16:06
+	.todo file comment corrected
+
+-config 44: +0 ki 14/05/01 18:08 "typeTodo.py" ki 14/05/01 18:53
+	handle .todo creation for entirely new project without files yet
+
+-config 45: +0 ki 14/05/01 18:37 "typeTodo.py" ki 14/05/01 18:37
+	
+
+-assure 46: +0 ki 14/05/01 18:38 "typeTodo.py" ki 14/05/01 18:54
+	is .window() a sufficient condition?
 

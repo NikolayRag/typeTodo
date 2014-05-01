@@ -20,9 +20,7 @@
 import sublime, sublime_plugin
 import re, os, time, codecs
 
-from dbFile import *
-from dbSql import *
-from dbHttp import *
+from db import *
 
 class TodoCommand(sublime_plugin.EventListener):
     packageName= 'typeTodo'
@@ -102,20 +100,15 @@ class TodoCommand(sublime_plugin.EventListener):
 
 
     def cfgStore(self, _view, _id, _state, _cat, _lvl, _fileName, _comment):
-        projectPair= self.getProject(_view)
+        projectPair= self.setDbCache(_view)
 
-        for cfgRoot, projectName in [projectPair]:
-            break
-        if projectName != '':
+        if projectPair['name'] != '':
             if _fileName:
-                _fileName= os.path.relpath(_fileName, cfgRoot)
+                _fileName= os.path.relpath(_fileName, projectPair['root'])
             else:
                 _fileName= ''
 
-        if cfgRoot not in self.projectDbCache:
-            self.projectDbCache[cfgRoot]= TodoDb(cfgRoot, projectName)
-
-        return self.projectDbCache[cfgRoot].store(_id, _state, _cat, _lvl, _fileName, _comment)
+        return self.projectDbCache[projectPair['root']].store(_id, _state, _cat, _lvl, _fileName, _comment)
 
 
 #todo 21 (general) +0: handle filename change, basically for new unsaved file
@@ -126,85 +119,27 @@ class TodoCommand(sublime_plugin.EventListener):
     def getProject(self, _view):
         firstFolderA= _view.window().folders()
         if len(firstFolderA) and (firstFolderA[0] != ''):
-            return [firstFolderA[0], os.path.split(firstFolderA[0])[1]]
+            return {'root': firstFolderA[0], 'name': os.path.split(firstFolderA[0])[1]}
 
-        return [os.path.join(sublime.packages_path(),self.packageName), '']
-
-
+        return {'root': os.path.join(sublime.packages_path(),self.packageName), 'name': ''}
 
 
+    def setDbCache(self, _view):
+        projectPair= self.getProject(_view)
+
+        if projectPair['root'] not in self.projectDbCache:
+            self.projectDbCache[projectPair['root']]= TodoDb(projectPair['root'], projectPair['name'])
+
+        return projectPair
 
 
 
+#todo 38 (config) +0: reread if changed; notice cfg cache is up if any other Sublime active
 
-
-#-todo 26 (db) +0: move todo array management to base TodoDb class
-#todo 27 (db) +0: handle delayed update
-#todo 29 (db) +0: New tasks Id assigning should NOT be delayed. Or yes? 
-#todo 28 (db) +0: make cached access: read task from db as its needed
-
-#   Project-assigned task set
-#   Read config and set up db engine
-
-class TodoDb():
-    db= None
-    todoA= None
-
-    reCfg= re.compile("^\s*(?:(mysql ([^\s]+) ([^\s]+) ([^\s]+) ([^\s]+)))\s*$")
-#    reCfg= re.compile("^\s*(?:(mysql ([^\s]+) ([^\s]+) ([^\s]+) ([^\s]+))|(http ([^\s]+) ([^\s]+) ([^\s]+)))\s*$")
-
-    def __init__(self, _root, _name):
-        self.todoA= {}
-
-        uname= '*Anon'
-        if 'USERNAME' in os.environ: uname= os.environ['USERNAME']
-
-        cfgPath= os.path.join(_root, _name +'.todo')
-
-#todo 38 (config) +0: reread if changed
-        cfgFound= None
-        cfgHeaderStrings= ''
-
-        try:
-            with codecs.open(cfgPath, 'r', 'UTF-8') as f:
-                while True:
-                    cfgString= f.readline().splitlines()[0] #db config be here
-                    if cfgString == '' or not cfgString:
-                        break
-
-                    cfgHeaderStrings+= cfgString +"\n"
-                    #catch last matched config
-                    cfgFoundTry= self.reCfg.match(cfgString)
-                    if cfgFoundTry:
-                        cfgFound= cfgFoundTry
-
-        except:
-            with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
-                f.write('')
-
-            cfgHeaderStrings= "# uncomment and configure:\n"\
-              +"# mysql 127.0.0.1 username password scheme\n"
-
-#todo 30 (doc) +0: config is taken: 1. project.todo first string, (2. global .todo first string), (3. env variables), (4. hardcoded)
-#todo 31 (doc) +0: config string format: 1. '' - full, 2. 'mysql [host] [log] [pas] [scheme] [table]', (3. 'http [host] [repId] [pass]'), (4. 'breef; ...' for duplication)
-
-
-        if cfgFound and cfgFound.group(1):
-            dbAddr= cfgFound.group(2)
-            dbUname= cfgFound.group(3)
-            dbPass= cfgFound.group(4)
-            dbScheme= cfgFound.group(5)
-
-            self.db= TodoDbSql(self.todoA, uname, _name, dbAddr, dbUname, dbPass, dbScheme)
-
-#        elif cfgFound and cfgFound.group(6):
-
-        else:
-            self.db= TodoDbFile(self.todoA, uname, _name, cfgPath, cfgHeaderStrings) #throw in sfgString to restore it in file
-
-
-    def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
-        return self.db.store(_id, _state, _cat, _lvl, _fileName, _comment)
-
+#todo 44 (config) +0: handle .todo creation for entirely new project without files yet
+    def on_load(self, _view):
+#todo 46 (assure) +0: is .window() a sufficient condition?
+        if _view.window():
+            self.setDbCache(_view)
 
 

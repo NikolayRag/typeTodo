@@ -18,7 +18,7 @@
 +db 6: +0 ki 14/04/22 11:47 "dbSql.py" ki 14/04/29 07:14
 	engine: sql 
 
--db 7: +0 ki 14/04/22 11:47 "dbHttp.py" ki 14/04/24 08:39
+-db 7: +0 ki 14/04/22 11:47 "dbHttp.py" ki 14/05/01 15:04
 	engine: httpdb
 
 -interaction 8: +0 ki 14/04/22 11:48 "typeTodo.py" ki 14/04/22 11:48
@@ -69,8 +69,8 @@
 +fix 23: +0 ki 14/04/24 09:55 "typeTodo.py" ki 14/04/30 10:52
 	handle unexistent config file
 
-+fix 24: +0 ki 14/04/28 03:36 "dbFile.py" ki 14/04/30 23:23
-	support unicode filenames
+-db 24: +0 ki 14/04/28 03:36 "юникод.js" ki 14/05/01 15:04
+	проверка юникода 
 
 +fix 25: +0 ki 14/04/28 03:37 "dbFile.py" ki 14/04/30 23:23
 	support unicode comments
@@ -78,8 +78,8 @@
 -db 26: +0 ki 14/04/28 21:32 "typeTodo.py" ki 14/04/28 22:28
 	move todo array management to base TodoDb class
 
--db 27: +0 ki 14/04/28 21:32 "typeTodo.py" ki 14/04/28 22:09
-	handle delayed update.
+-db 27: +0 ki 14/04/28 21:32 "typeTodo.py" ki 14/05/01 15:07
+	handle delayed update
 
 -db 28: +0 ki 14/04/28 21:35 "typeTodo.py" ki 14/04/28 22:10
 	make cached access: read task from db as its needed
@@ -108,7 +108,7 @@
 -sql 37: +0 ki 14/04/29 07:16 "dbSql.py" ki 14/04/30 01:47
 	optimize, optimize, opt
 
--config 38: +0 ki 14/04/30 10:52 "typeTodo.py" ki 14/04/30 23:25
+-config 38: +0 ki 14/04/30 10:52 "typeTodo.py" ki 14/05/01 15:06
 	reread if changed
 
 -issue 39: -1 ki 14/04/30 11:23 "dbSql.py" ki 14/04/30 11:25

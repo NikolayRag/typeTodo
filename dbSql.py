@@ -1,3 +1,5 @@
+# coding= utf-8
+
 '''
     PyMySql is used here under its own license which is included.
 

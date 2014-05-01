@@ -1,3 +1,5 @@
+# coding= utf-8
+
 #todo 2 (interaction) -1: midline TODO
 #todo 1 (interaction) -1: multiline TODO
 #todo 8 (interaction) +0: category auto-complete
@@ -137,7 +139,7 @@ class TodoCommand(sublime_plugin.EventListener):
 
 
 #-todo 26 (db) +0: move todo array management to base TodoDb class
-#todo 27 (db) +0: handle delayed update.
+#todo 27 (db) +0: handle delayed update
 #todo 29 (db) +0: New tasks Id assigning should NOT be delayed. Or yes? 
 #todo 28 (db) +0: make cached access: read task from db as its needed
 
@@ -175,6 +177,7 @@ class TodoDb():
                     cfgFoundTry= self.reCfg.match(cfgString)
                     if cfgFoundTry:
                         cfgFound= cfgFoundTry
+
         except:
             with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
                 f.write('')

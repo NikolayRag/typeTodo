@@ -100,6 +100,7 @@ class TodoCommand(sublime_plugin.EventListener):
 
 
     def cfgStore(self, _view, _id, _state, _cat, _lvl, _fileName, _comment):
+        #used here to make blank projects available
         projectPair= self.setDbCache(_view)
 
         if projectPair['name'] != '':
@@ -134,9 +135,6 @@ class TodoCommand(sublime_plugin.EventListener):
 
 
 
-#todo 38 (config) +0: reread if changed; notice cfg cache is up if any other Sublime active
-
-#todo 44 (config) +0: handle .todo creation for entirely new project without files yet
     def on_load(self, _view):
 #todo 46 (assure) +0: is .window() a sufficient condition?
         if _view.window():

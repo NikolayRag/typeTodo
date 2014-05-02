@@ -16,6 +16,17 @@ from dbHttp import *
 #todo 29 (db) +0: New tasks Id assigning should NOT be delayed. Or yes? 
 #todo 28 (db) +0: make cached access: read task from db as its needed
 
+
+
+
+#todo 38 (config) +0: reread and reconfig if changed (without db transfer); notice that cfg cache is up if any other Sublime active
+#todo 44 (config) +0: handle saving project - existing and blank
+#todo 47 (config) +0: define config sequence
+
+#todo 30 (doc) +0: config is taken: 1. project.todo first string, (2. global .todo first string), (3. env variables), (4. hardcoded)
+#todo 31 (doc) +0: config string format: 1. '' - full, 2. 'mysql [host] [log] [pas] [scheme] [table]', (3. 'http [host] [repId] [pass]'), (4. 'breef; ...' for duplication)
+
+
 #   Project-assigned task set
 #   Read config and set up db engine
 
@@ -54,10 +65,6 @@ class TodoDb():
         except:
             cfgHeaderStrings= "# uncomment and configure. LAST matched line matters:\n"\
               +"# mysql 127.0.0.1 username password scheme\n"
-
-
-#todo 30 (doc) +0: config is taken: 1. project.todo first string, (2. global .todo first string), (3. env variables), (4. hardcoded)
-#todo 31 (doc) +0: config string format: 1. '' - full, 2. 'mysql [host] [log] [pas] [scheme] [table]', (3. 'http [host] [repId] [pass]'), (4. 'breef; ...' for duplication)
 
 
         if cfgFound and cfgFound.group(1): #db: mysql

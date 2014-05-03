@@ -75,7 +75,7 @@
 +fix 25: +0 ki 14/04/28 03:37 "dbFile.py" ki 14/04/30 23:23
 	support unicode comments
 
--db 26: +0 ki 14/04/28 21:32 "typeTodo.py" ki 14/04/28 22:28
+-db 26: +0 ki 14/04/28 21:32 "db.py" ki 14/05/03 15:29
 	move todo array management to base TodoDb class
 
 -db 27: +0 ki 14/04/28 21:32 "db.py" ki 14/05/01 18:41
@@ -108,7 +108,7 @@
 -sql 37: +0 ki 14/04/29 07:16 "dbSql.py" ki 14/04/30 01:47
 	optimize, optimize, opt
 
--config 38: +0 ki 14/04/30 10:52 "db.py" ki 14/05/02 17:33
+-config 38: +0 ki 14/04/30 10:52 "db.py" ki 14/05/03 15:29
 	reread and reconfig if changed (without db transfer); notice that cfg cache is up if any other Sublime active
 
 -issue 39: -1 ki 14/04/30 11:23 "dbSql.py" ki 14/04/30 11:25

@@ -9,13 +9,11 @@ from dbHttp import *
 
 
 
-
 #-todo 26 (db) +0: move todo array management to base TodoDb class
 
 #todo 27 (db) +0: handle delayed update
 #todo 29 (db) +0: New tasks Id assigning should NOT be delayed. Or yes? 
 #todo 28 (db) +0: make cached access: read task from db as its needed
-
 
 
 
@@ -27,8 +25,10 @@ from dbHttp import *
 #todo 31 (doc) +0: config string format: 1. '' - full, 2. 'mysql [host] [log] [pas] [scheme] [table]', (3. 'http [host] [repId] [pass]'), (4. 'breef; ...' for duplication)
 
 
-#   Project-assigned task set
-#   Read config and set up db engine
+'''
+   per-project task set
+   Read config and set up db engine
+'''
 
 class TodoDb():
 

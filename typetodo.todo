@@ -1,9 +1,6 @@
 # 
 
--db 1: +0 ki 14/04/22 11:40 "typeTodo.py" ki 14/04/24 06:45
-	
-
--interaction 2: -1 ki 14/04/22 11:44 "typeTodo.py" ki 14/04/24 05:54
+-interaction 2: -1 ki 14/04/22 11:44 "typeTodo.py" ki 14/05/03 22:32
 	midline TODO
 
 -consistency 3: +0 ki 14/04/22 11:45 "typeTodo.py" ki 14/04/22 11:46
@@ -18,7 +15,7 @@
 +db 6: +0 ki 14/04/22 11:47 "dbSql.py" ki 14/04/29 07:14
 	engine: sql 
 
--db 7: +0 ki 14/04/22 11:47 "dbHttp.py" ki 14/05/01 15:04
+-db 7: +0 ki 14/04/22 11:47 "dbHttp.py" ki 14/05/03 22:57
 	engine: httpdb
 
 -interaction 8: +0 ki 14/04/22 11:48 "typeTodo.py" ki 14/04/22 11:48
@@ -57,11 +54,8 @@
 +general 19: +10 ki 14/04/24 08:52 "typeTodo.py" ki 14/04/24 09:26
 	fix:no project returned for new unsaved sourcefile
 
--blank 20: +0 ki 14/04/24 09:26 "" ki 14/04/24 09:26
-	
-
--general 21: +0 ki 14/04/24 09:26 "typeTodo.py" ki 14/04/24 09:27
-	handle filename change, basically for new unsaved file
+-general 21: +0 ki 14/04/24 09:26 "typeTodo.py" ki 14/05/04 02:22
+	handle filename change, basically for new unsaved files
 
 +bug 22: +0 ki 14/04/24 09:49 "dbFile.py" ki 14/04/24 09:50
 	error was thrown if writing TODO in new unsaved file for new unsaved project
@@ -75,7 +69,7 @@
 +fix 25: +0 ki 14/04/28 03:37 "dbFile.py" ki 14/04/30 23:23
 	support unicode comments
 
--db 26: +0 ki 14/04/28 21:32 "db.py" ki 14/05/03 15:29
+-db 26: +0 ki 14/04/28 21:32 "db.py" ki 14/05/03 22:33
 	move todo array management to base TodoDb class
 
 -db 27: +0 ki 14/04/28 21:32 "db.py" ki 14/05/01 18:41
@@ -90,11 +84,8 @@
 -doc 30: +0 ki 14/04/28 22:17 "db.py" ki 14/05/02 17:28
 	config is taken: 1. project.todo first string, (2. global .todo first string), (3. env variables), (4. hardcoded)
 
--doc 31: +0 ki 14/04/28 22:31 "typeTodo.py" ki 14/04/28 22:36
-	config string format: 1. '' - full, 2. 'mysql [host] [log] [pas] [scheme] [table]', (3. 'http [host] [repId] [pass]'), (4. 'breef; ...' for duplication)
-
-+blank 32: +0 ki 14/04/28 22:31 "typeTodo.py" ki 14/04/28 23:29
-	
+-doc 31: +0 ki 14/04/28 22:31 "db.py" ki 14/05/03 22:15
+	config string format: mysql [host] [log] [pas] [scheme] [table]
 
 -interaction 33: -10 ki 14/04/28 23:31 "typeTodo.py" ki 14/04/28 23:32
 	remove blank TODO from base if set to +
@@ -108,7 +99,7 @@
 -sql 37: +0 ki 14/04/29 07:16 "dbSql.py" ki 14/04/30 01:47
 	optimize, optimize, opt
 
--config 38: +0 ki 14/04/30 10:52 "db.py" ki 14/05/03 15:29
++config 38: +0 ki 14/04/30 10:52 "db.py" ki 14/05/04 02:00
 	reread and reconfig if changed (without db transfer); notice that cfg cache is up if any other Sublime active
 
 -issue 39: -1 ki 14/04/30 11:23 "dbSql.py" ki 14/04/30 11:25
@@ -129,12 +120,27 @@
 -config 44: +0 ki 14/05/01 18:08 "db.py" ki 14/05/02 17:28
 	handle saving project - existing and blank
 
--config 45: +0 ki 14/05/01 18:37 "typeTodo.py" ki 14/05/01 18:37
-	
-
 -assure 46: +0 ki 14/05/01 18:38 "typeTodo.py" ki 14/05/01 18:54
 	is .window() a sufficient condition?
 
 -config 47: +0 ki 14/05/02 17:26 "db.py" ki 14/05/02 17:35
 	define config sequence
+
++outdated 48: +0 ki 14/05/03 22:14 "db.py" ki 14/05/03 22:16
+	config string format: 1. '' - full, 2. 'mysql [host] [log] [pas] [scheme] [table]', (3. 'http [host] [repId] [pass]
+
++config 49: +5 ki 14/05/03 22:29 "db.py" ki 14/05/04 01:09
+	add config reloading ability; Save all (will matter on delayed save) and load again
+
+-interaction 50: +0 ki 14/05/03 22:33 "typeTodo.py" ki 14/05/03 22:47
+	make category into tag list
+
++simplify 54: +0 ki 14/05/03 23:17 "typeTodo.py" ki 14/05/03 23:18
+	getProject returns cached project or creates one
+
+-config 55: +5 ki 14/05/04 01:09 "db.py" ki 14/05/04 02:23
+	delayed: flush (existing) before reset db[engine]
+
++code 56: +0 ki 14/05/04 01:34 "db.py" ki 14/05/04 01:34
+	named cfg match
 

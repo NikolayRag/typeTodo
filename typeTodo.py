@@ -7,6 +7,7 @@
 #todo 10 (interaction) +0: colorizing
 #todo 11 (interaction) -2: make more TODO formats available
 #todo 33 (interaction) -10: remove blank TODO from base if set to +
+#todo 50 (interaction) +0: make category into tag list
 
 #todo 3 (consistency) +0: check at start
 #todo 4 (consistency) +0: check as source edited
@@ -100,44 +101,35 @@ class TodoCommand(sublime_plugin.EventListener):
 
 
     def cfgStore(self, _view, _id, _state, _cat, _lvl, _fileName, _comment):
-        #used here to make blank projects available
-        projectPair= self.setDbCache(_view)
-
-        if projectPair['name'] != '':
-            if _fileName:
-                _fileName= os.path.relpath(_fileName, projectPair['root'])
-            else:
-                _fileName= ''
-
-        return self.projectDbCache[projectPair['root']].store(_id, _state, _cat, _lvl, _fileName, _comment)
+        return self.getDB(_view).store(_id, _state, _cat, _lvl, _fileName, _comment)
 
 
-#todo 21 (general) +0: handle filename change, basically for new unsaved file
+#todo 21 (general) +0: handle filename change, basically for new unsaved files
 
-#   return [folder, projectName] where
-#       folder is full path used for project first
-#       projectName name ot that folder itself
-    def getProject(self, _view):
+    def getDB(self, _view):
+        curRoot= os.path.join(sublime.packages_path(),self.packageName)
+        curName= ''
+
         firstFolderA= _view.window().folders()
+
         if len(firstFolderA) and (firstFolderA[0] != ''):
-            return {'root': firstFolderA[0], 'name': os.path.split(firstFolderA[0])[1]}
+            curRoot= firstFolderA[0]
+            curName= os.path.split(firstFolderA[0])[1]
 
-        return {'root': os.path.join(sublime.packages_path(),self.packageName), 'name': ''}
+        #cache time
+        if curRoot not in self.projectDbCache:
+            self.projectDbCache[curRoot]= TodoDb(curRoot, curName)
+        else:
+            self.projectDbCache[curRoot].update(curRoot, curName)
 
+        return self.projectDbCache[curRoot]
 
-    def setDbCache(self, _view):
-        projectPair= self.getProject(_view)
-
-        if projectPair['root'] not in self.projectDbCache:
-            self.projectDbCache[projectPair['root']]= TodoDb(projectPair['root'], projectPair['name'])
-
-        return projectPair
 
 
 
     def on_load(self, _view):
 #todo 46 (assure) +0: is .window() a sufficient condition?
         if _view.window():
-            self.setDbCache(_view)
+            self.getDB(_view)
 
 

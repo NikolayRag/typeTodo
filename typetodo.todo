@@ -90,7 +90,7 @@
 -interaction 33: -10 ki 14/04/28 23:31 "typeTodo.py" ki 14/05/04 03:51
 	remove blank TODO from base if set to +
 
--sql 35: +0 ki 14/04/29 00:43 "dbSql.py" ki 14/04/29 00:45
+-sql 35: +0 ki 14/04/29 00:43 "dbSql.py" ki 14/05/04 04:15
 	deal with connection errors: host, log, scheme
 
 -db 36: +0 ki 14/04/29 07:14 "dbSql.py" ki 14/04/29 07:14
@@ -105,7 +105,7 @@
 -issue 39: -1 ki 14/04/30 11:23 "dbSql.py" ki 14/04/30 11:25
 	fail if tables deleted on the fly. Should fix ever?
 
--sql 40: +0 ki 14/04/30 12:03 "dbSql.py" ki 14/04/30 12:41
+-sql 40: +0 ki 14/04/30 12:03 "dbSql.py" ki 14/05/04 04:16
 	save subsequent versions as delayed save will be implemented
 
 +sql 41: +0 ki 14/04/30 18:45 "dbSql.py" ki 14/04/30 18:45
@@ -146,4 +146,10 @@
 
 +sql 57: +5 ki 14/05/04 03:31 "dbSql.py" ki 14/05/04 03:36
 	task id should be sequental within project, not db
+
+-sql 58: +0 ki 14/05/04 04:15 "dbSql.py" ki 14/05/04 04:16
 	
+
+-sql 59: -10 ki 14/05/04 04:17 "dbSql.py" ki 14/05/04 04:17
+	(not sure) check table over opened connection too
+

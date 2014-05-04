@@ -107,6 +107,8 @@ class TodoDbSql():
             print 'error: Sql connection'
             return False
 
+#todo 59 (sql) -10: (not sure) check table over opened connection too
+
         #check table
         cur = self.dbConn.cursor()
         for tName in self.dbTablesSrc:

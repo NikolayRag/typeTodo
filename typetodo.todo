@@ -147,9 +147,15 @@
 +sql 57: +5 ki 14/05/04 03:31 "dbSql.py" ki 14/05/04 03:36
 	task id should be sequental within project, not db
 
--sql 58: +0 ki 14/05/04 04:15 "dbSql.py" ki 14/05/04 04:16
-	
-
 -sql 59: -10 ki 14/05/04 04:17 "dbSql.py" ki 14/05/04 04:17
 	(not sure) check table over opened connection too
+
+-issue 60: +10 ki 14/05/04 06:31 "typeTodo.py" ki 14/05/04 06:32
+	task set to '+' and wiped out flushes undo stack
+
++errata 61: +0 ki 14/05/04 06:43 "typeTodo.py" ki 14/05/04 06:44
+	default 'blank' category changed to 'general'
+
++issue 62: +0 ki 14/05/04 06:44 "typeTodo.py" ki 14/05/04 06:45
+	importance level should not be reused
 

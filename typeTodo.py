@@ -17,6 +17,8 @@
 
 #todo 12 (doc) +0: removing TODO from code - dont remove it from db
 
+#todo 60 (issue) +10: task set to '+' and wiped out flushes undo stack
+
 
 import sublime, sublime_plugin
 import re, os, time, codecs
@@ -36,7 +38,7 @@ class TodoCommand(sublime_plugin.EventListener):
     reTodoExisting= re.compile('^(?:(?://|#)\s*)([\+\-])?todo\s+(\d+)(?:\s+\((.*)\))?(?:\s+([\+\-]\d+))?\s*:\s*(.*)\s*$')
 
 #todo: make cached stuff per-project (or not?)
-    lastCat= 'blank'
+    lastCat= 'general'
     lastLvl= '+0'
 
     def on_modified(self, _view):
@@ -81,8 +83,6 @@ class TodoCommand(sublime_plugin.EventListener):
     def substUpdate(self, _state, _id, _cat, _lvl, _comment, _view, _region):
         if _cat != None:
             self.lastCat= _cat
-        if _lvl != None:
-            self.lastLvl= _lvl
 
         _state= _state=='+'
         if _state:

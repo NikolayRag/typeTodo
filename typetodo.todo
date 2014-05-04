@@ -87,7 +87,7 @@
 -doc 31: +0 ki 14/04/28 22:31 "db.py" ki 14/05/03 22:15
 	config string format: mysql [host] [log] [pas] [scheme] [table]
 
--interaction 33: -10 ki 14/04/28 23:31 "typeTodo.py" ki 14/04/28 23:32
+-interaction 33: -10 ki 14/04/28 23:31 "typeTodo.py" ki 14/05/04 03:51
 	remove blank TODO from base if set to +
 
 -sql 35: +0 ki 14/04/29 00:43 "dbSql.py" ki 14/04/29 00:45
@@ -144,3 +144,6 @@
 +code 56: +0 ki 14/05/04 01:34 "db.py" ki 14/05/04 01:34
 	named cfg match
 
++sql 57: +5 ki 14/05/04 03:31 "dbSql.py" ki 14/05/04 03:36
+	task id should be sequental within project, not db
+	

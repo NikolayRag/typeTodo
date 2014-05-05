@@ -100,10 +100,11 @@ class TodoDb():
 
 
 
-        if self.projRoot:
+
+        if _fileName and self.projRoot:
             _fileName= os.path.relpath(_fileName, self.projRoot)
 
-        return self.db.store(_id, _state, _cat, _lvl, _fileName, _comment)
+        return self.db.store(_id, _state, _cat, _lvl, _fileName or '', _comment)
 
 
 

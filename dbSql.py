@@ -12,7 +12,6 @@ sys.path.append('PyMySql-master')
 import pymysql
 
 
-#todo 37 (sql) +0: optimize, optimize, opt
 class TodoDbSql():
     todoA= None
     projectName= ''
@@ -113,16 +112,16 @@ class TodoDbSql():
         cur = self.dbConn.cursor()
         for tName in self.dbTablesSrc:
             #if exists
-            flag= True
+            flagTableOk= True
             try:
                 cur.execute("DESCRIBE " +tName)
 
 #todo 36 (db) +0: check bad table and do something with it (upgrade? kill?)
-#                flag= False
+#                flagTableOk= False
             except:
-                flag= False
+                flagTableOk= False
 
-            if not flag: #didnt exist or removed
+            if not flagTableOk:
                 try:
                     cur.execute("CREATE TABLE  `" +tName +"` (" +self.dbTablesSrc[tName] +") DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1")
                 except:
@@ -142,7 +141,6 @@ class TodoDbSql():
 
 
 
-#todo 39 (issue) -1: fail if tables deleted on the fly. Should fix ever?
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
         if not self.reconnect():
             return False

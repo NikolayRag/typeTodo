@@ -1,12 +1,15 @@
 # coding= utf-8
 
-import sublime, sublime_plugin
-import re, os, time, codecs
+import sys, re, os, time, codecs
 
-from dbFile import *
-from dbSql import *
-from dbHttp import *
-
+if sys.version < '3':
+    from dbFile import *
+    from dbSql import *
+    from dbHttp import *
+else:
+    from .dbFile import *
+    from .dbSql import *
+    from .dbHttp import *
 
 
 #-todo 26 (db) +0: move todo array management to base TodoDb class

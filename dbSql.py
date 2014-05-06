@@ -7,12 +7,13 @@
     project's page is located at http://www.pymysql.org/
 '''
 
-import sys
-sys.path.append('PyMySql-master')
+import sublime
+import sys, os
+
 import pymysql
-
-
+    
 class TodoDbSql():
+
     todoA= None
     projectName= ''
     userName= ''
@@ -103,7 +104,7 @@ class TodoDbSql():
         except:
 #todo 35 (sql) +0: deal with connection errors: host, log, scheme
             self.dbConn= None
-            print 'error: Sql connection'
+            sublime.error_message('TypeTodo MySQL error:\n\n\tSql connection cannot be established,\n\tcheck MySQL settings')
             return False
 
 #todo 59 (sql) -10: (not sure) check table over opened connection too
@@ -125,7 +126,7 @@ class TodoDbSql():
                 try:
                     cur.execute("CREATE TABLE  `" +tName +"` (" +self.dbTablesSrc[tName] +") DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1")
                 except:
-                    print 'error: Sql maintainance'
+                    sublime.error_message('TypeTodo MySQL error:\n\n\tTable \'' +tName +'\' cannot be created')
                     return False
 
         cur.execute("INSERT INTO projects (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", self.projectName)

@@ -1,13 +1,11 @@
-######*v1.2.0*
 typeTodo
 =========
-
-
 
 Sublime plugin that holds source code TODO comments within database.
 
 
-.. ::
+
+.. contents::
 ..
 
 
@@ -15,7 +13,7 @@ Sublime plugin that holds source code TODO comments within database.
 ---------------
 
 1.1.
-       TypeTodo stores and updates verbose TODO comments to external per-project database while leaving breef version inlined in the code.
+       TypeTodo stores and updates verbose TODO comments to external per-project database and leaves breef version inlined in the code.
        
 1.2.
        Available database modes are **.todo** raw text file and **MySQL**

@@ -15,10 +15,25 @@ else:
 
 
 #todo 44 (config) +0: handle saving project - existing and blank
-#todo 47 (config) +0: define config sequence
 
-#todo 30 (doc) +0: config is taken: 1. project.todo first string, (2. global .todo first string), (3. env variables), (4. hardcoded)
-#todo 31 (doc) +0: config string format: mysql [host] [log] [pas] [scheme] [table]
+#-todo 30 (doc) +0: config is taken: 1. project.todo first string, 2. copy from global .todo first string, 3. hardcoded
+
+
+
+defaultCfgPath= ['']
+defaultCfgFound= {'engine': 'file'}
+defaultCfgHeaderStrings= "# uncomment and configure. LAST matched line matters:\n"\
+ +"# mysql 127.0.0.1 username password scheme\n"
+
+def plugin_loaded():
+    defaultCfgPath[0]= os.path.join(sublime.packages_path(), 'User', '.todo')
+    if not os.path.isfile(defaultCfgPath[0]):
+        with codecs.open(defaultCfgPath[0], 'w+', 'UTF-8') as f:
+            f.write(defaultCfgHeaderStrings)
+
+if sys.version < '3':
+    plugin_loaded()
+
 
 
 '''
@@ -27,7 +42,6 @@ else:
 '''
 
 class TodoDb():
-
     projUser= '*Anon*'
     projRoot= ''
     projName= ''
@@ -55,8 +69,8 @@ class TodoDb():
     def reset(self):
         cfgPath= os.path.join(self.projRoot, self.projName +'.todo')
 
-        cfgFound= {'engine': 'file'}
-        cfgHeaderStrings= ''
+        cfgFound= defaultCfgFound
+        cfgHeaderStrings= defaultCfgHeaderStrings
 
         cfgFoundA= [cfgFound]
         try:
@@ -64,17 +78,12 @@ class TodoDb():
             cfgFound= cfgFoundA[0]
         except:
             #try load default .todo config
-            cfgDefPath= os.path.join(sublime.packages_path(), 'User', '.todo')
-
             try:
-                cfgHeaderStrings= self.readCfg(cfgDefPath, cfgFoundA)
+                cfgHeaderStrings= self.readCfg(defaultCfgPath[0], cfgFoundA)
                 cfgFound= cfgFoundA[0]
 
             except: #create default .todo config
-                cfgHeaderStrings= "# uncomment and configure. LAST matched line matters:\n"\
-                  +"# mysql 127.0.0.1 username password scheme\n"
-
-                with codecs.open(cfgDefPath, 'w+', 'UTF-8') as f:
+                with codecs.open(defaultCfgPath[0], 'w+', 'UTF-8') as f:
                   f.write(cfgHeaderStrings)
 
 
@@ -133,6 +142,4 @@ class TodoDb():
             _fileName= os.path.relpath(_fileName, self.projRoot)
 
         return self.db.store(_id, _state, _cat, _lvl, _fileName or '', _comment)
-
-
 

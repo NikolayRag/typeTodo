@@ -1,17 +1,22 @@
-######*v1.1.0*
+######*v1.2.0*
 typeTodo
 =========
+
 
 
 Sublime plugin that holds source code TODO comments within database.
 
 
+.. contents::
+..
 
-###1. Key features
+
+1. Key features
+---------------
 
 1.1.
-       TypeTodo stores and updates TODO comments to external per-project database.
-
+       TypeTodo stores and updates verbose TODO comments to external per-project database while leaving breef version inlined in the code.
+       
 1.2.
        Available database modes are **.todo** raw text file and **MySQL**
 
@@ -19,9 +24,12 @@ Sublime plugin that holds source code TODO comments within database.
        Most interaction is done by ordinary inline source code commenting,
        without any menus and special shortcuts. Just type and don't look aside.
 
+1.4.
+       Each TODO created is assigned ID, unique within project
 
 
-###2. TODO creation and editing
+2. TODO creation and editing
+----------------------------
 
 2.1.
        As colon ':' is typed after ``//todo:`` (or ``#todo:`` here and later) comment,
@@ -49,7 +57,8 @@ Sublime plugin that holds source code TODO comments within database.
        and wipes that comment of the code.
 
 
-###3. TODO comment fields
+3. TODO comment fields
+----------------------
 
 3.1.
        TODO is a comment in form of ``//todo XXXX [(category)] [+|-N]: comment`` with following fields used:
@@ -70,7 +79,8 @@ Sublime plugin that holds source code TODO comments within database.
        - comment is any remaining text till the end of line
 
 
-###4. .todo database and config file
+4. .todo database and config file
+---------------------------------
 
 4.1.
        _[projectName].todo_ file is both configuration and default storage database.
@@ -137,7 +147,8 @@ using  following fields:
 
 
 
-###5. Meaningful issues
+5. Meaningful issues
+--------------------
 
 5.1.
        As TODO is created or edited, any changes are saved to db instantly, even if current source file is not saved.
@@ -149,7 +160,8 @@ using  following fields:
        NO braces/hyphens checking is performed. So if ``#todo:`` line is a part of multiline string, it WILL expand as typed.
        
 
-##6.         --> WARNING<--
+6. --> WARNING<--
+-------------------------
 
 6.1.
        as NO (no) consistency checking is performed

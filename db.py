@@ -2,10 +2,14 @@
 
 import sys, re, os, time, codecs
 
-from dbFile import *
-from dbSql import *
-from dbHttp import *
-
+if sys.version < '3':
+    from dbFile import *
+    from dbSql import *
+    from dbHttp import *
+else:
+    from .dbFile import *
+    from .dbSql import *
+    from .dbHttp import *
 
 #-todo 26 (db) +0: move todo array management to base TodoDb class
 
@@ -60,10 +64,7 @@ class TodoDb():
             cfgFound= cfgFoundA[0]
         except:
             #try load default .todo config
-            if sys.version < '3':
-                cfgDefPath= os.path.join(sublime.packages_path(), 'TypeTodo', '.todo')
-            else:
-                cfgDefPath= os.path.join(os.path.abspath(os.path.dirname(__file__)),'.todo')
+            cfgDefPath= os.path.join(sublime.packages_path(), 'User', '.todo')
 
             try:
                 cfgHeaderStrings= self.readCfg(cfgDefPath, cfgFoundA)

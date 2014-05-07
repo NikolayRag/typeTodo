@@ -11,7 +11,6 @@ else:
     from .dbSql import *
     from .dbHttp import *
 
-
 #-todo 26 (db) +0: move todo array management to base TodoDb class
 
 
@@ -59,26 +58,36 @@ class TodoDb():
         cfgFound= {'engine': 'file'}
         cfgHeaderStrings= ''
 
+        cfgFoundA= [cfgFound]
         try:
-            with codecs.open(cfgPath, 'r', 'UTF-8') as f:
-                while True:
-                    cfgString= f.readline().splitlines()[0] #db config be here
-                    if cfgString == '' or not cfgString:
-                        break
-
-                    cfgHeaderStrings+= cfgString +"\n"
-                    #catch last matched config
-                    cfgFoundTry= self.reCfg.match(cfgString)
-                    if cfgFoundTry:
-                        cfgFound= cfgFoundTry.groupdict()
-
+            cfgHeaderStrings= self.readCfg(cfgPath, cfgFoundA)
+            cfgFound= cfgFoundA[0]
         except:
-            cfgHeaderStrings= "# uncomment and configure. LAST matched line matters:\n"\
-              +"# mysql 127.0.0.1 username password scheme\n"
+            #try load default .todo config
+            if sys.version < '3':
+                cfgDefPath= os.path.join(sublime.packages_path(), 'TypeTodo', '.todo')
+            else:
+                cfgDefPath= os.path.join(os.path.abspath(os.path.dirname(__file__)),'.todo')
+
+            try:
+                cfgHeaderStrings= self.readCfg(cfgDefPath, cfgFoundA)
+                cfgFound= cfgFoundA[0]
+
+            except: #create default .todo config
+                cfgHeaderStrings= "# uncomment and configure. LAST matched line matters:\n"\
+                  +"# mysql 127.0.0.1 username password scheme\n"
+
+                with codecs.open(cfgDefPath, 'w+', 'UTF-8') as f:
+                  f.write(cfgHeaderStrings)
+
+
+            if cfgFound['engine'] != 'file': #save new blank cfg
+                with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
+                  f.write(cfgHeaderStrings)
+
 
         if cfgFound == self.cfgA:
             return
-
 
 #todo 55 (config) +5: delayed: flush (existing) before reset db[engine]
         self.cfgA= cfgFound
@@ -92,6 +101,25 @@ class TodoDb():
             self.db= TodoDbFile(self.todoA, self.projUser, self.projName, cfgPath, cfgHeaderStrings) #throw in sfgString to restore it in file
 
 
+
+    def readCfg(self, _cfgPath, _cfgFound):
+        cfgHeaderStrings= ''
+
+        with codecs.open(_cfgPath, 'r', 'UTF-8') as f:
+            while True:
+                l= f.readline().splitlines()
+                if l == []: break
+                cfgString= l[0]
+                if cfgString == '' or not cfgString:
+                    break
+
+                cfgHeaderStrings+= cfgString +"\n"
+                #catch last matched config
+                cfgFoundTry= self.reCfg.match(cfgString)
+                if cfgFoundTry:
+                    _cfgFound[0]= cfgFoundTry.groupdict()
+
+            return cfgHeaderStrings
 
 
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):

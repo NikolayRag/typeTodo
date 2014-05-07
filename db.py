@@ -2,14 +2,10 @@
 
 import sys, re, os, time, codecs
 
-if sys.version < '3':
-    from dbFile import *
-    from dbSql import *
-    from dbHttp import *
-else:
-    from .dbFile import *
-    from .dbSql import *
-    from .dbHttp import *
+from dbFile import *
+from dbSql import *
+from dbHttp import *
+
 
 #-todo 26 (db) +0: move todo array management to base TodoDb class
 

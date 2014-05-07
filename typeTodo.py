@@ -23,10 +23,7 @@
 import sublime, sublime_plugin
 import sys, re, os, time, codecs
 
-if sys.version < '3':
-    from db import *
-else:
-    from .db import *
+from db import *
 
 
 

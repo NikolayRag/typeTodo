@@ -7,7 +7,7 @@ typeTodo
 Sublime plugin that holds source code TODO comments within database.
 
 
-.. contents::
+.. ::
 ..
 
 

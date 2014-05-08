@@ -16,7 +16,7 @@ else:
 
 #todo 44 (config) +0: handle saving project - existing and blank
 
-#-todo 30 (doc) +0: config is taken: 1. project.todo first string, 2. copy from global .todo first string, 3. hardcoded
+#-todo 30 (doc) +0: config is taken: 1. project.do first string, 2. copy from global .do first string, 3. hardcoded
 
 
 
@@ -26,7 +26,7 @@ defaultCfgHeaderStrings= "# uncomment and configure. LAST matched line matters:\
  +"# mysql 127.0.0.1 username password scheme\n"
 
 def plugin_loaded():
-    defaultCfgPath[0]= os.path.join(sublime.packages_path(), 'User', '.todo')
+    defaultCfgPath[0]= os.path.join(sublime.packages_path(), 'User', '.do')
     if not os.path.isfile(defaultCfgPath[0]):
         with codecs.open(defaultCfgPath[0], 'w+', 'UTF-8') as f:
             f.write(defaultCfgHeaderStrings)
@@ -67,7 +67,7 @@ class TodoDb():
 
 
     def reset(self):
-        cfgPath= os.path.join(self.projRoot, self.projName +'.todo')
+        cfgPath= os.path.join(self.projRoot, self.projName +'.do')
 
         cfgFound= defaultCfgFound
         cfgHeaderStrings= defaultCfgHeaderStrings
@@ -77,12 +77,12 @@ class TodoDb():
             cfgHeaderStrings= self.readCfg(cfgPath, cfgFoundA)
             cfgFound= cfgFoundA[0]
         except:
-            #try load default .todo config
+            #try load default .do config
             try:
                 cfgHeaderStrings= self.readCfg(defaultCfgPath[0], cfgFoundA)
                 cfgFound= cfgFoundA[0]
 
-            except: #create default .todo config
+            except: #create default .do config
                 with codecs.open(defaultCfgPath[0], 'w+', 'UTF-8') as f:
                   f.write(cfgHeaderStrings)
 

@@ -19,6 +19,7 @@
 
 #todo 60 (issue) +10: task set to '+' and wiped out flushes undo stack
 
+
 import sublime, sublime_plugin
 import sys, re, os, time, codecs
 
@@ -26,6 +27,7 @@ if sys.version < '3':
     from db import *
 else:
     from .db import *
+
 
 
 #todo 65 (code) -1: make class for db cache
@@ -127,9 +129,9 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
             lastCat[0]= _cat
 
         _state= _state=='+'
+        _id= self.cfgStore(_id, _state, _cat, _lvl or 0, self.view.file_name(), _comment)
         if _state:
             self.view.replace(_edit, self.view.full_line(_region), '')
-        _id= self.cfgStore(_id, _state, _cat, _lvl or 0, self.view.file_name(), _comment)
 
         return _id
 

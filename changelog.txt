@@ -1,0 +1,24 @@
+v1.2.4
+
+- .todo files renamed to .do
+- .do color markup added
+
+
+v1.2.3
+
+- bugfixes
+
+
+v1.2.0
+
+- ST3 supported
+
+
+v1.1.0
+
+- MySQL support added
+
+
+v1.0.0
+- basic #todo recognising and editing
+- .todo database

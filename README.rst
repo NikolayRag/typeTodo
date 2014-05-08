@@ -16,7 +16,7 @@ Keep TODO comments at one place as they typed anywhere in project.
        TypeTodo stores and updates verbose TODO comments to external per-project database and leaves breef version inlined in the code.
        
 1.2.
-       Available database modes are **.todo** raw text file and **MySQL**
+       Available database modes are **.do** raw text file and **MySQL**
 
 1.3.
        Most interaction is done by ordinary inline source code commenting,
@@ -38,13 +38,13 @@ Keep TODO comments at one place as they typed anywhere in project.
 
 2.2.
        and stored within user-specified database.
-       Database is _[projectName].todo_ raw text file which is placed right above first folder, included in project.
-       OR database is specified within that _[projectName].todo_ file
+       Database is _[projectName].do_ raw text file which is placed right above first folder, included in project.
+       OR database is specified within that _[projectName].do_ file
 
 * database configuration is described in section 4
        
 2.3.
-       If at a moment there's no project used, then all-in-one _.todo_ file is used as a database.
+       If at a moment there's no project used, then all-in-one _.do_ file is used as a database.
        (for win7 it's stored in _[user]\AppData\Roaming\Sublime Text 2\Packages\User\_)
 
 2.4.
@@ -77,28 +77,28 @@ Keep TODO comments at one place as they typed anywhere in project.
        - comment is any remaining text till the end of line
 
 
-4. .todo database and config file
+4. .do database and config file
 ---------------------------------
 
 4.1.
-       _[projectName].todo_ file is both configuration and default storage database.
+       _[projectName].do_ file is both configuration and default storage database.
 
 4.2.
        It is placed within the parent of first folder which is included in project.
-       That is, if first folder included in project is _/stuff/z-files/sourcesA_, then database/config will be stored at _/stuff/z-files/z-files.todo_ file.
-       _[projectName].todo_ is automatically created as project is loaded.
+       That is, if first folder included in project is _/stuff/z-files/sourcesA_, then database/config will be stored at _/stuff/z-files/z-files.do_ file.
+       _[projectName].do_ is automatically created as project is loaded.
 
 4.3.
-       If theres no project in Sublime, then _[sublimePackage]/typeTodo/.todo_ is used.
+       If theres no project in Sublime, then _[sublimePackage]/typeTodo/.do_ is used.
        
 4.4.
-       First non-blank lines of _.todo_ file are used to configure database itself.
+       First non-blank lines of _.do_ file are used to configure database itself.
        The configuration is taken from **last** line within this block that matches supported settings.
-       _.todo_ file is checked periodically for database configuration, and it reapplies if changed
+       _.do_ file is checked periodically for database configuration, and it reapplies if changed
       
 4.5.
-       **.todo** default configuration.
-       If no acceptable configuration found, then database is stored within _[projectname].todo_ file itself.
+       **.do** default configuration.
+       If no acceptable configuration found, then database is stored within _[projectname].do_ file itself.
        Each todo have form of
 
 ~~~

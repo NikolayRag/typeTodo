@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+	<key>fileTypes</key>
+	<array>
+		<string>do</string>
+	</array>
+
+        <key>name</key>
+        <string>typeTodo</string>
+
+        <key>scopeName</key>
+        <string>text.typeTodo</string>
+
+        <key>patterns</key>
+        <array>
+		<dict>
+			<key>begin</key>
+			<string>^\+(.*) (\d+): ([+-]\d+) (.+) (\d\d/\d\d/\d\d \d\d:\d\d) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d)$</string>
+			<key>name</key>
+			<string>comment.typetodo</string>
+			<key>end</key>
+			<string>^\s*$</string>
+		</dict>
+
+        	<dict>
+			<key>begin</key>
+			<string>^-(.*) (\d+): (?:(\+0)|(-\d+)|(\+\d+)) (.+) (\d\d/\d\d/\d\d \d\d:\d\d) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d)$</string>
+			<key>name</key>
+			<string>entity.typetodo</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>constant.typetodo</string>
+				</dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.typetodo</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>constant.typetodo</string>
+				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>markup.inserted.typetodo</string>
+				</dict>
+				<key>5</key>
+				<dict>
+					<key>name</key>
+					<string>markup.deleted.typetodo</string>
+				</dict>
+				<key>6</key>
+				<dict>
+					<key>name</key>
+					<string>number.typetodo</string>
+				</dict>
+				<key>7</key>
+				<dict>
+					<key>name</key>
+					<string>number.typetodo</string>
+				</dict>
+				<key>8</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.typetodo</string>
+				</dict>
+				<key>9</key>
+				<dict>
+					<key>name</key>
+					<string>number.typetodo</string>
+				</dict>
+				<key>10</key>
+				<dict>
+					<key>name</key>
+					<string>number.typetodo</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>^\s*$</string>
+	       	</dict>
+        </array>
+
+        <key>uuid</key>
+        <string>9aced47c-0089-41db-ac5b-d1b77c142386</string>
+    </dict>
+</plist>

@@ -19,7 +19,6 @@
 
 #todo 60 (issue) +10: task set to '+' and wiped out flushes undo stack
 
-
 import sublime, sublime_plugin
 import sys, re, os, time, codecs
 
@@ -27,7 +26,6 @@ if sys.version < '3':
     from db import *
 else:
     from .db import *
-
 
 
 #todo 65 (code) -1: make class for db cache
@@ -73,15 +71,16 @@ class TodoCommand(sublime_plugin.EventListener):
 
 
 
+#todo: make cached stuff per-project (or not?)
+lastCat= ['general']
+lastLvl= '+0'
+
 class TypetodoSubstCommand(sublime_plugin.TextCommand):
     prevTxt= ''
 #todo: remove '$' for new so #todo can be placed before existing text
     reTodoNew= re.compile('^\s*((?://|#)\s*)todo:$')
     reTodoExisting= re.compile('^(?:(?://|#)\s*)([\+\-])?todo\s+(\d+)(?:\s+\((.*)\))?(?:\s+([\+\-]\d+))?\s*:\s*(.*)\s*$')
 
-#todo: make cached stuff per-project (or not?)
-    lastCat= 'general'
-    lastLvl= '+0'
 
 
     def run(self, _edit):
@@ -114,9 +113,9 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
 
     #create new todo in db and return string to replace original 'todo:'
     def substNew(self, _pfx, _edit, _region):
-        todoId= self.cfgStore(0, False, self.lastCat, self.lastLvl, self.view.file_name(), '')
+        todoId= self.cfgStore(0, False, lastCat[0], lastLvl, self.view.file_name(), '')
 
-        todoComment= _pfx + 'todo ' +str(todoId) +' (' +self.lastCat +') ' +self.lastLvl +': '
+        todoComment= _pfx + 'todo ' +str(todoId) +' (' +lastCat[0] +') ' +lastLvl +': '
         self.view.replace(_edit, _region, todoComment)
 
         return todoId
@@ -125,7 +124,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
     #store to db and, if changed state, remove comment
     def substUpdate(self, _state, _id, _cat, _lvl, _comment, _edit, _region):
         if _cat != None:
-            self.lastCat= _cat
+            lastCat[0]= _cat
 
         _state= _state=='+'
         if _state:

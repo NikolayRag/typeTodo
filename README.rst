@@ -1,7 +1,7 @@
 typeTodo
 =========
 
-Sublime plugin that holds source code TODO comments within database.
+Keep TODO comments at one place as they typed anywhere in project.
 
 
 

@@ -64,13 +64,22 @@ class TodoCommand(sublime_plugin.EventListener):
         if _view.window():
             getDB(_view)
 
-    def on_modified(self, _view):
+#todo: need to get 'previous' string state without caching to avoid bugs when typing part of 'todo:' while changing cursor position
+#in general - make triggering more clear
+#use command_history()? Its also dont fit perfect
+
+    #maybe lil overheat here, but it works
+    def on_selection_modified(self, _view):
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
             _view.run_command('typetodo_subst')
             self.mutexUnlocked= 1
 
-
+    def on_modified(self, _view):
+        if self.mutexUnlocked:
+            self.mutexUnlocked= 0
+            _view.run_command('typetodo_subst', {'_tryedit': True})
+            self.mutexUnlocked= 1
 
 
 #todo: make cached stuff per-project (or not?)
@@ -78,41 +87,55 @@ lastCat= ['general']
 lastLvl= '+0'
 
 class TypetodoSubstCommand(sublime_plugin.TextCommand):
-    prevTxt= ''
+    stateList= {
+        '+': True,
+        '-': False,
+        None: False
+    }
+
+    prevMatchNew= None
 #todo: remove '$' for new so #todo can be placed before existing text
-    reTodoNew= re.compile('^\s*((?://|#)\s*)todo:$')
+    reTodoNew= re.compile('^(\s*(?://|#)\s*)todo(:)?$')
+
+    prevMatchMod= None
     reTodoExisting= re.compile('^(?:(?://|#)\s*)([\+\-])?todo\s+(\d+)(?:\s+\((.*)\))?(?:\s+([\+\-]\d+))?\s*:\s*(.*)\s*$')
 
+    prevText= ''
 
-
-    def run(self, _edit):
+    def run(self, _edit, _tryedit= False):
         #more than one cursors skipped for number of reasons
         if (len(self.view.sel())!=1):
             return
 
         todoRegion = self.view.line(self.view.sel()[0])
         todoText = self.view.substr(todoRegion)
-#todo: need to get 'previous' string state without caching to avoid bugs when typing part of 'todo:' while changing cursor position
-#in general - make triggering more clear
-#use command_history()? Its also dont fit perfect
-        prevCheck= self.prevTxt
-        self.prevTxt= todoText
+
+        #shortcut
+        if todoText == self.prevText:
+            return
+        self.prevText= todoText
 
         _new = self.reTodoNew.match(todoText)
-        #get the moment ':' is added to avoid triggering on undo/redo/paste
-        if _new and (todoText==prevCheck+':'):
-            resNew= self.substNew(_new.group(1), _edit, todoRegion)
-            if not resNew:
-                sublime.status_message('Todo creation failed')
+        if _new:
+            #should trigger if ':' entered but was not here
+            if _tryedit and (_new.group(2) and self.prevMatchNew):
+                if not self.substNew(_new.group(1), _edit, todoRegion):
+                    sublime.status_message('Todo creation failed')
+
+            self.prevMatchNew= _new.group(2)==None
             return
 
         _mod= self.reTodoExisting.match(todoText)
-        if _mod :
-            resUpdate= self.substUpdate(_mod.group(1), _mod.group(2), _mod.group(3), _mod.group(4), _mod.group(5), _edit, todoRegion)
-            if not resUpdate:
-                sublime.status_message('Todo update failed')
-            return
+        if _mod:
+            state= self.stateList[_mod.group(1)]
+            #should trigger if '+' is either absent or was not here;
+            if _tryedit and (not state or self.prevMatchMod):
+                if not self.substUpdate(state, _mod.group(2), _mod.group(3), _mod.group(4), _mod.group(5), _edit, todoRegion):
+                    sublime.status_message('Todo update failed')
 
+            self.prevMatchMod= state==False
+            return
+ 
     #create new todo in db and return string to replace original 'todo:'
     def substNew(self, _pfx, _edit, _region):
         todoId= self.cfgStore(0, False, lastCat[0], lastLvl, self.view.file_name(), '')
@@ -128,13 +151,10 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
         if _cat != None:
             lastCat[0]= _cat
 
-        _state= _state=='+'
         _id= self.cfgStore(_id, _state, _cat, _lvl or 0, self.view.file_name(), _comment)
         if _state:
             self.view.replace(_edit, self.view.full_line(_region), '')
-
         return _id
-
 
     def cfgStore(self, _id, _state, _cat, _lvl, _fileName, _comment):
         return getDB(self.view).store(_id, _state, _cat, _lvl, _fileName, _comment)

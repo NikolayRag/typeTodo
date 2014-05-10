@@ -1,3 +1,8 @@
+v1.2.5
+
+- fixed bug with undoing done (+) doplets
+
+
 v1.2.4
 
 - .todo files renamed to .do

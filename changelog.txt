@@ -1,16 +1,9 @@
-v1.2.5
+v1.2.6
 
+- fixed bug with creating .do for blank projects
 - fixed bug with undoing done (+) doplets
-
-
-v1.2.4
-
 - .todo files renamed to .do
 - .do color markup added
-
-
-v1.2.3
-
 - bugfixes
 
 

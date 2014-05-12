@@ -35,12 +35,10 @@ else:
 projectDbCache= {}
 
 def getDB(_view):
-    curRoot= os.path.dirname(__file__)
+    curRoot= ''
     curName= ''
 
     firstFolderA= _view.window().folders()
-
-    print curRoot
 
     if len(firstFolderA) and (firstFolderA[0] != ''):
         curRoot= firstFolderA[0]

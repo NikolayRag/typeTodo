@@ -40,6 +40,8 @@ def getDB(_view):
 
     firstFolderA= _view.window().folders()
 
+    print curRoot
+
     if len(firstFolderA) and (firstFolderA[0] != ''):
         curRoot= firstFolderA[0]
         curName= os.path.split(firstFolderA[0])[1]
@@ -72,13 +74,15 @@ class TodoCommand(sublime_plugin.EventListener):
     def on_selection_modified(self, _view):
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
-            _view.run_command('typetodo_subst')
+            if len(_view.sel())==1: #more than one cursors skipped for number of reasons
+                _view.run_command('typetodo_subst')
             self.mutexUnlocked= 1
 
     def on_modified(self, _view):
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
-            _view.run_command('typetodo_subst', {'_tryedit': True})
+            if len(_view.sel())==1: #more than one cursors skipped for number of reasons
+                _view.run_command('typetodo_subst', {'_modified': True})
             self.mutexUnlocked= 1
 
 
@@ -102,11 +106,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
 
     prevText= ''
 
-    def run(self, _edit, _tryedit= False):
-        #more than one cursors skipped for number of reasons
-        if (len(self.view.sel())!=1):
-            return
-
+    def run(self, _edit, _modified= False):
         todoRegion = self.view.line(self.view.sel()[0])
         todoText = self.view.substr(todoRegion)
 
@@ -118,7 +118,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
         _new = self.reTodoNew.match(todoText)
         if _new:
             #should trigger if ':' entered but was not here
-            if _tryedit and (_new.group(2) and self.prevMatchNew):
+            if _modified and (_new.group(2) and self.prevMatchNew):
                 if not self.substNew(_new.group(1), _edit, todoRegion):
                     sublime.status_message('Todo creation failed')
 
@@ -129,7 +129,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
         if _mod:
             state= self.stateList[_mod.group(1)]
             #should trigger if '+' is either absent or was not here;
-            if _tryedit and (not state or self.prevMatchMod):
+            if _modified and (not state or self.prevMatchMod):
                 if not self.substUpdate(state, _mod.group(2), _mod.group(3), _mod.group(4), _mod.group(5), _edit, todoRegion):
                     sublime.status_message('Todo update failed')
 
@@ -158,6 +158,5 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
 
     def cfgStore(self, _id, _state, _cat, _lvl, _fileName, _comment):
         return getDB(self.view).store(_id, _state, _cat, _lvl, _fileName, _comment)
-
 
 #todo 21 (general) +0: handle filename change, basically for new unsaved files

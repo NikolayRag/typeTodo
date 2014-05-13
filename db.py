@@ -134,7 +134,7 @@ class TodoDb():
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
 
 #todo 27 (db) +0: handle delayed update
-#todo 29 (db) +0: New tasks Id assigning should NOT be delayed. Or yes? 
+#todo 29 (db) +0: New tasks Id assigning should NOT be delayed.
 #todo 28 (db) +0: make cached access: read task from db as its needed
         self.reset()
 

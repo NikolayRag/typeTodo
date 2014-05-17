@@ -20,17 +20,20 @@ else:
 
 
 
-defaultCfgPath= ['','']
-defaultCfgFound= {'engine': 'file'}
-defaultCfgHeaderStrings= "# uncomment and configure. LAST matched line matters:\n"\
- +"# mysql 127.0.0.1 username password scheme\n"
+defaultCfg= {
+    'path': '',
+    'file': '',
+    'db': {'engine': 'file'},
+    'header': "# uncomment and configure. LAST matched line matters:\n"\
+        +"# mysql 127.0.0.1 username password scheme\n"
+}
 
 def plugin_loaded():
-    defaultCfgPath[0]= os.path.join(sublime.packages_path(), 'User')
-    defaultCfgPath[1]= os.path.join(defaultCfgPath[0], '.do')
-    if not os.path.isfile(defaultCfgPath[1]):
-        with codecs.open(defaultCfgPath[1], 'w+', 'UTF-8') as f:
-            f.write(defaultCfgHeaderStrings)
+    defaultCfg['path']= os.path.join(sublime.packages_path(), 'User')
+    defaultCfg['file']= os.path.join(defaultCfg['path'], '.do')
+    if not os.path.isfile(defaultCfg['file']):
+        with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
+            f.write(defaultCfg['header'])
 
 if sys.version < '3':
     plugin_loaded()
@@ -66,14 +69,14 @@ class TodoDb():
         self.projName= _name
         self.projRoot= _root
         if _root == '':
-            self.projRoot= defaultCfgPath[0]
+            self.projRoot= defaultCfg['path']
 
 
     def reset(self):
         cfgPath= os.path.join(self.projRoot, self.projName +'.do')
 
-        cfgFound= defaultCfgFound
-        cfgHeaderStrings= defaultCfgHeaderStrings
+        cfgFound= defaultCfg['db']
+        cfgHeaderStrings= defaultCfg['header']
 
         cfgFoundA= [cfgFound]
         try:
@@ -82,11 +85,11 @@ class TodoDb():
         except:
             #try load default .do config; and create if none
             try:
-                cfgHeaderStrings= self.readCfg(defaultCfgPath[1], cfgFoundA)
+                cfgHeaderStrings= self.readCfg(defaultCfg['file'], cfgFoundA)
                 cfgFound= cfgFoundA[0]
 
             except: #create default .do config
-                with codecs.open(defaultCfgPath[1], 'w+', 'UTF-8') as f:
+                with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
                   f.write(cfgHeaderStrings)
 
 
@@ -127,6 +130,7 @@ class TodoDb():
                 cfgFoundTry= self.reCfg.match(cfgString)
                 if cfgFoundTry:
                     _cfgFound[0]= cfgFoundTry.groupdict()
+                    print _cfgFound[0]
 
             return cfgHeaderStrings
 

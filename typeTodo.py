@@ -33,9 +33,12 @@ else:
 projectDbCache= {}
 
 def getDB(_view):
+#todo 46 (assure) +0: is .window() a sufficient condition?
+    if not _view.window(): return False
+
     curRoot= ''
     curName= ''
-
+    
     firstFolderA= _view.window().folders()
 
     if len(firstFolderA) and (firstFolderA[0] != ''):
@@ -56,10 +59,8 @@ def getDB(_view):
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
-    def on_load(self, _view):
-#todo 46 (assure) +0: is .window() a sufficient condition?
-        if _view.window():
-            getDB(_view)
+    def on_activated(self, _view):
+        getDB(_view)
 
 #todo: need to get 'previous' string state without caching to avoid bugs when typing part of 'todo:' while changing cursor position
 #in general - make triggering more clear

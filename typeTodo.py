@@ -82,8 +82,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
             self.mutexUnlocked= 1
 
 
-
-
 class TypetodoSubstCommand(sublime_plugin.TextCommand):
 #todo: make cached stuff per-project (or not?)
     lastCat= ['general']
@@ -136,9 +134,9 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
  
     #create new todo in db and return string to replace original 'todo:'
     def substNew(self, _pfx, _edit, _region):
-        todoId= self.cfgStore(0, False, self.lastCat[0], lastLvl, self.view.file_name(), '')
+        todoId= self.cfgStore(0, False, self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 
-        todoComment= _pfx + 'todo ' +str(todoId) +' (' +self.lastCat[0] +') ' +lastLvl +': '
+        todoComment= _pfx + 'todo ' +str(todoId) +' (' +self.lastCat[0] +') ' +self.lastLvl +': '
         self.view.replace(_edit, _region, todoComment)
 
         return todoId

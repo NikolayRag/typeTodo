@@ -182,7 +182,7 @@ class TodoTask():
     fileName= ''
     comment= ''
     editor= ''
-    eStamp= ''
+    stamp= ''
 
     saved= False
 

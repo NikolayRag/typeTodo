@@ -146,6 +146,9 @@ class TodoDbSql():
         return True
 
 
+#public#
+
+
     def flush(self):
         if not self.reconnect():
             return False

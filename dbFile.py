@@ -59,6 +59,9 @@ class TodoDbFile():
 
 
 
+#public#
+
+
     def flush(self):
         with codecs.open(self.projectFname, 'w+', 'UTF-8') as f:
             f.write(self.cfgString)

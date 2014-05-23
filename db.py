@@ -16,7 +16,7 @@ else:
 
 #todo 44 (config) +0: handle saving project - existing and blank
 
-#-todo 30 (doc) +0: config is taken: 1. project.do first string, 2. copy from global .do first string, 3. hardcoded
+#todo 30 (doc) +0: config is taken: 1. project.do first string, 2. copy from global .do first string, 3. hardcoded
 
 
 
@@ -47,8 +47,8 @@ if sys.version < '3':
 
 class TodoDb():
     projUser= '*Anon*'
-    projRoot= ''
-    projName= ''
+    projectRoot= ''
+    projectName= ''
 
     cfgA= None
 
@@ -66,14 +66,15 @@ class TodoDb():
     def update(self, _root, _name):
         if 'USERNAME' in os.environ: self.projUser= os.environ['USERNAME']
 
-        self.projName= _name
-        self.projRoot= _root
+        self.projectName= _name
+        self.projectRoot= _root
         if _root == '':
-            self.projRoot= defaultCfg['path']
+            self.projectRoot= defaultCfg['path']
 
 
+##
     def reset(self):
-        cfgPath= os.path.join(self.projRoot, self.projName +'.do')
+        cfgPath= os.path.join(self.projectRoot, self.projectName +'.do')
 
         cfgFound= defaultCfg['db']
         cfgHeaderStrings= defaultCfg['header']
@@ -106,11 +107,11 @@ class TodoDb():
         self.todoA= {}
 
         if cfgFound['engine']== 'mysql':
-            self.db= TodoDbSql(self.todoA, self.projUser, self.projName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['scheme'])
+            self.db= TodoDbSql(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['scheme'])
 #        elif cfgFound['engine']== 'http':
 #            return
         else:
-            self.db= TodoDbFile(self.todoA, self.projUser, self.projName, cfgPath, cfgHeaderStrings) #throw in sfgString to restore it in file
+            self.db= TodoDbFile(self.todoA, self.projUser, self.projectName, cfgPath, cfgHeaderStrings) #throw in sfgString to restore it in file
 
 
 
@@ -130,23 +131,82 @@ class TodoDb():
                 cfgFoundTry= self.reCfg.match(cfgString)
                 if cfgFoundTry:
                     _cfgFound[0]= cfgFoundTry.groupdict()
-                    print _cfgFound[0]
 
             return cfgHeaderStrings
 
-
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
-
 #todo 27 (db) +0: handle delayed update
 #todo 29 (db) +0: New tasks Id assigning should NOT be delayed.
 #todo 28 (db) +0: make cached access: read task from db as its needed
         self.reset()
 
+        if _fileName and self.projectRoot:
+            _fileName= os.path.relpath(_fileName, self.projectRoot)
+        _fileName= _fileName or ''
+
+        _id= int(_id)
+
+        strStamp= time.strftime("%y/%m/%d %H:%M")
+
+        if not _id:
+#todo 26 (db) +0: handle unresponsive db task creation
+            _id= self.db.newId()
+
+        if _id not in self.todoA:
+            self.todoA[_id]= TodoTask(_id, self.projectName, self.projUser, strStamp)
+
+        self.todoA[_id].set(_state, _cat, _lvl, _fileName, _comment, self.projUser, strStamp)
+
+
+        self.db.flush()
+
+        return _id
 
 
 
-        if _fileName and self.projRoot:
-            _fileName= os.path.relpath(_fileName, self.projRoot)
 
-        return self.db.store(_id, _state, _cat, _lvl, _fileName or '', _comment)
+
+
+
+class TodoTask():
+    #static, defined at creation
+    id= 0
+    project= ''
+    creator= ''
+    cStamp= '' #used only for dbFile
+
+    #updatable
+    state= False
+    cat= ''
+    lvl= ''
+    fileName= ''
+    comment= ''
+    editor= ''
+    eStamp= ''
+
+    saved= False
+
+
+    def __init__(self, _id, _project, _creator, _stamp):
+        self.saved= False
+
+        self.id= _id
+        self.project= _project
+        self.creator= _creator
+        self.cStamp= _stamp
+
+
+    def set(self, _state, _cat, _lvl, _fileName, _comment, _editor, _stamp):
+        self.saved= False
+
+        if _state != '': self.state= _state
+        self.cat= _cat
+        self.lvl= _lvl
+        self.fileName= _fileName or ''
+        self.comment= _comment
+        self.editor= _editor
+        self.stamp= _stamp
+
+    def setSaved(self):
+        self.saved= True
 

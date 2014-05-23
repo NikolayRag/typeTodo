@@ -146,44 +146,53 @@ class TodoDbSql():
         return True
 
 
-
-    def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
+    def flush(self):
         if not self.reconnect():
             return False
-
         cur = self.dbConn.cursor()
 
-        cur.execute("INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", str(_state))
-        db_stateId= self.dbConn._result.insert_id
+        for iT in self.todoA:
+            curTodo= self.todoA[iT]
+            if curTodo.saved: continue
 
-        cur.execute("INSERT INTO files (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", (_fileName, self.db_pid))
-        db_fileId= self.dbConn._result.insert_id
+            cur.execute("INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", str(curTodo.state))
+            db_stateId= self.dbConn._result.insert_id
 
-        cur.execute("INSERT INTO categories (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", (_cat, self.db_pid))
-        db_catId= self.dbConn._result.insert_id
+            cur.execute("INSERT INTO files (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", (curTodo.fileName, self.db_pid))
+            db_fileId= self.dbConn._result.insert_id
 
-#todo 40 (sql) +0: save subsequent versions as delayed save will be implemented
-        if _id:
-            cur.execute("SELECT id FROM tasks WHERE id=%s AND id_project=%s", (_id, self.db_pid))
-            db_taskId= cur.fetchone()
-            if not db_taskId:
-                cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,%s,%s,%s,%s,1,%s,%s,%s)", (_id, db_stateId, db_catId, int(_lvl), self.db_uid, db_fileId, self.db_pid, _comment))
+            cur.execute("INSERT INTO categories (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", (curTodo.cat, self.db_pid))
+            db_catId= self.dbConn._result.insert_id
 
-            cur.execute("UPDATE tasks SET id_state=%s, id_category=%s, priority=%s, id_user=%s, version=version+1, id_filename=%s, comment=%s WHERE id=%s AND version>0 AND id_project=%s", (db_stateId, db_catId, int(_lvl), self.db_uid, db_fileId, _comment, _id, self.db_pid))
 
-        else:
-            cur.execute("SELECT max(id) max_id FROM tasks WHERE id_project IN (%s)", self.db_pid)
-            _id= cur.fetchone()
-            if _id and _id[0]:
-                _id= int(_id[0]) +1
-            else:
-                _id= 1
+    #todo 40 (sql) +0: save subsequent versions as delayed save will be implemented
+            cur.execute("SELECT id FROM tasks WHERE id=%s AND id_project=%s", (curTodo.id, self.db_pid))
+            if not cur.fetchone():
+                cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,%s,%s,%s,%s,1,%s,%s,%s)", (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, db_fileId, self.db_pid, curTodo.comment))
 
-            cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,%s,%s,%s,%s,0,%s,%s,%s)", (_id, db_stateId, db_catId, int(_lvl), self.db_uid, db_fileId, self.db_pid, _comment))
-            cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,%s,%s,%s,%s,1,%s,%s,%s)", (_id, db_stateId, db_catId, int(_lvl), self.db_uid, db_fileId, self.db_pid, _comment))
+            cur.execute("UPDATE tasks SET id_state=%s, id_category=%s, priority=%s, id_user=%s, version=version+1, id_filename=%s, comment=%s WHERE id=%s AND version>0 AND id_project=%s", (db_stateId, db_catId, curTodo.lvl, self.db_uid, db_fileId, curTodo.comment, curTodo.id, self.db_pid))
+
+            curTodo.setSaved()
 
         cur.close()
 
+        return True
+
+
+    def newId(self):
+        if not self.reconnect():
+            return False
+        cur = self.dbConn.cursor()
+
+        cur.execute("SELECT max(id) max_id FROM tasks WHERE id_project IN (%s)", self.db_pid)
+        _id= cur.fetchone()
+        if _id and _id[0]:
+            _id= int(_id[0]) +1
+        else:
+            _id= 1
+
+        cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,0,0,0,%s,0,0,%s,'')", (_id, self.db_uid, self.db_pid))
+        cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,0,0,0,%s,1,0,%s,'')", (_id, self.db_uid, self.db_pid))
+
+        cur.close()
         return _id
-
-

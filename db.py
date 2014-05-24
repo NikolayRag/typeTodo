@@ -51,7 +51,8 @@ class TodoDb():
 #todo 67 (general) +0: move cfg to class
     cfgA= None
 
-    flushTimeout= 5 #seconds
+#todo 75 (general) +0: make longer flush delay when having on_exit analog
+    flushTimeout= 2 #seconds
     timerFlush= None
     dirty= False
 
@@ -169,21 +170,20 @@ class TodoDb():
         return newId
 
     def flush(self, _final=False):
-        if not self.dirty: return
-
         self.timerFlush.cancel()
+
+        if not self.dirty: return
 
         if self.db.flush():
             self.dirty= False
             return
         
-#todo 72 (fix) +0: solve exception
-#        if not _final:
-#            sublime.status_message('TypeTodo error:\n\tcannot flush todo\'s\n\nWill retry in 5 sec\'s')
-#            self.timerFlush = Timer(self.flushTimeout, self.flush)
-#            self.timerFlush.start()
-#        else:
-        sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s')
+        if not _final:
+            sublime.set_timeout(lambda: sublime.status_message('TypeTodo error:\n\tcannot flush todo\'s\n\nWill retry in 5 sec\'s'), 0)
+            self.timerFlush = Timer(self.flushTimeout, self.flush)
+            self.timerFlush.start()
+        else:
+            sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s')
 
 
 class TodoTask():

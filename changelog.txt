@@ -1,3 +1,16 @@
+v1.3.0
+
+new:
+- internal: TodoTask are managed now from TodoDb. Step toward buffered flush and consistency check.
+- buffered flush introduced; all changes are flushed after 2 seconds of idle
+- as a result of buffered flush, SQL stores full history of TODO changes. No SQL table definitions affected.
+
+fixes:
+- idented doplets doesnt seems to be saved as edited; Now they do
+
+known issues:
+- changes flushed in 2 seconds of idle, so they will be lost if ST is exited in that time.
+
 v1.2.6
 
 - fixed bug with creating .do for blank projects

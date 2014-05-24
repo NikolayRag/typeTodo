@@ -175,6 +175,7 @@ class TodoDb():
         if not self.dirty: return
 
         if self.db.flush():
+            sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
             self.dirty= False
             return
         

@@ -143,6 +143,7 @@ using  following fields:
 * states
 * tasks
 
+All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved.
 
 
 5. Meaningful issues
@@ -157,6 +158,8 @@ using  following fields:
 5.3.
        NO braces/hyphens checking is performed. So if ``#todo:`` line is a part of multiline string, it WILL expand as typed.
        
+5.4.
+       Changes are flushed in 2 seconds of idle, so they will be lost if ST is exited in that time.
 
 6. --> WARNING<--
 -------------------------

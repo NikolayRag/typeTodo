@@ -63,24 +63,31 @@ class TodoDbFile():
 
 
     def flush(self):
-        with codecs.open(self.projectFname, 'w+', 'UTF-8') as f:
-            f.write(self.cfgString)
-            f.write("\n")
+        try:
+            with codecs.open(self.projectFname, 'w+', 'UTF-8') as f:
+                f.write(self.cfgString)
+                f.write("\n")
 
-            for iT in self.todoA:
-                curTodo= self.todoA[iT]
-                self.maxId= max(self.maxId, curTodo.id)
+                for iT in self.todoA:
+                    curTodo= self.todoA[iT]
+                    self.maxId= max(self.maxId, curTodo.id)
 
-                stateSign= '-'
-                if curTodo.state: stateSign= '+'
+                    stateSign= '-'
+                    if curTodo.state: stateSign= '+'
 
-                if not curTodo.cat: curTodo.cat= ''
+                    if not curTodo.cat: curTodo.cat= ''
 
 
-                curTodo.lvl= int(curTodo.lvl)
-                if curTodo.lvl>=0: curTodo.lvl= '+' +str(curTodo.lvl)
+                    curTodo.lvl= int(curTodo.lvl)
+                    if curTodo.lvl>=0: curTodo.lvl= '+' +str(curTodo.lvl)
 
-                f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(curTodo.lvl), curTodo.creator, curTodo.cStamp, '"'+curTodo.fileName+'"', curTodo.editor, curTodo.stamp]) +"\n\t" +curTodo.comment +"\n\n")
+                    f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(curTodo.lvl), curTodo.creator, curTodo.cStamp, '"'+curTodo.fileName+'"', curTodo.editor, curTodo.stamp]) +"\n\t" +curTodo.comment +"\n\n")
+
+            return True
+
+        except:
+            return False
+
 
     def newId(self):
         self.maxId+= 1

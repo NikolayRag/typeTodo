@@ -168,13 +168,15 @@ class TodoDbSql():
             db_catId= self.dbConn._result.insert_id
 
 
-    #todo 40 (sql) +0: save subsequent versions as delayed save will be implemented
-            cur.execute("SELECT id FROM tasks WHERE id=%s AND id_project=%s", (curTodo.id, self.db_pid))
-            if not cur.fetchone():
-                cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,%s,%s,%s,%s,1,%s,%s,%s)", (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, db_fileId, self.db_pid, curTodo.comment))
+            newVersion= 1
+            cur.execute("SELECT max(version) FROM tasks WHERE id=%s AND id_project=%s", (curTodo.id, self.db_pid))
+            recentTask= cur.fetchone()
+            if recentTask:
+                newVersion= recentTask[0]+1
 
-            cur.execute("UPDATE tasks SET id_state=%s, id_category=%s, priority=%s, id_user=%s, version=version+1, id_filename=%s, comment=%s WHERE id=%s AND version>0 AND id_project=%s", (db_stateId, db_catId, curTodo.lvl, self.db_uid, db_fileId, curTodo.comment, curTodo.id, self.db_pid))
+            cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)", (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment))
 
+#todo 69 (sql) +0: behave at individual save result
             curTodo.setSaved()
 
         cur.close()
@@ -195,7 +197,6 @@ class TodoDbSql():
             _id= 1
 
         cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,0,0,0,%s,0,0,%s,'')", (_id, self.db_uid, self.db_pid))
-        cur.execute("INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,0,0,0,%s,1,0,%s,'')", (_id, self.db_uid, self.db_pid))
 
         cur.close()
         return _id

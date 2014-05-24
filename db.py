@@ -1,6 +1,6 @@
 # coding= utf-8
 
-import sys, re, os, time, codecs
+import sys, re, os, time, codecs, threading
 
 if sys.version < '3':
     from dbFile import *
@@ -10,9 +10,6 @@ else:
     from .dbFile import *
     from .dbSql import *
     from .dbHttp import *
-
-#-todo 26 (db) +0: move todo array management to base TodoDb class
-
 
 #todo 44 (config) +0: handle saving project - existing and blank
 
@@ -50,7 +47,12 @@ class TodoDb():
     projectRoot= ''
     projectName= ''
 
+#todo 67 (general) +0: move cfg to class
     cfgA= None
+
+    flushTimeout= 5 #seconds
+    timerFlush= None
+    dirty= False
 
     db= None
     todoA= None
@@ -59,9 +61,10 @@ class TodoDb():
 #    reCfg= re.compile("^\s*(?:(mysql ([^\s]+) ([^\s]+) ([^\s]+) ([^\s]+))|(http ([^\s]+) ([^\s]+) ([^\s]+)))\s*$")
 
     def __init__(self, _root, _name):
+        self.timerFlush = Timer(0, None) #dummy
+
         self.update(_root, _name)
         self.reset()
-
 
     def update(self, _root, _name):
         if 'USERNAME' in os.environ: self.projUser= os.environ['USERNAME']
@@ -102,7 +105,8 @@ class TodoDb():
         if cfgFound == self.cfgA:
             return
 
-#todo 55 (config) +5: delayed: flush (existing) before reset db[engine]
+        self.flush(True)
+
         self.cfgA= cfgFound
         self.todoA= {}
 
@@ -135,8 +139,6 @@ class TodoDb():
             return cfgHeaderStrings
 
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
-#todo 27 (db) +0: handle delayed update
-#todo 29 (db) +0: New tasks Id assigning should NOT be delayed.
 #todo 28 (db) +0: make cached access: read task from db as its needed
         self.reset()
 
@@ -148,24 +150,39 @@ class TodoDb():
 
         strStamp= time.strftime("%y/%m/%d %H:%M")
 
-        if not _id:
-#todo 26 (db) +0: handle unresponsive db task creation
-            _id= self.db.newId()
+#todo 66 (db) +0: handle unresponsive db task creation
+        newId= _id or self.db.newId()
 
-        if _id not in self.todoA:
-            self.todoA[_id]= TodoTask(_id, self.projectName, self.projUser, strStamp)
+#todo 71 (db) +0: instantly remove blank new task from cache before saving if set to +
+        if newId not in self.todoA: #for new and repairing tasks
+            self.todoA[newId]= TodoTask(newId, self.projectName, self.projUser, strStamp)
 
-        self.todoA[_id].set(_state, _cat, _lvl, _fileName, _comment, self.projUser, strStamp)
+        if _id:
+            self.dirty= True
+            self.todoA[newId].set(_state, _cat, _lvl, _fileName, _comment, self.projUser, strStamp)
 
+        self.timerFlush.cancel()
+        self.timerFlush = Timer(self.flushTimeout, self.flush)
+        self.timerFlush.start()
 
-        self.db.flush()
+        return newId
 
-        return _id
+    def flush(self, _final=False):
+        if not self.dirty: return
 
+        self.timerFlush.cancel()
 
-
-
-
+        if self.db.flush():
+            self.dirty= False
+            return
+        
+#todo 72 (fix) +0: solve exception
+#        if not _final:
+#            sublime.status_message('TypeTodo error:\n\tcannot flush todo\'s\n\nWill retry in 5 sec\'s')
+#            self.timerFlush = Timer(self.flushTimeout, self.flush)
+#            self.timerFlush.start()
+#        else:
+        sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s')
 
 
 class TodoTask():
@@ -184,11 +201,10 @@ class TodoTask():
     editor= ''
     stamp= ''
 
-    saved= False
-
+    saved= True
 
     def __init__(self, _id, _project, _creator, _stamp):
-        self.saved= False
+        self.saved= True
 
         self.id= _id
         self.project= _project

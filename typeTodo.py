@@ -55,7 +55,7 @@ def getDB(_view):
 
 
 
-
+#todo 70 (db) +10: flush at exit
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
@@ -98,7 +98,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
     reTodoNew= re.compile('^(\s*(?://|#)\s*)todo(:)?$')
 
     prevMatchMod= None
-    reTodoExisting= re.compile('^(?:(?://|#)\s*)([\+\-])?todo\s+(\d+)(?:\s+\((.*)\))?(?:\s+([\+\-]\d+))?\s*:\s*(.*)\s*$')
+    reTodoExisting= re.compile('^(?:\s*(?://|#)\s*)([\+\-])?todo\s+(\d+)(?:\s+\((.*)\))?(?:\s+([\+\-]\d+))?\s*:\s*(.*)\s*$')
 
     prevText= ''
 

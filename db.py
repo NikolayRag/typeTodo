@@ -1,6 +1,7 @@
 # coding= utf-8
 
-import sys, re, os, time, codecs, threading
+import sys, re, os, time, codecs
+from threading import Timer
 
 if sys.version < '3':
     from dbFile import *

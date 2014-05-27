@@ -14,8 +14,6 @@ else:
 
 #todo 44 (config) +0: handle saving project - existing and blank
 
-#todo 30 (doc) +0: config is taken: 1. project.do first string, 2. copy from global .do first string, 3. hardcoded
-
 
 
 defaultCfg= {
@@ -51,8 +49,7 @@ class TodoDb():
 #todo 67 (general) +0: move cfg to class
     cfgA= None
 
-#todo 75 (general) +0: make longer flush delay when having on_exit analog
-    flushTimeout= 2 #seconds
+    flushTimeout= 5 #seconds
     timerFlush= None
     dirty= False
 
@@ -141,7 +138,6 @@ class TodoDb():
             return cfgHeaderStrings
 
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
-#todo 28 (db) +0: make cached access: read task from db as its needed
         self.reset()
 
         if _fileName and self.projectRoot:

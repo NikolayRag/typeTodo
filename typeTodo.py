@@ -33,6 +33,8 @@ else:
 projectDbCache= {}
 
 def getDB(_view):
+#todo 74 (db) -1: make better caching of projectDbCache
+#    if _view.TTDB: return _view.TTDB
 #todo 46 (assure) +0: is .window() a sufficient condition?
     if not _view.window(): return False
 
@@ -51,15 +53,27 @@ def getDB(_view):
     else:
         projectDbCache[curRoot].update(curRoot, curName)
 
+#    _view.TTDB= projectDbCache[curRoot]
     return projectDbCache[curRoot]
 
-
-
-#todo 70 (db) +10: flush at exit
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
+#todo 76 (db) -1: use canceled exit handler
+#    timeoutExit= Timer(None, 0)
+    def exitHandler(self,_view):
+        for curDB in projectDbCache:
+            projectDbCache[curDB].flush(True)
+
+        
+    def on_deactivated(self,_view):
+        self.exitHandler(_view)
+#        self.timeoutExit= Timer(self.exitHandler, False)
+#        self.timeoutExit.start()
+
+
     def on_activated(self, _view):
+#        self.timeoutExit.cancel()
         getDB(_view)
 
 #todo: need to get 'previous' string state without caching to avoid bugs when typing part of 'todo:' while changing cursor position

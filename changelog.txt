@@ -1,3 +1,10 @@
+v1.3.1
+
+fixes:
+- all changes are flushed at exit (and at changing window)
+- as flush-at-exit fixed, flushing delay raised to 5 sec's
+
+
 v1.3.0
 
 new:
@@ -9,7 +16,8 @@ fixes:
 - idented doplets doesnt seems to be saved as edited; Now they do
 
 known issues:
-- changes flushed in 2 seconds of idle, so they will be lost if ST is exited in that time.
+- (fixed in v1.3.1) changes flushed in 2 seconds of idle, so they will be lost if ST is exited in that time.
+
 
 v1.2.6
 

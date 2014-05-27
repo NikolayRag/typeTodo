@@ -122,7 +122,7 @@ class TodoDbSql():
             try:
                 cur.execute("DESCRIBE " +tName)
 
-#todo 36 (db) +0: check bad table and do something with it (upgrade? kill?)
+#todo 36 (sql) +0: check bad table and do something with it (upgrade? kill?)
 #                flagTableOk= False
             except:
                 flagTableOk= False

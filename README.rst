@@ -158,8 +158,6 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
 5.3.
        NO braces/hyphens checking is performed. So if ``#todo:`` line is a part of multiline string, it WILL expand as typed.
        
-5.4.
-       Changes are flushed in 2 seconds of idle, so they will be lost if ST is exited in that time.
 
 6. --> WARNING<--
 -------------------------

@@ -1,6 +1,5 @@
 # coding= utf-8
 
-#todo 2 (interaction) -1: midline TODO
 #todo 1 (interaction) -1: multiline TODO
 #todo 8 (interaction) +0: category auto-complete
 #todo 9 (interaction) -1: using snippets
@@ -59,26 +58,12 @@ def getDB(_view):
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
-#todo 76 (db) -1: use canceled exit handler
-#    timeoutExit= Timer(None, 0)
-    def exitHandler(self,_view):
+    def on_deactivated(self,_view):
         for curDB in projectDbCache:
             projectDbCache[curDB].flush(True)
 
-        
-    def on_deactivated(self,_view):
-        self.exitHandler(_view)
-#        self.timeoutExit= Timer(self.exitHandler, False)
-#        self.timeoutExit.start()
-
-
     def on_activated(self, _view):
-#        self.timeoutExit.cancel()
         getDB(_view)
-
-#todo: need to get 'previous' string state without caching to avoid bugs when typing part of 'todo:' while changing cursor position
-#in general - make triggering more clear
-#use command_history()? Its also dont fit perfect
 
     #maybe lil overheat here, but it works
     def on_selection_modified(self, _view):
@@ -108,7 +93,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
     }
 
     prevMatchNew= None
-#todo: remove '$' for new so #todo can be placed before existing text
+#todo 2 (interaction) -1: midline TODO
     reTodoNew= re.compile('^(\s*(?://|#)\s*)todo(:)?$')
 
     prevMatchMod= None

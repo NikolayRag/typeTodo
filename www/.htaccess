@@ -1,0 +1,11 @@
+Options -Includes +FollowSymLinks -Indexes
+AddHandler server-parsed .shtml
+DirectoryIndex index.php
+# AddDefaultCharset UTF-8
+CookieTracking on
+CookieExpires "1 years"
+
+# default php version is 5.x.x
+# uncomment next line to use  4.4.9
+# AddType application/x-httpd-php44 php
+

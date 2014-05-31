@@ -56,8 +56,6 @@ class TodoDb():
     db= None
     todoA= None
 
-    reCfg= re.compile("^\s*(?:((?P<engine>mysql) (?P<addr>[^\s]+) (?P<login>[^\s]+) (?P<passw>[^\s]+) (?P<scheme>[^\s]+)))\s*$")
-#    reCfg= re.compile("^\s*(?:(mysql ([^\s]+) ([^\s]+) ([^\s]+) ([^\s]+))|(http ([^\s]+) ([^\s]+) ([^\s]+)))\s*$")
 
     def __init__(self, _root, _name):
         self.timerFlush = Timer(0, None) #dummy
@@ -110,15 +108,17 @@ class TodoDb():
         self.todoA= {}
 
         if cfgFound['engine']== 'mysql':
-            self.db= TodoDbSql(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['scheme'])
-#        elif cfgFound['engine']== 'http':
-#            return
+            self.db= TodoDbSql(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'])
+        elif cfgFound['engine']== 'http':
+            self.db= TodoDbHttp(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'])
         else:
             self.db= TodoDbFile(self.todoA, self.projUser, self.projectName, cfgPath, cfgHeaderStrings) #throw in sfgString to restore it in file
 
 
 
     def readCfg(self, _cfgPath, _cfgFound):
+        reCfg= re.compile("^\s*(?:(?P<engine>mysql|http) (?P<addr>[^\s]+) (?P<login>[^\s]+) (?P<passw>[^\s]+) (?P<base>[^\s]+))\s*$")
+    
         cfgHeaderStrings= ''
 
         with codecs.open(_cfgPath, 'r', 'UTF-8') as f:
@@ -131,7 +131,7 @@ class TodoDb():
 
                 cfgHeaderStrings+= cfgString +"\n"
                 #catch last matched config
-                cfgFoundTry= self.reCfg.match(cfgString)
+                cfgFoundTry= reCfg.match(cfgString)
                 if cfgFoundTry:
                     _cfgFound[0]= cfgFoundTry.groupdict()
 

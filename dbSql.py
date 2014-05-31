@@ -19,13 +19,6 @@ import pymysql
     
 class TodoDbSql():
 
-    todoA= None
-    projectName= ''
-    userName= ''
-
-    db_pid= 0
-    db_uid= 0
-
     dbTablesSrc= {
         "categories": "\
           `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
@@ -80,11 +73,19 @@ class TodoDbSql():
 
     }
 
+    db_pid= 0
+    db_uid= 0
+
+
+    todoA= None
+    projectName= ''
+    userName= ''
 
     dbAddr= ''
     dbUname= ''
     dbPass= ''
     dbScheme= ''
+
 
     dbConn= None
 

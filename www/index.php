@@ -19,13 +19,17 @@ include('sqldb.php');
 if (!key_exists('project', $_GET))
 	exit;
 
-$DB->apply('getIdProj', $_GET['project']);
+$DB->apply('getIdRep', $_GET['rep']);
+$db_rId= $DB->fetch(0);
+//if (!$db_rId) {echo 112412; exit;}
+
+$DB->apply('getIdProj', $db_rId, $_GET['project']);
 $db_pId= $DB->lastInsertId();
-if (key_exists('user', $_GET))
-$DB->apply('getIdUser', $_GET['user']);
-$db_uId= $DB->lastInsertId();
 
 if (key_exists('newid', $_GET)) {
+	$DB->apply('getIdUser', $_POST['user']);
+	$db_uId= $DB->lastInsertId();
+
 	$DB->apply('getMaxId', $db_pId);
 
 	$newId= $DB->fetch(0);
@@ -41,6 +45,8 @@ if (key_exists('newid', $_GET)) {
 }
 
 if (key_exists('flush', $_GET)) {
+	$DB->apply('getIdUser', $_POST['user']);
+	$db_uId= $DB->lastInsertId();
 	foreach (explode(',', $_POST['ids']) as $taskId) {
 		$DB->apply('getIdStates', $_POST["state$taskId"]);
 		$db_sId= $DB->lastInsertId();

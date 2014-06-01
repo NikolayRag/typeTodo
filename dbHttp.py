@@ -11,9 +11,29 @@ registered:
 0. user can secure his ID's by applying his hash (username+pass) in config
 1. same as unregistered.1
 2. any access to SITE using that ID is specified by user
-'''
 
-#-todo 7 (db) +0: engine: httpdb
+
+flow:
+
+- each http request specifies projects/tasks repository by hash (public)
+    OR by username (secured)
+- each rep hold number of projects
+
+public rep:
+- rep is initialised by requesting name from server (at config)
+- repository can be accessed anonymously, both reading and writing.
+    *The ONLY protection from intrusion so far is hash complexity (xx-byte?)
+- project accessed by specifying rep hash and project name within rep
+
+secured rep:
+- rep is initialised by creating on server/requesting while logged
+- rep is accessed by owner only (by default)
+- rep access can be expanded by owner
+
+either:
+- task editor name specified by rather an plain text (anon) or by logged user id
+
+'''
 
 import urllib2, urllib
 
@@ -27,10 +47,7 @@ class TodoDbHttp():
     httpPass= ''
     httpScheme= ''
 
-#todo 18 (config) +0: assign default unique http id at very start
-
-    #db related
-
+#todo 18 (config) +0: assign default unique rep id at very start
 
     def __init__(self, _todoA, _uname, _name, _httpAddr, _httpUname, _httpPass, _httpRepository):
         self.todoA= _todoA
@@ -41,7 +58,6 @@ class TodoDbHttp():
         self.httpUname= _httpUname
         self.httpPass= _httpPass
         self.httpRepository= _httpRepository
-
 
     def flush(self):
 #todo 77 (http) +0: make post request json
@@ -62,7 +78,9 @@ class TodoDbHttp():
             curTodo.setSaved()
 
         postData['ids']= ','.join(postList)
-        req = urllib2.Request('http://' +self.httpAddr +'/?flush&user=' +self.userName +'&project=' +self.projectName, urllib.urlencode(postData))
+        postData['user']= self.userName
+#todo 79 (http) +0: turn on unicode
+        req = urllib2.Request('http://' +self.httpAddr +'/?flush&rep=' +self.httpRepository +'&project=' +self.projectName, urllib.urlencode(postData))
         try:
             response = urllib2.urlopen(req).read()
             print response
@@ -71,6 +89,8 @@ class TodoDbHttp():
             return False
 
     def newId(self):
-        req = urllib2.Request('http://' +self.httpAddr +'/?newid&user=' +self.userName +'&project=' +self.projectName)
+        postData= {}
+        postData['user']= self.userName
+        req = urllib2.Request('http://' +self.httpAddr +'/?newid&rep=' +self.httpRepository +'&project=' +self.projectName, urllib.urlencode(postData))
         response = urllib2.urlopen(req).read()
         return response

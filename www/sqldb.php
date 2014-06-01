@@ -18,12 +18,20 @@ $sqlTemplate= array(
           UNIQUE KEY `Index_2` (`id_project`,`name`) USING BTREE
         ) DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1",
 
+        'makeTabReps'=> "CREATE TABLE `reps` (
+	  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+	  `name` varchar(45) NOT NULL,
+	  PRIMARY KEY (`id`),
+	  UNIQUE KEY `Index_2` (`name`)
+	) DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1;",
+
         'makeTabProjects'=> "CREATE TABLE  `projects` (
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-          `name` varchar(45) NOT NULL,
-          PRIMARY KEY (`id`),
-          UNIQUE KEY `Index_2` (`name`)
-        ) DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1",
+	  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+	  `name` varchar(45) NOT NULL,
+	  `id_rep` int(10) unsigned DEFAULT '0',
+	  PRIMARY KEY (`id`),
+	  UNIQUE KEY `Index_2` (`name`,`id_rep`) USING BTREE
+	) DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1",
 
         'makeTabUsers'=> "CREATE TABLE  `users` (
           `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -55,8 +63,12 @@ $sqlTemplate= array(
 
 
 
+        'getIdRep'=> "
+	  SELECT id FROM reps WHERE name=?
+	",
+
         'getIdProj'=> "
-	  INSERT INTO projects (name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)
+	  INSERT INTO projects (id_rep,name) VALUES (?,?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)
 	",
 
         'getIdUser'=> "
@@ -96,7 +108,7 @@ $sqlTemplate= array(
 
 	'getTasksOldest'=> "
 	  SELECT * FROM (
-	    SELECT id_project maxp,id maxi,max(version) maxv FROM tasks WHERE id_project=1 GROUP BY id
+	    SELECT id_project maxp,id maxi,max(version) maxv FROM tasks WHERE id_project=? GROUP BY id
 	  ) maxv INNER JOIN tasks ON id_project=maxp AND id=maxi AND version=maxv AND version>0
 	  LEFT JOIN (SELECT id idstate, name namestate FROM states) _states ON idstate=id_state
 	  LEFT JOIN (SELECT id idcat, name namecat FROM categories) _cats ON idcat=id_category

@@ -79,8 +79,10 @@ class TodoDbHttp():
 
         postData['ids']= ','.join(postList)
         postData['user']= self.userName
+        postData['rep']= self.httpRepository
+        postData['project']= self.projectName
 #todo 79 (http) +0: turn on unicode
-        req = urllib2.Request('http://' +self.httpAddr +'/flush.php?rep=' +self.httpRepository +'&project=' +self.projectName, urllib.urlencode(postData))
+        req = urllib2.Request('http://' +self.httpAddr +'/?=flush', urllib.urlencode(postData))
         try:
             response = urllib2.urlopen(req).read()
             return True
@@ -94,7 +96,9 @@ class TodoDbHttp():
     def newId(self):
         postData= {}
         postData['user']= self.userName
-        req = urllib2.Request('http://' +self.httpAddr +'/newid.php?rep=' +self.httpRepository +'&project=' +self.projectName, urllib.urlencode(postData))
+        postData['rep']= self.httpRepository
+        postData['project']= self.projectName
+        req = urllib2.Request('http://' +self.httpAddr +'/?=newid', urllib.urlencode(postData))
         try:
             response= urllib2.urlopen(req).read()
         except:

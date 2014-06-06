@@ -31,12 +31,24 @@ defaultCfg= {
     }
 }
 
+#todo 80 (config) +0: initialize with http engine
+def initGlobalDo():
+    cfgFound= defaultCfg['factorydb'].copy()
+    cfgFound['base']= '1212122'
+    cfgFound['header']+= cfgFound['engine'] +" " +cfgFound['addr'] +" " +cfgFound['base'] +"\n"
+
+    with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
+      f.write(cfgFound['header'])
+
+    return cfgFoundTry
+
+
 def plugin_loaded():
     defaultCfg['path']= os.path.join(sublime.packages_path(), 'User')
     defaultCfg['file']= os.path.join(defaultCfg['path'], '.do')
     if not os.path.isfile(defaultCfg['file']):
-        with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
-            f.write(defaultCfg['header'])
+        print initGlobalDo()
+
 
 if sys.version < '3':
     plugin_loaded()
@@ -90,12 +102,7 @@ class TodoDb():
                 cfgFound= self.readCfg(defaultCfg['file'])
 
             except: #create default .do config
-#todo 80 (config) +0: initialize with http engine
-                cfgFound= defaultCfg['factorydb'].copy()
-                cfgFound['header']+= cfgFound['engine'] +" " +cfgFound['addr'] +" " +cfgFound['base'] +"\n"
-
-                with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
-                  f.write(cfgFound['header'])
+                cfgFound= initGlobalDo()
 
             if cfgFound['engine'] != 'file': #save new project .do
                 with codecs.open(cfgPath, 'w+', 'UTF-8') as f:

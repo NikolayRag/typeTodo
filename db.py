@@ -19,9 +19,16 @@ else:
 defaultCfg= {
     'path': '',
     'file': '',
-    'db': {'engine': 'file'},
-    'header': "# uncomment and configure. LAST matched line matters:\n"\
-        +"# mysql 127.0.0.1 username password scheme\n"
+    'factorydb': {
+        'engine': 'http',
+        'addr': 'jobr.c',
+        'login': '',
+        'passw': '',
+        'base': '',
+        'header': "# uncomment and configure. LAST matched line matters:\n"\
+            +"# mysql 127.0.0.1 username password scheme\n"\
+            +"# http 127.0.0.1 repository [username] [password]\n"
+    }
 }
 
 def plugin_loaded():
@@ -76,27 +83,23 @@ class TodoDb():
     def reset(self):
         cfgPath= os.path.join(self.projectRoot, self.projectName +'.do')
 
-        cfgFound= defaultCfg['db']
-        cfgHeaderStrings= defaultCfg['header']
-
-        cfgFoundA= [cfgFound]
-        try:
-            cfgHeaderStrings= self.readCfg(cfgPath, cfgFoundA)
-            cfgFound= cfgFoundA[0]
+        try: #projects config
+            cfgFound= self.readCfg(cfgPath)
         except:
-            #try load default .do config; and create if none
-            try:
-                cfgHeaderStrings= self.readCfg(defaultCfg['file'], cfgFoundA)
-                cfgFound= cfgFoundA[0]
+            try: #try load default .do config
+                cfgFound= self.readCfg(defaultCfg['file'])
 
             except: #create default .do config
+#todo 80 (config) +0: initialize with http engine
+                cfgFound= defaultCfg['factorydb'].copy()
+                cfgFound['header']+= cfgFound['engine'] +" " +cfgFound['addr'] +" " +cfgFound['base'] +"\n"
+
                 with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
-                  f.write(cfgHeaderStrings)
+                  f.write(cfgFound['header'])
 
-
-            if cfgFound['engine'] != 'file': #save new blank cfg
+            if cfgFound['engine'] != 'file': #save new project .do
                 with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
-                  f.write(cfgHeaderStrings)
+                  f.write(cfgFound['header'])
 
 
         if cfgFound == self.cfgA:
@@ -112,14 +115,23 @@ class TodoDb():
         elif cfgFound['engine']== 'http':
             self.db= TodoDbHttp(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'])
         else:
-            self.db= TodoDbFile(self.todoA, self.projUser, self.projectName, cfgPath, cfgHeaderStrings) #throw in sfgString to restore it in file
+            self.db= TodoDbFile(self.todoA, self.projUser, self.projectName, cfgPath, cfgFound['header']) #throw in sfgString to restore it in file
 
 
 
-    def readCfg(self, _cfgPath, _cfgFound):
-        reCfg= re.compile("^\s*(?:(?P<engine>mysql|http) (?P<addr>[^\s]+) (?P<login>[^\s]+) (?P<passw>[^\s]+) (?P<base>[^\s]+))\s*$")
+    def readCfg(self, _cfgPath):
+        reMysqlStr= "(?P<engines>mysql)\s+(?P<addrs>[^\s]+)\s+(?P<logins>[^\s]+)\s+(?P<passws>[^\s]+)\s+(?P<bases>[^\s]+)"
+        reHttpStr= "(?P<engineh>http)\s+(?P<addrh>[^\s]+)\s+(?P<baseh>[^\s]+)\s*(?P<loginh>[^\s]*)\s*(?P<passwh>[^\s]*)"
+        reCfg= re.compile("^\s*(?:" +reMysqlStr +"|" +reHttpStr +")\s*$")
     
-        cfgHeaderStrings= ''
+        foundCfg= {
+            'engine': 'file',
+            'addr': '',
+            'login': '',
+            'passw': '',
+            'base': ''
+        }
+        collectHeader= ''
 
         with codecs.open(_cfgPath, 'r', 'UTF-8') as f:
             while True:
@@ -129,13 +141,32 @@ class TodoDb():
                 if cfgString == '' or not cfgString:
                     break
 
-                cfgHeaderStrings+= cfgString +"\n"
+                collectHeader+= cfgString +"\n"
                 #catch last matched config
                 cfgFoundTry= reCfg.match(cfgString)
                 if cfgFoundTry:
-                    _cfgFound[0]= cfgFoundTry.groupdict()
+                    curCfg= cfgFoundTry.groupdict()
+                    if curCfg['engines']:
+                        foundCfg= {
+                            'engine': curCfg['engines'],
+                            'addr': curCfg['addrs'],
+                            'login': curCfg['logins'],
+                            'passw': curCfg['passws'],
+                            'base': curCfg['bases'],
+                        }
+                    elif curCfg['engineh']:
+                        foundCfg= {
+                            'engine': curCfg['engineh'],
+                            'addr': curCfg['addrh'],
+                            'login': curCfg['loginh'],
+                            'passw': curCfg['passwh'],
+                            'base': curCfg['baseh'],
+                        }
 
-            return cfgHeaderStrings
+
+        foundCfg['header']= collectHeader
+
+        return foundCfg
 
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
         self.reset()

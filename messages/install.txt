@@ -1,0 +1,7 @@
+TypeTodo important notice:
+
+If global ".do" config not exists, default configuration is set to use HTTP database at http://jobr.c
+New public repository will be created and used within all upcoming ".do" files.
+
+Warning: If you loose that repository key, there can be NO WAY to get it back.
+You should use http://jobr.c reminder service before that event if you are aware of repository safeness.

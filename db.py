@@ -178,6 +178,7 @@ class TodoDb():
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
         self.reset()
 
+#todo 82 (fix) +0: error on creating/flushing todos in the file that is placed NOT under project path
         if _fileName and self.projectRoot:
             _fileName= os.path.relpath(_fileName, self.projectRoot)
         _fileName= _fileName or ''

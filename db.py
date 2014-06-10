@@ -31,11 +31,18 @@ defaultCfg= {
     }
 }
 
-#todo 80 (config) +0: initialize with http engine
+#todo 83 (config) -10: move http initialization to http-related module
+import urllib2
 def initGlobalDo():
     cfgFound= defaultCfg['factorydb'].copy()
-    cfgFound['base']= '1212122'
-    cfgFound['header']+= cfgFound['engine'] +" " +cfgFound['addr'] +" " +cfgFound['base'] +"\n"
+
+    req = urllib2.Request('http://' +cfgFound['addr'] +'/?=newrep')
+    try:
+        cfgFound['base']= urllib2.urlopen(req).read()
+        cfgFound['header']+= cfgFound['engine'] +" " +cfgFound['addr'] +" " +cfgFound['base'] +"\n"
+    except:
+#todo 84 (config) +1: make reasonable message/controls
+        sublime.error_message('TypeTodo error:\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`')
 
     with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
       f.write(cfgFound['header'])

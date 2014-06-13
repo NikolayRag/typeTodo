@@ -113,8 +113,6 @@ class TodoDbSql():
             sublime.error_message('TypeTodo MySQL error:\n\n\tSql connection cannot be established,\n\tcheck MySQL settings')
             return False
 
-#todo 59 (sql) -10: (not sure) check table over opened connection too
-
         #check table
         cur = self.dbConn.cursor()
         for tName in self.dbTablesSrc:

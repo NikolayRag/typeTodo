@@ -21,7 +21,7 @@ defaultCfg= {
     'file': '',
     'factorydb': {
         'engine': 'http',
-        'addr': 'jobr.c',
+        'addr': 'c6713.shared.hc.ru',
         'login': '',
         'passw': '',
         'base': '',
@@ -31,21 +31,24 @@ defaultCfg= {
     }
 }
 
+#todo 85 (control) +1: make command to open rep's/projects www
+
 #todo 83 (config) -10: move http initialization to http-related module
 import urllib2
-def initGlobalDo():
-    cfgFound= defaultCfg['factorydb'].copy()
 
-    req = urllib2.Request('http://' +cfgFound['addr'] +'/?=newrep')
+def initGlobalDo():
+    cfgFoundTry= defaultCfg['factorydb'].copy()
+
+    req = urllib2.Request('http://' +cfgFoundTry['addr'] +'/?=newrep')
     try:
-        cfgFound['base']= urllib2.urlopen(req).read()
-        cfgFound['header']+= cfgFound['engine'] +" " +cfgFound['addr'] +" " +cfgFound['base'] +"\n"
+        cfgFoundTry['base']= urllib2.urlopen(req).read()
+        cfgFoundTry['header']+= cfgFoundTry['engine'] +" " +cfgFoundTry['addr'] +" " +cfgFoundTry['base'] +"\n"
     except:
-#todo 84 (config) +1: make reasonable message/controls
-        sublime.error_message('TypeTodo error:\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`')
+#todo 84 (control) +0: make reasonable message/controls
+        sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
 
     with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
-      f.write(cfgFound['header'])
+      f.write(cfgFoundTry['header'])
 
     return cfgFoundTry
 
@@ -54,7 +57,7 @@ def plugin_loaded():
     defaultCfg['path']= os.path.join(sublime.packages_path(), 'User')
     defaultCfg['file']= os.path.join(defaultCfg['path'], '.do')
     if not os.path.isfile(defaultCfg['file']):
-        print initGlobalDo()
+        initGlobalDo()
 
 
 if sys.version < '3':

@@ -47,7 +47,6 @@ class TodoDbHttp():
     httpPass= ''
     httpScheme= ''
 
-#todo 18 (config) +0: assign default unique rep id at very start
 
     def __init__(self, _todoA, _uname, _name, _httpAddr, _httpUname, _httpPass, _httpRepository):
         self.todoA= _todoA

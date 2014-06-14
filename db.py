@@ -14,38 +14,50 @@ else:
 
 #todo 44 (config) +0: handle saving project - existing and blank
 
-
+#todo 89 (db) +0: save context (+-2 strings of code) with task. NOT for 'file' mode
 
 defaultCfg= {
     'path': '',
     'file': '',
+    'httpsetup': 'http://c6713.shared.hc.ru/typetodohttpapiserver.txt',
     'factorydb': {
         'engine': 'http',
-        'addr': 'c6713.shared.hc.ru',
+        'addr': '',
         'login': '',
         'passw': '',
         'base': '',
         'header': "# uncomment and configure. LAST matched line matters:\n"\
             +"# mysql 127.0.0.1 username password scheme\n"\
-            +"# http 127.0.0.1 repository [username] [password]\n"
+#todo 88 (config) +0: change http config to "anon_repository OR username/pass"
+            +"# http 127.0.0.1 repository\n"
     }
 }
 
 #todo 85 (control) +1: make command to open rep's/projects www
 
-#todo 83 (config) -10: move http initialization to http-related module
-import urllib2
-
 def initGlobalDo():
     cfgFoundTry= defaultCfg['factorydb'].copy()
 
-    req = urllib2.Request('http://' +cfgFoundTry['addr'] +'/?=newrep')
+    httpInitFlag= True
+    req = urllib2.Request(defaultCfg['httpsetup'])
     try:
-        cfgFoundTry['base']= urllib2.urlopen(req).read()
-        cfgFoundTry['header']+= cfgFoundTry['engine'] +" " +cfgFoundTry['addr'] +" " +cfgFoundTry['base'] +"\n"
+        cfgFoundTry['addr']= urllib2.urlopen(req).read()
     except:
-#todo 84 (control) +0: make reasonable message/controls
+        httpInitFlag= False
+
+    if httpInitFlag:
+        req = urllib2.Request('http://' +cfgFoundTry['addr'] +'/?=newrep')
+        try:
+            cfgFoundTry['base']= urllib2.urlopen(req).read()
+            cfgFoundTry['header']+= cfgFoundTry['engine'] +" " +cfgFoundTry['addr'] +" " +cfgFoundTry['base'] +"\n"
+        except:
+            httpInitFlag= False
+
+    if not httpInitFlag:
+        cfgFoundTry= defaultCfg['factorydb'].copy()
         sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
+    else:
+        sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
 
     with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
       f.write(cfgFoundTry['header'])

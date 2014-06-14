@@ -20,8 +20,8 @@ defaultCfg= {
     'path': '',
     'file': '',
     'httpsetup': 'http://c6713.shared.hc.ru/typetodohttpapiserver.txt',
-    'factorydb': {
-        'engine': 'http',
+    'blankdb': {
+        'engine': 'file',
         'addr': '',
         'login': '',
         'passw': '',
@@ -33,28 +33,32 @@ defaultCfg= {
     }
 }
 
-#todo 85 (control) +1: make command to open rep's/projects www
+#todo 85 (control) +10: make command to open rep's/projects www
 
 def initGlobalDo():
-    cfgFoundTry= defaultCfg['factorydb'].copy()
+    cfgFoundTry= defaultCfg['blankdb'].copy()
 
     httpInitFlag= True
+
+    #get current http server URL
     req = urllib2.Request(defaultCfg['httpsetup'])
     try:
         cfgFoundTry['addr']= urllib2.urlopen(req).read()
     except:
         httpInitFlag= False
 
+    #request new radnom public repository
     if httpInitFlag:
         req = urllib2.Request('http://' +cfgFoundTry['addr'] +'/?=newrep')
         try:
             cfgFoundTry['base']= urllib2.urlopen(req).read()
+            cfgFoundTry['engine']= 'http'
             cfgFoundTry['header']+= cfgFoundTry['engine'] +" " +cfgFoundTry['addr'] +" " +cfgFoundTry['base'] +"\n"
         except:
             httpInitFlag= False
 
     if not httpInitFlag:
-        cfgFoundTry= defaultCfg['factorydb'].copy()
+        cfgFoundTry= defaultCfg['blankdb'].copy()
         sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
     else:
         sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
@@ -153,13 +157,7 @@ class TodoDb():
         reHttpStr= "(?P<engineh>http)\s+(?P<addrh>[^\s]+)\s+(?P<baseh>[^\s]+)\s*(?P<loginh>[^\s]*)\s*(?P<passwh>[^\s]*)"
         reCfg= re.compile("^\s*(?:" +reMysqlStr +"|" +reHttpStr +")\s*$")
     
-        foundCfg= {
-            'engine': 'file',
-            'addr': '',
-            'login': '',
-            'passw': '',
-            'base': ''
-        }
+        foundCfg= defaultCfg['blankdb'].copy()
         collectHeader= ''
 
         with codecs.open(_cfgPath, 'r', 'UTF-8') as f:

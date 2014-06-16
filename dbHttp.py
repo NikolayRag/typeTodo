@@ -101,7 +101,7 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=newid', urllib.urlencode(postData))
         try:
             response= urllib2.urlopen(req).read()
-            if int(response) != response:
+            if str(int(response)) != response:
                 response= False
                 print('HTTP server returns unexpected result using repository: ' +self.httpRepository)
 

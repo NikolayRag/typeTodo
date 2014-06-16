@@ -84,9 +84,12 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=flush', urllib.urlencode(postData))
         try:
             response = urllib2.urlopen(req).read()
-            return True
+            if responce!='':
+                return True
+            print('HTTP server fails flushing. Repository: ' +self.httpRepository)
+            return False
         except:
-            print('HTTP server returns unexpected result using repository: ' +self.httpRepository)
+            print('HTTP server error while flushing. Repository: ' +self.httpRepository)
             return False
 
 # reserve new db entry
@@ -103,10 +106,10 @@ class TodoDbHttp():
             response= urllib2.urlopen(req).read()
             if str(int(response)) != response:
                 response= False
-                print('HTTP server returns unexpected result using repository: ' +self.httpRepository)
+                print('HTTP server fails creating doplet. Repository: ' +self.httpRepository)
 
         except:
             response= False;
-            print('HTTP server returns error using repository: ' +self.httpRepository)
+            print('HTTP server error while creating doplet. Repository: ' +self.httpRepository)
 
         return response

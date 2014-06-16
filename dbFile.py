@@ -8,6 +8,8 @@ else:
     from .db import *
 
 class TodoDbFile():
+    dbOk= True
+
     todoA= None
     projectName= ''
     cfgString= ''
@@ -55,7 +57,10 @@ class TodoDbFile():
                         self.todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), ctxTodo.group(9))
                         ctxTodo= None
         except:
-            None
+            self.dbOk= False
+            return False
+
+        return True
 
 
 
@@ -63,6 +68,11 @@ class TodoDbFile():
 
 
     def flush(self):
+        if not self.dbOk:
+            print("TypeTodo 'file' db was not properly inited. Disabled.")
+
+            return False
+
         try:
             with codecs.open(self.projectFname, 'w+', 'UTF-8') as f:
                 f.write(self.cfgString)
@@ -86,6 +96,8 @@ class TodoDbFile():
             return True
 
         except:
+            print("TypeTodo 'file' db experienced error while flushing")
+
             return False
 
 

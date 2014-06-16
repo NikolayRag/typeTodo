@@ -61,6 +61,7 @@ def initGlobalDo():
         cfgFoundTry= defaultCfg['blankdb'].copy()
         sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
     else:
+        print("New TypeTodo repository: " +cfgFoundTry['base'])
         sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
 
     with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
@@ -196,6 +197,7 @@ class TodoDb():
         return foundCfg
 
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
+        self.timerFlush.cancel()
         self.reset()
 
 #todo 82 (fix) +0: error on creating/flushing todos in the file that is placed NOT under project path
@@ -209,6 +211,9 @@ class TodoDb():
 
 #todo 66 (db) +0: handle unresponsive db task creation
         newId= _id or self.db.newId()
+        if not newId:
+            sublime.status_message('Todo creation failed, see console for info')
+            return False
 
 #todo 71 (db) +0: instantly remove blank new task from cache before saving if set to +
         if newId not in self.todoA: #for new and repairing tasks
@@ -218,13 +223,12 @@ class TodoDb():
             self.dirty= True
             self.todoA[newId].set(_state, _cat, _lvl, _fileName, _comment, self.projUser, strStamp)
 
-        self.timerFlush.cancel()
         self.timerFlush = Timer(self.flushTimeout, self.flush)
         self.timerFlush.start()
 
         return newId
 
-    def flush(self, _final=False):
+    def flush(self, _atExit=False):
         self.timerFlush.cancel()
 
         if not self.dirty: return
@@ -234,8 +238,8 @@ class TodoDb():
             self.dirty= False
             return
         
-        if not _final:
-            sublime.set_timeout(lambda: sublime.status_message('TypeTodo error:\n\tcannot flush todo\'s\n\nWill retry in 5 sec\'s'), 0)
+        if not _atExit:
+            sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry in 5 sec\'s'), 0)
             self.timerFlush = Timer(self.flushTimeout, self.flush)
             self.timerFlush.start()
         else:

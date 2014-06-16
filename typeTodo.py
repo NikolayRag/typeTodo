@@ -115,8 +115,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
         if _new:
             #should trigger if ':' entered but was not here
             if _modified and (_new.group(2) and self.prevMatchNew):
-                if not self.substNew(_new.group(1), _edit, todoRegion):
-                    sublime.status_message('Todo creation failed')
+                self.substNew(_new.group(1), _edit, todoRegion)
 
             self.prevMatchNew= _new.group(2)==None
             return
@@ -126,8 +125,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
             state= self.stateList[_mod.group(1)]
             #should trigger if '+' is either absent or was not here;
             if _modified and (not state or self.prevMatchMod):
-                if not self.substUpdate(state, _mod.group(2), _mod.group(3), _mod.group(4), _mod.group(5), _edit, todoRegion):
-                    sublime.status_message('Todo update failed')
+                self.substUpdate(state, _mod.group(2), _mod.group(3), _mod.group(4), _mod.group(5), _edit, todoRegion)
 
             self.prevMatchMod= state==False
             return

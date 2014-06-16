@@ -73,7 +73,7 @@ class TodoDbHttp():
             postData['lvl' +str(curTodo.id)]= curTodo.lvl
             postData['comm' +str(curTodo.id)]= curTodo.comment.encode('utf8')
 
-#todo 78 (http) +0: use actual http result
+#todo 78 (http) +1: use actual http result
             curTodo.setSaved()
 
         postData['ids']= ','.join(postList)
@@ -86,6 +86,7 @@ class TodoDbHttp():
             response = urllib2.urlopen(req).read()
             return True
         except:
+            print('HTTP server returns unexpected result using repository: ' +self.httpRepository)
             return False
 
 # reserve new db entry
@@ -100,6 +101,12 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=newid', urllib.urlencode(postData))
         try:
             response= urllib2.urlopen(req).read()
+            if int(response) != response:
+                response= False
+                print('HTTP server returns unexpected result using repository: ' +self.httpRepository)
+
         except:
             response= False;
+            print('HTTP server returns error using repository: ' +self.httpRepository)
+
         return response

@@ -110,7 +110,7 @@ class TodoDbSql():
         except:
 #todo 35 (sql) +0: deal with connection errors: host, log, scheme
             self.dbConn= None
-            sublime.error_message('TypeTodo MySQL error:\n\n\tSql connection cannot be established,\n\tcheck MySQL settings')
+            print('TypeTodo MySQL error:\n\n\tSql connection cannot be established,\n\tcheck MySQL settings')
             return False
 
         #check table
@@ -130,7 +130,7 @@ class TodoDbSql():
                 try:
                     cur.execute("CREATE TABLE  `" +tName +"` (" +self.dbTablesSrc[tName] +") DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1")
                 except:
-                    sublime.error_message('TypeTodo MySQL error:\n\n\tTable \'' +tName +'\' cannot be created')
+                    print('TypeTodo MySQL error:\n\n\tTable \'' +tName +'\' cannot be created')
                     return False
 
         cur.execute("INSERT INTO projects (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", self.projectName)

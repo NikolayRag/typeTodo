@@ -35,7 +35,7 @@ either:
 
 '''
 
-import urllib2, urllib
+import urllib2, urllib, json
 
 class TodoDbHttp():
     todoA= None
@@ -59,7 +59,6 @@ class TodoDbHttp():
         self.httpRepository= _httpRepository
 
     def flush(self):
-#todo 77 (http) +0: make post request json
         postData= {}
         postList= list()
         for iT in self.todoA:
@@ -73,9 +72,6 @@ class TodoDbHttp():
             postData['lvl' +str(curTodo.id)]= curTodo.lvl
             postData['comm' +str(curTodo.id)]= curTodo.comment.encode('utf8')
 
-#todo 78 (http) +1: use actual http result
-            curTodo.setSaved()
-
         postData['ids']= ','.join(postList)
         postData['user']= self.userName.encode('utf8')
         postData['rep']= self.httpRepository
@@ -84,10 +80,20 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=flush', urllib.urlencode(postData))
         try:
             response = urllib2.urlopen(req).read()
-            if responce!='':
-                return True
-            print('HTTP server fails flushing. Repository: ' +self.httpRepository)
-            return False
+            if response=='':
+                print('HTTP server fails flushing. Repository: ' +self.httpRepository)
+                return False
+
+            allOk= True
+            response= json.loads(response)
+            for respId in response:
+                if response[respId]==0:
+                    self.todoA[int(respId)].setSaved()
+                else:
+                    print ('Task ' +respId +' was not saved yet')
+                    allOk= False
+            return allOk
+
         except:
             print('HTTP server error while flushing. Repository: ' +self.httpRepository)
             return False

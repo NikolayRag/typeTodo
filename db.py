@@ -238,6 +238,7 @@ class TodoDb():
             self.dirty= False
             return
         
+#todo 92 (flush) +0: limit flush retries
         if not _atExit:
             sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry in 5 sec\'s'), 0)
             self.timerFlush = Timer(self.flushTimeout, self.flush)

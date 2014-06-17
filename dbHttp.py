@@ -80,22 +80,28 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=flush', urllib.urlencode(postData))
         try:
             response = urllib2.urlopen(req).read()
+#todo 93 (assure) +0: should http flush return '' ever?
             if response=='':
-                print('HTTP server fails flushing. Repository: ' +self.httpRepository)
+                print('TypeTodo: HTTP server fails flushing. Repository: ' +self.httpRepository)
                 return False
 
             allOk= True
             response= json.loads(response)
             for respId in response:
-                if response[respId]==0:
+                if not self.todoA[int(respId)]:
+                    print ('TypeTodo: Server responded task ' +respId +' that doesn\'t exists. Skipping')
+
+                elif response[respId]==0:
                     self.todoA[int(respId)].setSaved()
+
                 else:
-                    print ('Task ' +respId +' was not saved yet')
+                    print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
                     allOk= False
+
             return allOk
 
         except:
-            print('HTTP server error while flushing. Repository: ' +self.httpRepository)
+            print('TypeTodo: HTTP server error while flushing. Repository: ' +self.httpRepository)
             return False
 
 # reserve new db entry
@@ -112,10 +118,10 @@ class TodoDbHttp():
             response= urllib2.urlopen(req).read()
             if str(int(response)) != response:
                 response= False
-                print('HTTP server fails creating doplet. Repository: ' +self.httpRepository)
+                print('TypeTodo: HTTP server fails creating doplet. Repository: ' +self.httpRepository)
 
         except:
             response= False;
-            print('HTTP server error while creating doplet. Repository: ' +self.httpRepository)
+            print('TypeTodo: HTTP server error while creating doplet. Repository: ' +self.httpRepository)
 
         return response

@@ -69,7 +69,7 @@ class TodoDbFile():
 
     def flush(self):
         if not self.dbOk:
-            print("TypeTodo 'file' db was not properly inited. Disabled.")
+            print("TypeTodo: 'file' db was not properly inited. Disabled.")
 
             return False
 
@@ -96,7 +96,7 @@ class TodoDbFile():
             return True
 
         except:
-            print("TypeTodo 'file' db experienced error while flushing")
+            print("TypeTodo: 'file' db experienced error while flushing")
 
             return False
 

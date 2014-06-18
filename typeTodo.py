@@ -56,6 +56,7 @@ def getDB(_view):
     return projectDbCache[curRoot]
 
 
+#todo 94 (command) +1: make command to repair broken HTTP settings (absent rep)
 
 class TypetodoWwwCommand(sublime_plugin.TextCommand):
     def run(self, _edit):

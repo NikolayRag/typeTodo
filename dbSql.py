@@ -16,6 +16,8 @@ else:
     sys.path.append(os.path.join(os.path.dirname(__file__), 'PyMySQL-master'))
 
 import pymysql
+
+#todo 95 (store) +0: add more 'context' using SQL
     
 class TodoDbSql():
 

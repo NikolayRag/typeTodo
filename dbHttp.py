@@ -34,6 +34,7 @@ either:
 - task editor name specified by rather an plain text (anon) or by logged user id
 
 '''
+#todo 96 (store) +0: add more 'context' using HTTP
 
 import urllib2, urllib, json
 

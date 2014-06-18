@@ -28,8 +28,7 @@ defaultCfg= {
         'base': '',
         'header': "# uncomment and configure. LAST matched line matters:\n"\
             +"# mysql 127.0.0.1 username password scheme\n"\
-#todo 88 (config) +0: change http config to "anon_repository OR username/pass"
-            +"# http 127.0.0.1 repository\n"
+            +"# http 127.0.0.1 repository [username password]\n"
     }
 }
 
@@ -146,7 +145,7 @@ class TodoDb():
         if cfgFound['engine']== 'mysql':
             self.db= TodoDbSql(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'])
         elif cfgFound['engine']== 'http':
-            self.db= TodoDbHttp(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'])
+            self.db= TodoDbHttp(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['base'], cfgFound['login'], cfgFound['passw'])
         else:
             self.db= TodoDbFile(self.todoA, self.projUser, self.projectName, cfgPath, cfgFound['header']) #throw in sfgString to restore it in file
 

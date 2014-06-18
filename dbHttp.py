@@ -44,20 +44,20 @@ class TodoDbHttp():
     userName= ''
 
     httpAddr= ''
+    httpRepository= ''
     httpUname= ''
     httpPass= ''
-    httpScheme= ''
 
 
-    def __init__(self, _todoA, _uname, _name, _httpAddr, _httpUname, _httpPass, _httpRepository):
+    def __init__(self, _todoA, _uname, _name, _httpAddr, _httpRepository, _httpUname, _httpPass):
         self.todoA= _todoA
         self.userName= _uname
         self.projectName= _name
 
         self.httpAddr= _httpAddr
+        self.httpRepository= _httpRepository
         self.httpUname= _httpUname
         self.httpPass= _httpPass
-        self.httpRepository= _httpRepository
 
     def flush(self):
         postData= {}

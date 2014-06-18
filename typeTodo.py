@@ -62,7 +62,10 @@ class TypetodoWwwCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= getDB(self.view)
         cCfg= cDb.cfgA
-        if cCfg['engine'] != 'http' or cCfg['addr'] == '' or cCfg['base'] == '':
+        if cCfg['engine'] != 'http':
+            sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
+            return
+        if cCfg['addr'] == '' or cCfg['base'] == '':
             sublime.error_message('TypeTodo warning:\n\n\tCannot open project\'s HTTP repository.\n\tIt is not properly configured.')
             return
         webbrowser.open_new_tab('http://' +cCfg['addr'] +'/' +cCfg['base'] +'/' +cDb.projectName)

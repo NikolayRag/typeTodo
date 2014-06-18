@@ -17,7 +17,7 @@
 #todo 12 (doc) +0: removing TODO from code - dont remove it from db
 
 
-import sublime, sublime_plugin
+import sublime, sublime_plugin, webbrowser
 import sys, re, os, time, codecs
 
 if sys.version < '3':
@@ -54,6 +54,19 @@ def getDB(_view):
 
 #    _view.TTDB= projectDbCache[curRoot]
     return projectDbCache[curRoot]
+
+
+
+class TypetodoWwwCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        cDb= getDB(self.view)
+        cCfg= cDb.cfgA
+        if cCfg['engine'] != 'http' or cCfg['addr'] == '' or cCfg['base'] == '':
+            sublime.error_message('TypeTodo warning:\n\n\tCannot open project\'s HTTP repository.\n\tIt is not properly configured.')
+            return
+        webbrowser.open_new_tab('http://' +cCfg['addr'] +'/' +cCfg['base'] +'/' +cDb.projectName)
+
+
 
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1

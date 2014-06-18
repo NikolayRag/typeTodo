@@ -33,7 +33,6 @@ defaultCfg= {
     }
 }
 
-#todo 85 (control) +10: make command to open rep's/projects www
 
 def initGlobalDo():
     cfgFoundTry= defaultCfg['blankdb'].copy()

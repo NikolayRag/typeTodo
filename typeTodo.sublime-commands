@@ -1,0 +1,6 @@
+[
+    {
+        "caption": "TypeTodo: Open current HTTP repository URL",
+        "command": "typetodo_www"
+    }
+]

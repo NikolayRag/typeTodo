@@ -67,16 +67,16 @@ class TodoDbHttp():
             if curTodo.saved: continue
 
             postList.append(str(curTodo.id))
-            postData['state' +str(curTodo.id)]= str(curTodo.state).encode('utf8')
-            postData['file' +str(curTodo.id)]= curTodo.fileName.encode('utf8')
-            postData['cat' +str(curTodo.id)]= curTodo.cat.encode('utf8')
+            postData['state' +str(curTodo.id)]= urllib2.quote(str(curTodo.state).encode('utf-8'))
+            postData['file' +str(curTodo.id)]= urllib2.quote(curTodo.fileName.encode('utf-8'))
+            postData['cat' +str(curTodo.id)]= urllib2.quote(curTodo.cat.encode('utf-8'))
             postData['lvl' +str(curTodo.id)]= curTodo.lvl
-            postData['comm' +str(curTodo.id)]= curTodo.comment.encode('utf8')
+            postData['comm' +str(curTodo.id)]= urllib2.quote(curTodo.comment.encode('utf-8'))
 
         postData['ids']= ','.join(postList)
-        postData['user']= self.userName.encode('utf8')
+        postData['user']= urllib2.quote(self.userName.encode('utf-8'))
         postData['rep']= self.httpRepository
-        postData['project']= self.projectName.encode('utf8')
+        postData['project']= urllib2.quote(self.projectName.encode('utf-8'))
 
         req = urllib2.Request('http://' +self.httpAddr +'/?=flush', urllib.urlencode(postData))
         try:

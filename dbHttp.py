@@ -81,9 +81,8 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=flush', urllib.urlencode(postData))
         try:
             response = urllib2.urlopen(req).read()
-#todo 93 (assure) +0: should http flush return '' ever?
             if response=='':
-                print('TypeTodo: HTTP server fails flushing. Repository: ' +self.httpRepository)
+                print('TypeTodo: HTTP server flushing returns unexpected result. Repository: ' +self.httpRepository)
                 return False
 
             allOk= True

@@ -72,6 +72,49 @@ class TypetodoWwwCommand(sublime_plugin.TextCommand):
 
 
 
+class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        cDb= getDB(self.view)
+        fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
+        if not os.path.isfile(fn):
+            sublime.message_dialog('TypeTodo:\n\tNo projects .do file found,\n\tit should be created at restart')
+            return
+        sublime.active_window().open_file(fn, sublime.TRANSIENT)
+
+
+class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        fn= defaultCfg['file']
+        if not os.path.isfile(fn):
+            sublime.message_dialog('TypeTodo:\n\tNo global .do file found,\n\tit should be created at restart')
+            return
+        sublime.active_window().open_file(fn, sublime.TRANSIENT)
+
+class TypetodoCfgResetCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        cDb= getDB(self.view)
+        fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
+        if not os.path.isfile(fn):
+            sublime.message_dialog('TypeTodo:\n\tNo projects .do file found,\n\tit should be created at restart')
+            return
+        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tProjects .do file will be DELETED\n\tand created back from global settings\n\n\tIt may contain data in `file` mode\n\tor unsaved database connection settings,\n\tsuch as login, pass or public repository name.\n\n\tProcceed anyway?'):
+            return
+        os.remove(fn)
+        cDb.reset()
+
+class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        fn= defaultCfg['file']
+        if not os.path.isfile(fn):
+            sublime.message_dialog('TypeTodo:\n\tNo global .do file found,\n\tit should be created at restart')
+            return
+        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tProcceed anyway?'):
+            return
+        os.remove(fn)
+        initGlobalDo()
+
+
+
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 

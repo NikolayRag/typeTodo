@@ -77,6 +77,9 @@ class TodoDbHttp():
         postData['user']= urllib2.quote(self.userName.encode('utf-8'))
         postData['rep']= self.httpRepository
         postData['project']= urllib2.quote(self.projectName.encode('utf-8'))
+        if self.httpUname!='' and self.httpPass!='':
+            postData['logName']= urllib2.quote(self.httpUname)
+            postData['logPass']= urllib2.quote(self.httpPass)
 
         req = urllib2.Request('http://' +self.httpAddr +'/?=flush', urllib.urlencode(postData))
         try:
@@ -110,9 +113,12 @@ class TodoDbHttp():
 
     def newId(self):
         postData= {}
-        postData['user']= self.userName.encode('utf8')
+        postData['user']= urllib2.quote(self.userName.encode('utf-8'))
         postData['rep']= self.httpRepository
-        postData['project']= self.projectName.encode('utf8')
+        postData['project']= urllib2.quote(self.projectName.encode('utf-8'))
+        if self.httpUname!='' and self.httpPass!='':
+            postData['logName']= urllib2.quote(self.httpUname)
+            postData['logPass']= urllib2.quote(self.httpPass)
         req = urllib2.Request('http://' +self.httpAddr +'/?=newid', urllib.urlencode(postData))
         try:
             response= urllib2.urlopen(req).read()

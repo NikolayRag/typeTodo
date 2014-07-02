@@ -19,7 +19,7 @@ else:
 defaultCfg= {
     'path': '',
     'file': '',
-    'httpsetup': 'http://c6713.shared.hc.ru/typetodohttpapiserver.txt',
+    'httpsetup': 'typetodo.com',
     'blankdb': {
         'engine': 'file',
         'addr': '',
@@ -38,19 +38,13 @@ def initGlobalDo():
 
     httpInitFlag= True
 
-    #get current http server URL
-    req = urllib2.Request(defaultCfg['httpsetup'])
-    try:
-        cfgFoundTry['addr']= urllib2.urlopen(req).read()
-    except:
-        httpInitFlag= False
-
     #request new radnom public repository
     if httpInitFlag:
-        req = urllib2.Request('http://' +cfgFoundTry['addr'] +'/?=newrep')
+        req = urllib2.Request('http://' +defaultCfg['httpsetup'] +'/?=newrep')
         try:
-            cfgFoundTry['base']= urllib2.urlopen(req).read()
             cfgFoundTry['engine']= 'http'
+            cfgFoundTry['addr']= defaultCfg['httpsetup']
+            cfgFoundTry['base']= urllib2.urlopen(req).read()
             cfgFoundTry['header']+= cfgFoundTry['engine'] +" " +cfgFoundTry['addr'] +" " +cfgFoundTry['base'] +"\n"
         except:
             httpInitFlag= False

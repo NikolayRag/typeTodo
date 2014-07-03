@@ -1,27 +1,31 @@
 [
     {
-        "caption": "TypeTodo: Open current HTTP repository URL",
+        "caption": "TypeTodo: Browse project's HTTP repository",
         "command": "typetodo_www"
     },
 
     {
-        "caption": "TypeTodo: Open current project's .do (config)",
+        "caption": "TypeTodo: Open config: current",
         "command": "typetodo_cfg_open"
     },
 
     {
-        "caption": "TypeTodo: Reset current project's .do (config) CAUTION!",
+        "caption": "TypeTodo: Reset config: current. CAUTION!",
         "command": "typetodo_cfg_reset"
     },
 
     {
-        "caption": "TypeTodo: Open global .do (config)",
+        "caption": "TypeTodo: Open config: global",
         "command": "typetodo_global_open"
     },
 
     {
-        "caption": "TypeTodo: Reset global project's .do (config) CAUTION!",
+        "caption": "TypeTodo: Reset config: global. CAUTION!",
         "command": "typetodo_global_reset"
-    }
+    },
 
+    {
+        "caption": "TypeTodo: Transfer current base using global settings",
+        "command": "typetodo_transfer"
+    }
 ]

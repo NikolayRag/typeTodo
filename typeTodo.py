@@ -113,6 +113,13 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
         os.remove(fn)
         initGlobalDo()
 
+#todo 98 (command) +1: make transfer
+class TypetodoTransferCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        fn= defaultCfg['file']
+        if not sublime.ok_cancel_dialog('TypeTodo Transfer:\n\n\tCurrent project\'s TypeTodo settings\n\twill be reset from global config.\n\tAll content of project\'s database\n\twill be copied to new location.\n\n\tCommand will do nothing\n\tif database configs are the same.'):
+            return
+
 
 
 class TypetodoEvent(sublime_plugin.EventListener):

@@ -33,35 +33,6 @@ class TodoDbFile():
         self.flush()
 
 
-    def fetch(self):
-        try:
-            with codecs.open(self.projectFname, 'r', 'UTF-8') as f:
-                ctxTodo= None
-                for ln in f:
-                    ln= ln.splitlines()[0]
-                    matchParse= self.reTodoParse.match(ln)
-                    if matchParse:
-                        __id= int(matchParse.group(3))
-#todo 63 (db) +0: TodoTask should not be used here
-                        if __id not in self.todoA:
-                            self.todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), matchParse.group(6))
-                        ctxTodo= matchParse
-
-                        self.maxId= max(self.maxId, __id)
-                        continue
-
-                    if ctxTodo:
-                        __state= False
-                        if ctxTodo.group(1)=='+': __state= True
-                        matchComment= self.reCommentParse.match(ln)
-                        self.todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), ctxTodo.group(9))
-                        ctxTodo= None
-        except:
-            self.dbOk= False
-            return False
-
-        return True
-
 
 
 #public#
@@ -104,3 +75,36 @@ class TodoDbFile():
     def newId(self):
         self.maxId+= 1
         return self.maxId
+
+
+    def fetch(self, _id=False):
+        try:
+            with codecs.open(self.projectFname, 'r', 'UTF-8') as f:
+                ctxTodo= None
+                for ln in f:
+                    ln= ln.splitlines()[0]
+                    matchParse= self.reTodoParse.match(ln)
+                    if matchParse:
+                        __id= int(matchParse.group(3))
+
+                        if _id and _id!=__id: #pick one
+                            continue
+
+                        if __id not in self.todoA:
+                            self.todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), matchParse.group(6))
+                        ctxTodo= matchParse
+
+                        self.maxId= max(self.maxId, __id)
+                        continue
+
+                    if ctxTodo:
+                        __state= False
+                        if ctxTodo.group(1)=='+': __state= True
+                        matchComment= self.reCommentParse.match(ln)
+                        self.todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), ctxTodo.group(9))
+                        ctxTodo= None
+        except:
+            self.dbOk= False
+            return False
+
+        return True

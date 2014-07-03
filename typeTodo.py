@@ -116,9 +116,23 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
 #todo 98 (command) +1: make transfer
 class TypetodoTransferCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        fn= defaultCfg['file']
+        cDb= getDB(self.view)
         if not sublime.ok_cancel_dialog('TypeTodo Transfer:\n\n\tCurrent project\'s TypeTodo settings\n\twill be reset from global config.\n\tAll content of project\'s database\n\twill be copied to new location.\n\n\tCommand will do nothing\n\tif database configs are the same.'):
             return
+
+        cDb.flush(True)
+        if not cDb.fetch():
+            sublime.error_message('TypeTodo Error:\n\n\tSafe fault, all remain intact.')
+            return
+
+        for iT in cDb.todoA:
+            curTodo= cDb.todoA[iT].setSaved(False)
+
+        fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
+        os.remove(fn)
+        cDb.reset()
+        cDb.dirty= True
+        cDb.flush(True)
 
 
 

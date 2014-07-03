@@ -98,6 +98,7 @@ class TodoDb():
     def __init__(self, _root, _name):
         self.timerFlush = Timer(0, None) #dummy
 
+        self.todoA= {}
         self.update(_root, _name)
         self.reset()
 
@@ -131,10 +132,10 @@ class TodoDb():
         if cfgFound == self.cfgA:
             return
 
-        self.flush(True)
-
+#todo 99 (assure) +0: check if flushing needed at reset()
+#        self.flush(True)
+#        self.todoA= {}
         self.cfgA= cfgFound
-        self.todoA= {}
 
         if cfgFound['engine']== 'mysql':
             self.db= TodoDbSql(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'])
@@ -239,6 +240,13 @@ class TodoDb():
             sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s')
 
 
+    def fetch(self, _id=False):
+        return self.db.fetch(_id)
+
+
+
+
+
 class TodoTask():
     #static, defined at creation
     id= 0
@@ -277,6 +285,6 @@ class TodoTask():
         self.editor= _editor
         self.stamp= _stamp
 
-    def setSaved(self):
-        self.saved= True
+    def setSaved(self, _state=True):
+        self.saved= _state
 

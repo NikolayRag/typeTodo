@@ -114,10 +114,11 @@ class TodoDbSql():
         try:
             self.dbConn = pymysql.connect(host=self.dbAddr, port=3306, user=self.dbUname, passwd=self.dbPass, db=self.dbScheme, use_unicode=True, charset="utf8")
             self.dbConn.autocommit(True)
-        except:
+        except Exception as e:
 #todo 35 (sql) +0: deal with connection errors: host, log, scheme
             self.dbConn= None
-            print('TypeTodo: MySQL error, Sql connection cannot be established, check MySQL settings')
+            print('TypeTodo: MySQL error, Sql connection cannot be established, check MySQL settings:')
+            print(e)
             return False
 
         #check table
@@ -135,12 +136,11 @@ class TodoDbSql():
 
             if not flagTableOk:
                 try:
-                    cur.execute(
-                        "CREATE TABLE  %s (%s) DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1",
-                        (tName, self.dbTablesSrc[tName])
-                    )
-                except:
-                    print('TypeTodo: MySQL error, Table \'' +tName +'\' cannot be created')
+                    cur.execute("CREATE TABLE  `" +tName +"` (" +self.dbTablesSrc[tName] +") DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1")
+                except Exception as e:
+                    print('TypeTodo: MySQL error, Table \'' +tName +'\' cannot be created:')
+                    print(e)
+                    self.dbConn= None
                     return False
 
         cur.execute(

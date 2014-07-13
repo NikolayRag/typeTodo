@@ -36,7 +36,15 @@ either:
 '''
 #todo 96 (store) +0: add more 'context' using HTTP
 
-import urllib2, urllib, json
+import sys, json
+
+if sys.version < '3':
+    import urllib2, urllib
+else:
+    import urllib.request as urllib2
+    import urllib.parse as urllib
+
+
 
 class TodoDbHttp():
     todoA= None
@@ -53,6 +61,8 @@ class TodoDbHttp():
         self.todoA= _todoA
         self.userName= _uname
         self.projectName= _name
+        if self.projectName== '':
+            self.projectName= '*'
 
         self.httpAddr= _httpAddr
         self.httpRepository= _httpRepository
@@ -81,9 +91,9 @@ class TodoDbHttp():
             postData['logName']= urllib2.quote(self.httpUname)
             postData['logPass']= urllib2.quote(self.httpPass)
 
-        req = urllib2.Request('http://' +self.httpAddr +'/?=flush', urllib.urlencode(postData))
+        req = urllib2.Request('http://' +self.httpAddr +'/?=flush', str.encode(urllib.urlencode(postData)))
         try:
-            response = urllib2.urlopen(req).read()
+            response = bytes.decode( urllib2.urlopen(req).read() )
             if response=='':
                 print('TypeTodo: HTTP server flushing returns unexpected result. Repository: ' +self.httpRepository)
                 return False
@@ -119,9 +129,9 @@ class TodoDbHttp():
         if self.httpUname!='' and self.httpPass!='':
             postData['logName']= urllib2.quote(self.httpUname)
             postData['logPass']= urllib2.quote(self.httpPass)
-        req = urllib2.Request('http://' +self.httpAddr +'/?=newid', urllib.urlencode(postData))
+        req = urllib2.Request('http://' +self.httpAddr +'/?=newid', str.encode(urllib.urlencode(postData)))
         try:
-            response= urllib2.urlopen(req).read()
+            response= bytes.decode( urllib2.urlopen(req).read() )
             if str(int(response)) != response:
                 response= False
                 print('TypeTodo: HTTP server fails creating doplet. Repository: ' +self.httpRepository)

@@ -44,7 +44,7 @@ def initGlobalDo():
         try:
             cfgFoundTry['engine']= 'http'
             cfgFoundTry['addr']= defaultCfg['httpsetup']
-            cfgFoundTry['base']= urllib2.urlopen(req).read()
+            cfgFoundTry['base']= bytes.decode( urllib2.urlopen(req).read() )
             cfgFoundTry['header']+= cfgFoundTry['engine'] +" " +cfgFoundTry['addr'] +" " +cfgFoundTry['base'] +"\n"
         except:
             httpInitFlag= False

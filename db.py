@@ -262,6 +262,7 @@ class TodoTask():
     comment= ''
     editor= ''
     stamp= ''
+    version= 1
 
     saved= True
 

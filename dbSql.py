@@ -256,10 +256,8 @@ class TodoDbSql():
         )
 
         sqn= {}
-        i= 0
         for field in cur.description:
-            sqn[field[0]]= i
-            i+= 1
+            sqn[field[0]]= len(sqn)
 
         for task in cur.fetchall():
             __id= int(task[sqn['id']])

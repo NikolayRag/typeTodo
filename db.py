@@ -40,7 +40,10 @@ def readCfg(_cfgPath):
     reHttpStr= "(?P<engineh>http)\s+(?P<addrh>[^\s]+)\s+(?P<baseh>[^\s]+)\s*(?P<loginh>[^\s]*)\s*(?P<passwh>[^\s]*)"
     reCfg= re.compile("^\s*(?:" +reMysqlStr +"|" +reHttpStr +")\s*$")
 
-    f= codecs.open(_cfgPath, 'r', 'UTF-8')
+    try:
+        f= codecs.open(_cfgPath, 'r', 'UTF-8')
+    except:
+        f= False
     if not f:
         return False
 

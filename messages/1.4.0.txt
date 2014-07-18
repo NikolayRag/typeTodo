@@ -1,10 +1,10 @@
 TypeTodo v1.4.0 important notice:
 
-HTTP database engine is introduced and become default.
+HTTP database engine is introduced and attempt to become default.
+Existing project's configs will remain unchanged.
 
-
-If global ".do" config not exists, default configuration is set to use HTTP database at http://c6713.shared.hc.ru
-New public repository will be created and used within all upcoming ".do" files.
-
+Default configuration is set to use HTTP database at http://typetodo.com if global  config doesn't exists or is blank.
+In this case new public repository will be created and used within all upcoming projects files.
 Warning: If you loose that repository key, there can be NO WAY to get it back.
-You can access you http repository at http://c6713.shared.hc.ru/repname, where repname is same as in .do config (e.g. /~eif9t7kgahvk)
+
+You can access your http repository at http://typetodo.com/repname, where repname is same as in .do config (e.g. /~eif9t7kgahvk)

@@ -10,11 +10,6 @@
     },
 
     {
-        "caption": "TypeTodo: Reset config: current. CAUTION!",
-        "command": "typetodo_cfg_reset"
-    },
-
-    {
         "caption": "TypeTodo: Open config: global",
         "command": "typetodo_global_open"
     },

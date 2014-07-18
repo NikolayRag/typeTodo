@@ -141,3 +141,8 @@ class TodoDbHttp():
             print('TypeTodo: HTTP server error while creating doplet. Repository: ' +self.httpRepository)
 
         return response
+
+
+#todo 105 (http) +0: make fetch()
+    def fetch(self, _id=False):
+        return False

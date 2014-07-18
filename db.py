@@ -16,10 +16,12 @@ else:
 
 #todo 89 (db) +0: save context (+-2 strings of code) with task. NOT for 'file' mode
 
+#todo 102 (config) +0: handle 'updated' flag to make global update for HTTP
+
 defaultCfg= {
     'path': '',
     'file': '',
-    'httpsetup': 'typetodo.com',
+    'defaultHttpApi': 'typetodo.com',
     'blankdb': {
         'engine': 'file',
         'addr': '',
@@ -33,17 +35,67 @@ defaultCfg= {
 }
 
 
-def initGlobalDo():
+def readCfg(_cfgPath):
+    reMysqlStr= "(?P<engines>mysql)\s+(?P<addrs>[^\s]+)\s+(?P<logins>[^\s]+)\s+(?P<passws>[^\s]+)\s+(?P<bases>[^\s]+)"
+    reHttpStr= "(?P<engineh>http)\s+(?P<addrh>[^\s]+)\s+(?P<baseh>[^\s]+)\s*(?P<loginh>[^\s]*)\s*(?P<passwh>[^\s]*)"
+    reCfg= re.compile("^\s*(?:" +reMysqlStr +"|" +reHttpStr +")\s*$")
+
+    f= codecs.open(_cfgPath, 'r', 'UTF-8')
+    if not f:
+        return False
+
+    foundCfg= defaultCfg['blankdb'].copy()
+    headerCollect= ''
+
+    while True:
+        l= f.readline().splitlines()
+        if l==[] or l[0]=='' or not l[0]:
+            break
+
+        cfgString= l[0]
+
+        headerCollect+= cfgString +"\n"
+        #catch last matched config
+        cfgFoundTry= reCfg.match(cfgString)
+        if cfgFoundTry:
+            curCfg= cfgFoundTry.groupdict()
+            if curCfg['engines']:
+                foundCfg= {
+                    'engine': curCfg['engines'],
+                    'addr': curCfg['addrs'],
+                    'login': curCfg['logins'],
+                    'passw': curCfg['passws'],
+                    'base': curCfg['bases'],
+                }
+            elif curCfg['engineh']:
+                foundCfg= {
+                    'engine': curCfg['engineh'],
+                    'addr': curCfg['addrh'],
+                    'login': curCfg['loginh'],
+                    'passw': curCfg['passwh'],
+                    'base': curCfg['baseh'],
+                }
+
+    foundCfg['header']= headerCollect
+    return foundCfg
+
+
+def initGlobalDo(_force=False):
+    if not _force:
+        cfgFoundTry= readCfg(defaultCfg['file'])
+        if cfgFoundTry:
+            return cfgFoundTry
+
     cfgFoundTry= defaultCfg['blankdb'].copy()
 
     httpInitFlag= True
 
     #request new radnom public repository
     if httpInitFlag:
-        req = urllib2.Request('http://' +defaultCfg['httpsetup'] +'/?=newrep')
+        req = urllib2.Request('http://' +defaultCfg['defaultHttpApi'] +'/?=newrep')
         try:
             cfgFoundTry['engine']= 'http'
-            cfgFoundTry['addr']= defaultCfg['httpsetup']
+            cfgFoundTry['addr']= defaultCfg['defaultHttpApi']
             cfgFoundTry['base']= bytes.decode( urllib2.urlopen(req).read() )
             cfgFoundTry['header']+= cfgFoundTry['engine'] +" " +cfgFoundTry['addr'] +" " +cfgFoundTry['base'] +"\n"
         except:
@@ -56,8 +108,11 @@ def initGlobalDo():
         print("New TypeTodo repository: " +cfgFoundTry['base'])
         sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
 
-    with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
-      f.write(cfgFoundTry['header'])
+    try:
+        with codecs.open(defaultCfg['file'], 'w+', 'UTF-8') as f:
+            f.write(cfgFoundTry['header'])
+    except:
+        return False
 
     return cfgFoundTry
 
@@ -65,8 +120,7 @@ def initGlobalDo():
 def plugin_loaded():
     defaultCfg['path']= os.path.join(sublime.packages_path(), 'User')
     defaultCfg['file']= os.path.join(defaultCfg['path'], '.do')
-    if not os.path.isfile(defaultCfg['file']):
-        initGlobalDo()
+    initGlobalDo()
 
 
 if sys.version < '3':
@@ -112,17 +166,18 @@ class TodoDb():
 
 
 ##
-    def reset(self):
+    def reset(self, _force=False):
         cfgPath= os.path.join(self.projectRoot, self.projectName +'.do')
 
-        try: #projects config
-            cfgFound= self.readCfg(cfgPath)
-        except:
-            try: #try load default .do config
-                cfgFound= self.readCfg(defaultCfg['file'])
+        cfgFound= False
+        if not _force:
+            cfgFound= readCfg(cfgPath)
 
-            except: #create default .do config
-                cfgFound= initGlobalDo()
+        if not cfgFound: 
+            cfgFound= initGlobalDo()
+
+            if not cfgFound:
+                return
 
             if cfgFound['engine'] != 'file': #save new project .do
                 with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
@@ -145,49 +200,6 @@ class TodoDb():
             self.db= TodoDbFile(self.todoA, self.projUser, self.projectName, cfgPath, cfgFound['header']) #throw in sfgString to restore it in file
 
 
-
-    def readCfg(self, _cfgPath):
-        reMysqlStr= "(?P<engines>mysql)\s+(?P<addrs>[^\s]+)\s+(?P<logins>[^\s]+)\s+(?P<passws>[^\s]+)\s+(?P<bases>[^\s]+)"
-        reHttpStr= "(?P<engineh>http)\s+(?P<addrh>[^\s]+)\s+(?P<baseh>[^\s]+)\s*(?P<loginh>[^\s]*)\s*(?P<passwh>[^\s]*)"
-        reCfg= re.compile("^\s*(?:" +reMysqlStr +"|" +reHttpStr +")\s*$")
-    
-        foundCfg= defaultCfg['blankdb'].copy()
-        collectHeader= ''
-
-        with codecs.open(_cfgPath, 'r', 'UTF-8') as f:
-            while True:
-                l= f.readline().splitlines()
-                if l == []: break
-                cfgString= l[0]
-                if cfgString == '' or not cfgString:
-                    break
-
-                collectHeader+= cfgString +"\n"
-                #catch last matched config
-                cfgFoundTry= reCfg.match(cfgString)
-                if cfgFoundTry:
-                    curCfg= cfgFoundTry.groupdict()
-                    if curCfg['engines']:
-                        foundCfg= {
-                            'engine': curCfg['engines'],
-                            'addr': curCfg['addrs'],
-                            'login': curCfg['logins'],
-                            'passw': curCfg['passws'],
-                            'base': curCfg['bases'],
-                        }
-                    elif curCfg['engineh']:
-                        foundCfg= {
-                            'engine': curCfg['engineh'],
-                            'addr': curCfg['addrh'],
-                            'login': curCfg['loginh'],
-                            'passw': curCfg['passwh'],
-                            'base': curCfg['baseh'],
-                        }
-
-
-        foundCfg['header']= collectHeader
-
-        return foundCfg
 
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
         self.timerFlush.cancel()

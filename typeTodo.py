@@ -31,16 +31,19 @@ else:
 #{projectFolder: TodoDb} cache
 projectDbCache= {}
 
-def getDB(_view):
+def getDB(_view=False, _folder=False):
 #todo 74 (db) -1: make better caching of projectDbCache
 #    if _view.TTDB: return _view.TTDB
 #todo 46 (assure) +0: is .window() a sufficient condition?
-    if not _view.window(): return False
-
     curRoot= ''
     curName= ''
-    
-    firstFolderA= _view.window().folders()
+
+    if _folder!=False:
+        firstFolderA=(_folder,)
+    elif _view and _view.window:
+        firstFolderA= _view.window().folders()
+    else:
+        return False
 
     if len(firstFolderA) and (firstFolderA[0] != ''):
         curRoot= firstFolderA[0]
@@ -55,8 +58,6 @@ def getDB(_view):
 #    _view.TTDB= projectDbCache[curRoot]
     return projectDbCache[curRoot]
 
-
-#todo 94 (command) +1: make command to repair broken HTTP settings (absent rep)
 
 class TypetodoWwwCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
@@ -77,47 +78,43 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
         cDb= getDB(self.view)
         fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
         if not os.path.isfile(fn):
-            sublime.message_dialog('TypeTodo:\n\tNo projects .do file found,\n\tit should be created at restart')
+            sublime.message_dialog('TypeTodo:\n\tNo projects .do file found,\n\tplease restart Sublime')
             return
         sublime.active_window().open_file(fn, sublime.TRANSIENT)
 
 
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        fn= defaultCfg['file']
+        cDb= getDB(False,'')
+        fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
         if not os.path.isfile(fn):
-            sublime.message_dialog('TypeTodo:\n\tNo global .do file found,\n\tit should be created at restart')
+            sublime.message_dialog('TypeTodo:\n\tCannot create global .do file,\n\tplease restart Sublime')
             return
         sublime.active_window().open_file(fn, sublime.TRANSIENT)
 
-class TypetodoCfgResetCommand(sublime_plugin.TextCommand):
-    def run(self, _edit):
-        cDb= getDB(self.view)
-        fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
-        if not os.path.isfile(fn):
-            sublime.message_dialog('TypeTodo:\n\tNo projects .do file found,\n\tit should be created at restart')
-            return
-        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tProjects .do file will be DELETED\n\tand created back from global settings\n\n\tIt may contain data in `file` mode\n\tor unsaved database connection settings,\n\tsuch as login, pass or public repository name.\n\n\tProcceed anyway?'):
-            return
-        os.remove(fn)
-        cDb.reset()
-
 class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        fn= defaultCfg['file']
-        if not os.path.isfile(fn):
-            sublime.message_dialog('TypeTodo:\n\tNo global .do file found,\n\tit should be created at restart')
-            return
+        cDb= getDB(False,'')
         if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tProcceed anyway?'):
             return
-        os.remove(fn)
-        initGlobalDo()
 
-#todo 98 (command) +1: make transfer
+        cDb.flush(True)
+        if not cDb.fetch() or not initGlobalDo(True):
+            sublime.message_dialog('TypeTodo:\n\tCannot reset global .do file,\n\tplease restart Sublime')
+            return
+
+        cDb.reset()
+        for iT in cDb.todoA:
+            curTodo= cDb.todoA[iT].setSaved(False)
+        cDb.dirty= True
+        cDb.flush(True)
+
+
 class TypetodoTransferCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= getDB(self.view)
-        if not sublime.ok_cancel_dialog('TypeTodo Transfer:\n\n\tCurrent project\'s TypeTodo settings\n\twill be reset from global config.\n\tAll content of project\'s database\n\twill be copied to new location.\n\n\tCommand will do nothing\n\tif database configs are the same.'):
+
+        if not sublime.ok_cancel_dialog('TypeTodo Transfer:\n\n\tCurrent project\'s TypeTodo settings\n\twill be reset from global config.\n\tAll content of project\'s database\n\twill be copied to new location.'):
             return
 
         cDb.flush(True)
@@ -125,12 +122,10 @@ class TypetodoTransferCommand(sublime_plugin.TextCommand):
             sublime.error_message('TypeTodo Error:\n\n\tSafe fault, all remain intact.')
             return
 
+#todo 103 (command) +0: make fallback on transfer
+        cDb.reset(True)
         for iT in cDb.todoA:
             curTodo= cDb.todoA[iT].setSaved(False)
-
-        fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
-        os.remove(fn)
-        cDb.reset()
         cDb.dirty= True
         cDb.flush(True)
 

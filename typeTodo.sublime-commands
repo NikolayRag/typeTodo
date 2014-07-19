@@ -5,22 +5,22 @@
     },
 
     {
-        "caption": "TypeTodo: Open config: current",
+        "caption": "TypeTodo: Open config: project",
         "command": "typetodo_cfg_open"
     },
 
     {
-        "caption": "TypeTodo: Open config: global",
+        "caption": "TypeTodo: Open config: Global",
         "command": "typetodo_global_open"
     },
 
     {
-        "caption": "TypeTodo: Reset config: global. CAUTION!",
+        "caption": "TypeTodo: Reset Global config. WARNING!",
         "command": "typetodo_global_reset"
     },
 
     {
-        "caption": "TypeTodo: Transfer current base using global settings",
+        "caption": "TypeTodo: Transfer current base using Global config",
         "command": "typetodo_transfer"
     }
 ]

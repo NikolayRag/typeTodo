@@ -11,7 +11,7 @@ WARNING: If you loose public repository key, there can be NO WAY to get it back.
 
 Documentation is available at:
 TypeTodo home,
-	http://typetodo.com/_sublime/
+	http://typetodo.com/sublime
 Github,
 	https://github.com/NikolayRag/typeTodo
 Package Control,

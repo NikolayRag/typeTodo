@@ -120,7 +120,7 @@ using  following fields:
 * creationStamp
        - date and time task was created. Using **dd/mm/yy hh:mm** format
 * filename
-       - file at which task was created. If **.sublime-project* is found, relative path is stored.
+       - file at which task was created. If *.sublime-project* is found, relative path is stored.
 * editorName
        - name of user which edited task last, is taken from environment variable
 * editionStamp

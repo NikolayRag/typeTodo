@@ -32,8 +32,7 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
 2.1.
        As colon ':' is typed after ``//todo:`` (or ``#todo:`` here and later) comment,
        line is instantly expanded with additional fields:
-       ``//todo:`` becomes
-       ``//todo XXXX (category) [+-]N:``
+       ``//todo:`` expands to ``//todo XXXX (category) [+-]N:``
        
 * detailed fields description found in section 3
 
@@ -62,7 +61,7 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
        TODO is a comment in form of ``//todo XXXX (tag) [+-]N: comment`` with following fields used:
 
 * XXXX
-      -  **mandatory**
+       - **mandatory**
        - would be auto-generated sequential number, unique within project
 * (tag)
        - *optional*

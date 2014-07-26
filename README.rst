@@ -103,6 +103,7 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
        *.do* file holds tasks using following format in that case:
        
 ``+|-category XXXX: [+|-N] creatorName creationStamp filename editorName editionStamp``
+
 ``comment``
 
 using  following fields:

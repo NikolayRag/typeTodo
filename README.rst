@@ -103,7 +103,6 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
        *.do* file holds tasks using following format in that case:
        
 ``+|-category XXXX: [+|-N] creatorName creationStamp filename editorName editionStamp``
-
 ``comment``
 
 using  following fields:
@@ -142,7 +141,7 @@ using  following fields:
 * tasks
 
 All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved.
-*
+
 4.8.
        **HTTP** mode is used if configuration ``http [host] [repository] [user] [pass]`` line is found in *.do* config.
        Repository can be **public** or **personal**.

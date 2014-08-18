@@ -1,6 +1,5 @@
 # coding= utf-8
 
-#todo 2 (interaction) -1: midline TODO
 #todo 1 (interaction) -1: multiline TODO
 #todo 8 (interaction) +0: category auto-complete
 #todo 9 (interaction) -1: using snippets
@@ -18,7 +17,7 @@
 #todo 12 (doc) +0: removing TODO from code - dont remove it from db
 
 
-import sublime, sublime_plugin
+import sublime, sublime_plugin, webbrowser
 import sys, re, os, time, codecs
 
 if sys.version < '3':
@@ -32,16 +31,19 @@ else:
 #{projectFolder: TodoDb} cache
 projectDbCache= {}
 
-def getDB(_view):
+def getDB(_view=False, _folder=False):
 #todo 74 (db) -1: make better caching of projectDbCache
 #    if _view.TTDB: return _view.TTDB
 #todo 46 (assure) +0: is .window() a sufficient condition?
-    if not _view.window(): return False
-
     curRoot= ''
     curName= ''
-    
-    firstFolderA= _view.window().folders()
+
+    if _folder!=False:
+        firstFolderA=(_folder,)
+    elif _view and _view.window:
+        firstFolderA= _view.window().folders()
+    else:
+        return False
 
     if len(firstFolderA) and (firstFolderA[0] != ''):
         curRoot= firstFolderA[0]
@@ -56,29 +58,84 @@ def getDB(_view):
 #    _view.TTDB= projectDbCache[curRoot]
     return projectDbCache[curRoot]
 
+
+class TypetodoWwwCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        cDb= getDB(self.view)
+        cCfg= cDb.cfgA
+        if cCfg['engine']!='http' or cCfg['addr']=='' or cCfg['base']=='':
+            sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
+            return
+        webbrowser.open_new_tab('http://' +cCfg['addr'] +'/' +cCfg['base'] +'/' +cDb.projectName)
+
+
+
+class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        cDb= getDB(self.view)
+        fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
+        if not os.path.isfile(fn):
+            sublime.message_dialog('TypeTodo:\n\tNo projects .do file,\n\tplease restart Sublime')
+            return
+        sublime.active_window().open_file(fn, sublime.TRANSIENT)
+
+
+class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        cDb= getDB(False,'')
+        fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
+        if not os.path.isfile(fn):
+            sublime.message_dialog('TypeTodo:\n\tNo global .do file,\n\tplease restart Sublime')
+            return
+        sublime.active_window().open_file(fn, sublime.TRANSIENT)
+
+class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        cDb= getDB(False,'')
+        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tGlobal database content\n\twill be copied to new location.\n\n\tProcceed anyway?'):
+            return
+
+        cDb.flush(True)
+        if not cDb.fetch() or not initGlobalDo(True):
+            sublime.message_dialog('TypeTodo error:\n\tCannot reset global .do file,\n\tall remain intact.')
+            return
+
+        cDb.reset()
+        for iT in cDb.todoA:
+            curTodo= cDb.todoA[iT].setSaved(False)
+        cDb.dirty= True
+        cDb.flush(True)
+
+
+class TypetodoTransferCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        cDb= getDB(self.view)
+        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tCurrent project\'s TypeTodo settings\n\twill be reset using current global settings.\n\tProject\'s database content\n\twill be copied to new location.'):
+            return
+
+        cDb.flush(True)
+        if not cDb.fetch():
+            sublime.error_message('TypeTodo Error:\n\n\tCannot transfer,\n\tall remain intact.')
+            return
+
+#todo 103 (command) +0: make fallback on transfer
+        cDb.reset(True)
+        for iT in cDb.todoA:
+            curTodo= cDb.todoA[iT].setSaved(False)
+        cDb.dirty= True
+        cDb.flush(True)
+
+
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
-#todo 76 (db) -1: use canceled exit handler
-#    timeoutExit= Timer(None, 0)
-    def exitHandler(self,_view):
+    def on_deactivated(self,_view):
         for curDB in projectDbCache:
             projectDbCache[curDB].flush(True)
 
-        
-    def on_deactivated(self,_view):
-        self.exitHandler(_view)
-#        self.timeoutExit= Timer(self.exitHandler, False)
-#        self.timeoutExit.start()
-
-
+#todo 86 (issue) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
     def on_activated(self, _view):
-#        self.timeoutExit.cancel()
         getDB(_view)
-
-#todo: need to get 'previous' string state without caching to avoid bugs when typing part of 'todo:' while changing cursor position
-#in general - make triggering more clear
-#use command_history()? Its also dont fit perfect
 
     #maybe lil overheat here, but it works
     def on_selection_modified(self, _view):
@@ -108,7 +165,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
     }
 
     prevMatchNew= None
-#todo: remove '$' for new so #todo can be placed before existing text
+#todo 2 (interaction) -1: midline TODO
     reTodoNew= re.compile('^(\s*(?://|#)\s*)todo(:)?$')
 
     prevMatchMod= None
@@ -129,8 +186,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
         if _new:
             #should trigger if ':' entered but was not here
             if _modified and (_new.group(2) and self.prevMatchNew):
-                if not self.substNew(_new.group(1), _edit, todoRegion):
-                    sublime.status_message('Todo creation failed')
+                self.substNew(_new.group(1), _edit, todoRegion)
 
             self.prevMatchNew= _new.group(2)==None
             return
@@ -140,8 +196,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
             state= self.stateList[_mod.group(1)]
             #should trigger if '+' is either absent or was not here;
             if _modified and (not state or self.prevMatchMod):
-                if not self.substUpdate(state, _mod.group(2), _mod.group(3), _mod.group(4), _mod.group(5), _edit, todoRegion):
-                    sublime.status_message('Todo update failed')
+                self.substUpdate(state, _mod.group(2), _mod.group(3), _mod.group(4), _mod.group(5), _edit, todoRegion)
 
             self.prevMatchMod= state==False
             return

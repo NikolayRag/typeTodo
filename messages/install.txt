@@ -1,0 +1,18 @@
+TypeTodo important notice:
+
+Default database is configured to be HTTP with http://typetodo.com server.
+New public repository is created and will be used within all upcoming projects. Existing project's configs will remain unchanged.
+HTTP repository is accessable at http://typetodo.com/repname, where repname is same as in .do config (e.g. /~eif9t7kgahvk)
+
+You can locate and reset TypeTodo's configs using provided Sublime commands that are named "TypeTodo:...".
+
+WARNING: If you loose public repository key, there can be NO WAY to get it back.
+
+
+Documentation is available at:
+TypeTodo home,
+	http://typetodo.com/sublime
+Github,
+	https://github.com/NikolayRag/typeTodo
+Package Control,
+	https://sublime.wbond.net/packages/TypeTodo

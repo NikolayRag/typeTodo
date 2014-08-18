@@ -1,0 +1,26 @@
+[
+    {
+        "caption": "TypeTodo: Browse project's HTTP repository",
+        "command": "typetodo_www"
+    },
+
+    {
+        "caption": "TypeTodo: Open config: project",
+        "command": "typetodo_cfg_open"
+    },
+
+    {
+        "caption": "TypeTodo: Open config: Global",
+        "command": "typetodo_global_open"
+    },
+
+    {
+        "caption": "TypeTodo: Reset Global config. WARNING!",
+        "command": "typetodo_global_reset"
+    },
+
+    {
+        "caption": "TypeTodo: Transfer current base using Global config",
+        "command": "typetodo_transfer"
+    }
+]

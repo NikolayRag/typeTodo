@@ -1,7 +1,7 @@
 typeTodo
 =========
 
-Keep TODO comments at one place as they typed anywhere in project.
+Manage TODO comments as tasks, as they're typed anywhere in project.
 
 
 
@@ -16,7 +16,7 @@ Keep TODO comments at one place as they typed anywhere in project.
        TypeTodo stores and updates verbose TODO comments to external per-project database and leaves breef version inlined in the code.
        
 1.2.
-       Available database modes are **.do** raw text file and **MySQL**
+       Available database modes are *.do* raw text **File**, **MySQL** or **HTTP** (new in v1.4.0)
 
 1.3.
        Most interaction is done by ordinary inline source code commenting,
@@ -31,21 +31,20 @@ Keep TODO comments at one place as they typed anywhere in project.
 
 2.1.
        As colon ':' is typed after ``//todo:`` (or ``#todo:`` here and later) comment,
-       line is instantly expanded with additional fields in format of:
-       ``//todo XXXX [(category)] [+|-N]: ``
+       line is instantly expanded with additional fields:
+       ``//todo:`` expands to ``//todo XXXX (category) [+-]N:``
        
 * detailed fields description found in section 3
 
 2.2.
        and stored within user-specified database.
-       Database is _[projectName].do_ raw text file which is placed right above first folder, included in project.
-       OR database is specified within that _[projectName].do_ file
+       Database is specified within *[projectName].do* text file which is placed right above first folder, included in project.
 
 * database configuration is described in section 4
        
 2.3.
-       If at a moment there's no project used, then all-in-one _.do_ file is used as a database.
-       (for win7 it's stored in _[user]\AppData\Roaming\Sublime Text 2\Packages\User\_)
+       If at a moment there's no project used, then all-in-one *.do* file is used as a database.
+       (for win7 it's stored in *[user]\\AppData\\Roaming\\Sublime Text 2\\Packages\\User\\*)
 
 2.4.
        Further edition of existing TODO comment will flush it to db as well, using XXXX as id.
@@ -59,20 +58,19 @@ Keep TODO comments at one place as they typed anywhere in project.
 ----------------------
 
 3.1.
-       TODO is a comment in form of ``//todo XXXX [(category)] [+|-N]: comment`` with following fields used:
+       TODO is a comment in form of ``//todo XXXX (tag) [+-]N: comment`` with following fields used:
 
 * XXXX
        - **mandatory**
        - would be auto-generated sequential number, unique within project
-* (category)
+* (tag)
        - *optional*
        - default: 'general'
-       - category name is used as major tag name.
        - When you rename it, new name will be reused with next new TODO
-* +|-N
+* [+-]N
        - *optional*
        - default: +0
-       - importance level. Just signed (always) integer number for addition.
+       - priority level. Just signed (always) integer number for addition.
 * comment
        - comment is any remaining text till the end of line
 
@@ -81,34 +79,36 @@ Keep TODO comments at one place as they typed anywhere in project.
 ---------------------------------
 
 4.1.
-       _[projectName].do_ file is both configuration and default storage database.
+       *[projectName].do* file is used both as configuration and storage database.
 
 4.2.
-       It is placed within the parent of first folder which is included in project.
-       That is, if first folder included in project is _/stuff/z-files/sourcesA_, then database/config will be stored at _/stuff/z-files/z-files.do_ file.
-       _[projectName].do_ is automatically created as project is loaded.
+       It is placed within the parent of first project's folder.
+       That is, if first folder included in project is */stuff/project-1*, then */stuff/project-1.do* file will be used as config.
+       *[projectName].do* is automatically created if none as project is loaded.
 
 4.3.
-       If theres no project in Sublime, then _[sublimePackage]/typeTodo/.do_ is used.
+       If there's no project in Sublime, then *[sublimePackage]/typeTodo/.do* is used.
        
 4.4.
-       First non-blank lines of _.do_ file are used to configure database itself.
+       First non-blank lines of *.do* file are used to configure database itself.
        The configuration is taken from **last** line within this block that matches supported settings.
-       _.do_ file is checked periodically for database configuration, and it reapplies if changed
+       *.do* file is checked periodically for database configuration, and it reapplies if changed
       
 4.5.
-       **.do** default configuration.
-       If no acceptable configuration found, then database is stored within _[projectname].do_ file itself.
-       Each todo have form of
+       **.do** default configuration is HTTP, using http://typetodo.com as database.
 
-~~~
-+|-category XXXX: [+|-N] creatorName creationStamp filename editorName editionStamp
-       comment
-~~~
+4.6.
+       **FILE** mode todo uses same *.do* file as default configuration.
+       *.do* file holds tasks using following format in that case:
+       
+``+|-category XXXX: [+|-N] creatorName creationStamp filename editorName editionStamp``
+
+``comment``
+
 using  following fields:
 
 * +|-
-       - 'done' state; '-' indicates open task, '+' - closed
+       - 'done' state; ``-`` indicates open task, ``+`` - closed
 * category
        - that category tag name from TODO comment format 
 * XXXX
@@ -120,7 +120,7 @@ using  following fields:
 * creationStamp
        - date and time task was created. Using **dd/mm/yy hh:mm** format
 * filename
-       - file at which task was created. If *.sublime-project is found, relative path is stored.
+       - file at which task was created. If *.sublime-project* is found, relative path is stored.
 * editorName
        - name of user which edited task last, is taken from environment variable
 * editionStamp
@@ -128,13 +128,10 @@ using  following fields:
 * comment, *at second line*
        - arbitrary text
 
-4.6. *reserved*
-
 4.7.
-       **MySQL**.
-       If configuration ``mysql [host] [user] [pass] [scheme]`` line is found (without braces), then typetodo uses that specified MySQL server to store tasks.
+       **MySQL** mode is used if configuration ``mysql [host] [user] [pass] [scheme]`` line is found in *.do* config.
        [Scheme] specified MUST exist at server.
-       Following tables will created:
+       Following tables will be created:
 
 * projects
 * categories
@@ -143,6 +140,18 @@ using  following fields:
 * states
 * tasks
 
+All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved.
+
+4.8.
+       **HTTP** mode is used if configuration ``http [host] [repository] [user] [pass]`` line is found in *.do* config.
+       Repository can be **public** or **personal**.
+
+* public repository
+       - is created new at first run or can be recreated new using *TypeTodo: Reset Global config* Sublime command. It is free to read and write by everyone who knows it's name.
+       - public repository is accessible at http://typetodo.com/[repname] where [repname] looks like *~exwvpaytkfs6*
+* personal repository
+       - have same name as registered user. It is readable by everyone (yet) but can be written only when username/pass is provided.
+       
 All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved.
 
 
@@ -163,16 +172,13 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
 -------------------------
 
 6.1.
-       as NO (no) consistency checking is performed
-       between db and source files with ``//todo`` comments,
-       any ``//todo`` editing except of that in source files with sublime
-       will easily make things inconsistent and unpredictable
-
-6.2.
-       All changes to comment are flushed to db instantly and implicitly
-       at each keystroke typed. Reload file without save will result in inconsistence.
+       As NO (no) consistency checking is performed between db and source files,
+       any ``//todo`` comments editing outside Sublime will easily make things inconsistent and unpredictable.
+       Also all changes to comments are flushed to database without saving source file itself.
+       Reload file without save will result in inconsistence.
        This behavior will remain till synchronizing back FROM database will be done
 
-6.3.
+6.2.
        creating ``//todo XXXX:`` by defining XXXX explicitly will overwrite or create that specified XXXX task in database
 
+   

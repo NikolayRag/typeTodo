@@ -29,7 +29,7 @@ class TodoDbFile():
         self.cfgString= _cfgStr
 
         #{id: TodoTask()}
-        self.fetch()
+        self.fetch() #file mode flushes entire db every time, so it must init with full shot
         self.flush()
 
 

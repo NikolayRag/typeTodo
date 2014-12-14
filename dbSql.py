@@ -255,7 +255,7 @@ class TodoDbSql():
             (self.db_pid)
         )
 
-        sqn= {}
+        sqn= {} #get id for field names
         for field in cur.description:
             sqn[field[0]]= len(sqn)
 

@@ -136,6 +136,13 @@ if sys.version < '3':
    Read config and set up db engine
 '''
 
+#todo 109 (db) +5: Make multiple .db connectons for one base.
+'''
+    Read and hold all latest versions of tasks at reset()
+     from all specified engines.
+    Then store them back if inconsistence found,
+     thus making them synchronised.
+'''
 class TodoDb():
     projUser= '*Anon*'
     projectRoot= ''
@@ -187,7 +194,7 @@ class TodoDb():
                   f.write(cfgFound['header'])
 
 
-        if cfgFound == self.cfgA:
+        if cfgFound == self.cfgA: #no changes
             return
 
 #todo 99 (assure) +0: check if flushing needed at reset()
@@ -195,6 +202,7 @@ class TodoDb():
 #        self.todoA= {}
         self.cfgA= cfgFound
 
+#todo 108 (db) +0: always use file mode as well
         if cfgFound['engine']== 'mysql':
             self.db= TodoDbSql(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'])
         elif cfgFound['engine']== 'http':
@@ -244,6 +252,8 @@ class TodoDb():
         if self.db.flush():
             sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
             self.dirty= False
+#todo 111 (db) +0: (109); reset tasks .saved=true here, after flushing all.
+#todo 112 (db) +0: Use and check tasks .version
             return
         
 #todo 92 (flush) +0: limit flush retries

@@ -44,6 +44,10 @@ else:
     import urllib.request as urllib2
     import urllib.parse as urllib
 
+if sys.version < '3':
+    from db import *
+else:
+    from .db import *
 
 
 class TodoDbHttp():
@@ -68,6 +72,7 @@ class TodoDbHttp():
         self.httpRepository= _httpRepository
         self.httpUname= _httpUname
         self.httpPass= _httpPass
+
 
     def flush(self):
         postData= {}
@@ -145,4 +150,29 @@ class TodoDbHttp():
 
 #todo 105 (http) +0: make fetch()
     def fetch(self, _id=False):
-        return False
+        postData= {}
+        postData['rep']= self.httpRepository
+        postData['project']= urllib2.quote(self.projectName.encode('utf-8'))
+        if self.httpUname!='' and self.httpPass!='':
+            postData['logName']= urllib2.quote(self.httpUname)
+            postData['logPass']= urllib2.quote(self.httpPass)
+        req = urllib2.Request('http://' +self.httpAddr +'/?=fetchtasks', str.encode(urllib.urlencode(postData)))
+        try:
+            response= bytes.decode( urllib2.urlopen(req).read() )
+            
+            for task in json.loads(response):
+                __id= int(task['id'])
+                if __id not in self.todoA:
+                    self.todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], task['stamp'])
+
+                __state= True
+                if task['namestate']=='False':
+                    __state= False
+                self.todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], task['stamp'])
+
+        except:
+            response= False;
+            print('Cant fetch http')
+            return False
+
+        return True

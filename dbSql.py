@@ -8,7 +8,7 @@
 '''
 
 import sublime
-import sys, os
+import sys, os, datetime
 
 if sys.version < '3':
     sys.path.append('PyMySQL-master')
@@ -206,9 +206,6 @@ class TodoDbSql():
                 (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment)
             )
 
-#todo 69 (sql) +0: behave at individual save result
-            curTodo.setSaved()
-
         cur.close()
 
         return True
@@ -259,14 +256,16 @@ class TodoDbSql():
         for field in cur.description:
             sqn[field[0]]= len(sqn)
 
+        todoA= {}
         for task in cur.fetchall():
             __id= int(task[sqn['id']])
-            if __id not in self.todoA:
-                self.todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], task[sqn['stamp']])
+#todo 144 (multidb) +0: sql; handle cStamp/stamp on fetch
+            if __id not in todoA:
+                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], task[sqn['stamp']].timetuple())
 
             __state= True
             if task[sqn['namestate']]=='False':
                 __state= False
-            self.todoA[__id].set(__state, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], task[sqn['stamp']])
+            todoA[__id].set(__state, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], task[sqn['stamp']].timetuple())
 
-        return True
+        return todoA

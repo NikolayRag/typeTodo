@@ -23,7 +23,7 @@ defaultCfg= {
     'file': '',
     'defaultHttpApi': 'typetodo.com',
     'blankdb': {
-        'engine': 'file',
+        'engine': '',
         'addr': '',
         'login': '',
         'passw': '',
@@ -36,8 +36,8 @@ defaultCfg= {
 
 
 def readCfg(_cfgPath):
-    reMysqlStr= "(?P<engines>mysql)\s+(?P<addrs>[^\s]+)\s+(?P<logins>[^\s]+)\s+(?P<passws>[^\s]+)\s+(?P<bases>[^\s]+)"
-    reHttpStr= "(?P<engineh>http)\s+(?P<addrh>[^\s]+)\s+(?P<baseh>[^\s]+)\s*(?P<loginh>[^\s]*)\s*(?P<passwh>[^\s]*)"
+    reMysqlStr= "(?P<enginesql>mysql)\s+(?P<addrs>[^\s]+)\s+(?P<logins>[^\s]+)\s+(?P<passws>[^\s]+)\s+(?P<bases>[^\s]+)"
+    reHttpStr= "(?P<enginehttp>http)\s+(?P<addrh>[^\s]+)\s+(?P<baseh>[^\s]+)\s*(?P<loginh>[^\s]*)\s*(?P<passwh>[^\s]*)"
     reCfg= re.compile("^\s*(?:" +reMysqlStr +"|" +reHttpStr +")\s*$")
 
     try:
@@ -62,17 +62,17 @@ def readCfg(_cfgPath):
         cfgFoundTry= reCfg.match(cfgString)
         if cfgFoundTry:
             curCfg= cfgFoundTry.groupdict()
-            if curCfg['engines']:
+            if curCfg['enginesql']:
                 foundCfg= {
-                    'engine': curCfg['engines'],
+                    'engine': curCfg['enginesql'],
                     'addr': curCfg['addrs'],
                     'login': curCfg['logins'],
                     'passw': curCfg['passws'],
                     'base': curCfg['bases'],
                 }
-            elif curCfg['engineh']:
+            elif curCfg['enginehttp']:
                 foundCfg= {
-                    'engine': curCfg['engineh'],
+                    'engine': curCfg['enginehttp'],
                     'addr': curCfg['addrh'],
                     'login': curCfg['loginh'],
                     'passw': curCfg['passwh'],
@@ -136,7 +136,7 @@ if sys.version < '3':
    Read config and set up db engine
 '''
 
-#todo 109 (db) +5: Make multiple .db connectons for one base.
+#todo 109 (multidb) +5: Make multiple .db connectons for one base.
 '''
     Read and hold all latest versions of tasks at reset()
      from all specified engines.
@@ -155,7 +155,7 @@ class TodoDb():
     timerFlush= None
     dirty= False
 
-    db= None
+    dbA= {}
     todoA= None
 
 
@@ -177,8 +177,10 @@ class TodoDb():
 
 ##
     def reset(self, _force=False):
+#todo 145 (cfg) +0: repair onfly switching
         cfgPath= os.path.join(self.projectRoot, self.projectName +'.do')
 
+#todo 149 (cfg) +5: make use of more than one (last) cfg string
         cfgFound= False
         if not _force:
             cfgFound= readCfg(cfgPath)
@@ -189,7 +191,8 @@ class TodoDb():
             if not cfgFound:
                 return
 
-            if cfgFound['engine'] != 'file': #save new project .do
+#todo 118 (multidb) +0: check why only 'file' mode
+            if cfgFound['engine'] != '': #save new project .do
                 with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
                   f.write(cfgFound['header'])
 
@@ -197,19 +200,17 @@ class TodoDb():
         if cfgFound == self.cfgA: #no changes
             return
 
-#todo 99 (assure) +0: check if flushing needed at reset()
-#        self.flush(True)
-#        self.todoA= {}
         self.cfgA= cfgFound
 
-#todo 108 (db) +0: always use file mode as well
+        self.dbA= {}
+        self.dbA['file']= TodoDbFile(self.todoA, self.projUser, self.projectName, cfgPath, cfgFound['header']) #throw in cfgString to restore it in file
         if cfgFound['engine']== 'mysql':
-            self.db= TodoDbSql(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'])
-        elif cfgFound['engine']== 'http':
-            self.db= TodoDbHttp(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['base'], cfgFound['login'], cfgFound['passw'])
-        else:
-            self.db= TodoDbFile(self.todoA, self.projUser, self.projectName, cfgPath, cfgFound['header']) #throw in sfgString to restore it in file
+            self.dbA['mysql']= TodoDbSql(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'])
+        if cfgFound['engine']== 'http':
+            self.dbA['http']= TodoDbHttp(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['base'], cfgFound['login'], cfgFound['passw'])
 
+        self.fetch() #sync all db at first
+        self.flush()
 
 
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
@@ -223,13 +224,17 @@ class TodoDb():
 
         _id= int(_id)
 
-        strStamp= time.strftime("%y/%m/%d %H:%M")
-
 #todo 66 (db) +0: handle unresponsive db task creation
-        newId= _id or self.db.newId()
+        newId= _id or 0
+        if not _id:
+            for db in self.dbA:
+                newId= int(max(newId, self.dbA[db].newId()))
+
         if not newId:
             sublime.status_message('Todo creation failed, see console for info')
             return False
+
+        strStamp= time.localtime()
 
 #todo 71 (db) +0: instantly remove blank new task from cache before saving if set to +
         if newId not in self.todoA: #for new and repairing tasks
@@ -244,18 +249,25 @@ class TodoDb():
 
         return newId
 
+#todo 148 (general) +10: handle fucking unresponsive servers! Especially http
     def flush(self, _atExit=False):
         self.timerFlush.cancel()
 
-        if not self.dirty: return
-
-        if self.db.flush():
-            sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
-            self.dirty= False
-#todo 111 (db) +0: (109); reset tasks .saved=true here, after flushing all.
-#todo 112 (db) +0: Use and check tasks .version
-            return
+        flushOk= True
+        for db in self.dbA:
+            if self.dirty or db=='file':
+                flushOk= flushOk and self.dbA[db].flush()
         
+        if flushOk:
+            sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
+
+#todo 69 (multidb) +0: behave at individual save results of each db
+            for iT in self.todoA:
+                self.todoA[iT].setSaved(True)
+
+            self.dirty= False
+            return
+
 #todo 92 (flush) +0: limit flush retries
         if not _atExit:
             sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry in 5 sec\'s'), 0)
@@ -266,7 +278,35 @@ class TodoDb():
 
 
     def fetch(self, _id=False):
-        return self.db.fetch(_id)
+        success= True
+
+#todo 119 (multidb) +0: check if self.todoA need to be wiped
+        for db in self.dbA:
+
+            todoA= self.dbA[db].fetch(_id)
+            if not todoA:
+                print(db)
+                return False
+
+            for iT in todoA: #each fetched task have to be compared to existing
+                task= todoA[iT]
+                __id= task.id
+
+#todo 112 (multidb) +0: Use and check tasks .version x
+
+                if __id not in self.todoA:
+                    task.setSaved(True)
+                    self.todoA[__id]= task
+
+#todo 146 (multidb) +5: check timezone when fetching from distant source
+#todo 147 (multidb) +10: item should be unsaved for incomplete db; manage saved[] for different db's
+                else:
+                    if task.stamp > self.todoA[__id].stamp:
+                        task.setSaved(False)
+                        self.dirty= True
+                        self.todoA[__id]= task
+
+        return success
 
 
 
@@ -277,7 +317,8 @@ class TodoTask():
     id= 0
     project= ''
     creator= ''
-    cStamp= '' #used only for dbFile
+
+    cStamp= False #used only for dbFile
 
     #updatable
     state= False
@@ -286,12 +327,14 @@ class TodoTask():
     fileName= ''
     comment= ''
     editor= ''
-    stamp= ''
+    stamp= False
     version= 1
 
+    canSave= False #for skipping at file mode
     saved= True
 
     def __init__(self, _id, _project, _creator, _stamp):
+        self.canSave= False
         self.saved= True
 
         self.id= _id
@@ -301,11 +344,12 @@ class TodoTask():
 
 
     def set(self, _state, _cat, _lvl, _fileName, _comment, _editor, _stamp):
+        self.canSave= True
         self.saved= False
 
         if _state != '': self.state= _state
-        self.cat= _cat
-        self.lvl= _lvl
+        self.cat= _cat or ''
+        self.lvl= int(_lvl) or 0
         self.fileName= _fileName or ''
         self.comment= _comment
         self.editor= _editor

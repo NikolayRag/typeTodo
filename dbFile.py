@@ -29,9 +29,6 @@ class TodoDbFile():
         self.cfgString= _cfgStr
 
         #{id: TodoTask()}
-        self.fetch() #file mode flushes entire db every time, so it must init with full shot
-        self.flush()
-
 
 
 
@@ -51,18 +48,17 @@ class TodoDbFile():
 
                 for iT in self.todoA:
                     curTodo= self.todoA[iT]
+                    if not curTodo.canSave:
+                        continue
+
                     self.maxId= max(self.maxId, curTodo.id)
 
                     stateSign= '-'
                     if curTodo.state: stateSign= '+'
 
-                    if not curTodo.cat: curTodo.cat= ''
-
-
-                    curTodo.lvl= int(curTodo.lvl)
-                    if curTodo.lvl>=0: curTodo.lvl= '+' +str(curTodo.lvl)
-
-                    f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(curTodo.lvl), curTodo.creator, curTodo.cStamp, '"'+curTodo.fileName+'"', curTodo.editor, curTodo.stamp]) +"\n\t" +curTodo.comment +"\n\n")
+                    lvl= curTodo.lvl
+                    if curTodo.lvl>=0: lvl= '+' +str(curTodo.lvl)
+                    f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), curTodo.creator, time.strftime('%y/%m/%d %H:%M', curTodo.cStamp), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M', curTodo.stamp)]) +"\n\t" +curTodo.comment +"\n\n")
 
             return True
 
@@ -79,6 +75,7 @@ class TodoDbFile():
 
     def fetch(self, _id=False):
         try:
+            todoA= {}
             with codecs.open(self.projectFname, 'r', 'UTF-8') as f:
                 ctxTodo= None
                 for ln in f:
@@ -90,8 +87,8 @@ class TodoDbFile():
                         if _id and _id!=__id: #pick one
                             continue
 
-                        if __id not in self.todoA:
-                            self.todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), matchParse.group(6))
+                        if __id not in todoA:
+                            todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), time.strptime(matchParse.group(6),'%y/%m/%d %H:%M'))
                         ctxTodo= matchParse
 
                         self.maxId= max(self.maxId, __id)
@@ -101,10 +98,10 @@ class TodoDbFile():
                         __state= False
                         if ctxTodo.group(1)=='+': __state= True
                         matchComment= self.reCommentParse.match(ln)
-                        self.todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), ctxTodo.group(9))
+                        todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), time.strptime(ctxTodo.group(9),'%y/%m/%d %H:%M'))
                         ctxTodo= None
+            return todoA
+
         except:
             self.dbOk= False
             return False
-
-        return True

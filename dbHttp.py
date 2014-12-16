@@ -109,10 +109,7 @@ class TodoDbHttp():
                 if not self.todoA[int(respId)]:
                     print ('TypeTodo: Server responded task ' +respId +' that doesn\'t exists. Skipping')
 
-                elif response[respId]==0:
-                    self.todoA[int(respId)].setSaved()
-
-                else:
+                elif response[respId]!=0:
                     print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
                     allOk= False
 
@@ -148,7 +145,6 @@ class TodoDbHttp():
         return response
 
 
-#todo 105 (http) +0: make fetch()
     def fetch(self, _id=False):
         postData= {}
         postData['rep']= self.httpRepository
@@ -158,21 +154,23 @@ class TodoDbHttp():
             postData['logPass']= urllib2.quote(self.httpPass)
         req = urllib2.Request('http://' +self.httpAddr +'/?=fetchtasks', str.encode(urllib.urlencode(postData)))
         try:
+            todoA= {}
             response= bytes.decode( urllib2.urlopen(req).read() )
             
             for task in json.loads(response):
                 __id= int(task['id'])
-                if __id not in self.todoA:
-                    self.todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], task['stamp'])
+
+#todo 143 (multidb) +0: http; handle cStamp/stamp on fetch
+                if __id not in todoA:
+                    todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], time.strptime(task['stamp'],'%Y-%m-%d %H:%M:%S'))
 
                 __state= True
                 if task['namestate']=='False':
                     __state= False
-                self.todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], task['stamp'])
+                todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], time.strptime(task['stamp'],'%Y-%m-%d %H:%M:%S'))
+
+            return todoA
 
         except:
-            response= False;
             print('Cant fetch http')
             return False
-
-        return True

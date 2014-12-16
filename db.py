@@ -210,7 +210,7 @@ class TodoDb():
             self.dbA['http']= TodoDbHttp(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['base'], cfgFound['login'], cfgFound['passw'])
 
         self.fetch() #sync all db at first
-        self.flush()
+        self.flush(True)
 
 
     def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
@@ -249,7 +249,6 @@ class TodoDb():
 
         return newId
 
-#todo 148 (general) +10: handle fucking unresponsive servers! Especially http
     def flush(self, _atExit=False):
         self.timerFlush.cancel()
 

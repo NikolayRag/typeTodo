@@ -40,7 +40,7 @@ def getDB(_view=False, _folder=False):
 
     if _folder!=False:
         firstFolderA=(_folder,)
-    elif _view and _view.window:
+    elif _view!=False and _view.window():
         firstFolderA= _view.window().folders()
     else:
         return False
@@ -130,8 +130,10 @@ class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
     def on_deactivated(self,_view):
-        for curDB in projectDbCache:
-            projectDbCache[curDB].flush(True)
+#todo 148 (general) +10: handle fucking unresponsive servers! Especially http
+#        for curDB in projectDbCache:
+#            projectDbCache[curDB].flush(True)
+        getDB(_view).flush(True)
 
 #todo 86 (issue) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
     def on_activated(self, _view):

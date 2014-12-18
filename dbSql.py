@@ -8,7 +8,7 @@
 '''
 
 import sublime
-import sys, os, datetime
+import sys, os, time
 
 if sys.version < '3':
     sys.path.append('PyMySQL-master')
@@ -248,7 +248,7 @@ class TodoDbSql():
         cur = self.dbConn.cursor()
 
         cur.execute(
-            "SELECT *,UNIX_TIMESTAMP(stamp) ustamp FROM (\
+            "SELECT *, UNIX_TIMESTAMP(CONVERT_TZ(stamp, @@session.time_zone, '+00:00')) gstamp FROM (\
               SELECT id_project maxp,id maxi,max(version) maxv FROM tasks WHERE id_project=%s GROUP BY id\
             ) maxv INNER JOIN tasks ON id_project=maxp AND id=maxi AND version=maxv AND version>0\
             LEFT JOIN (SELECT id idproject, name nameproject FROM projects) _projects ON idproject=id_project\
@@ -268,11 +268,11 @@ class TodoDbSql():
             __id= int(task[sqn['id']])
 #todo 144 (multidb) +0: sql; handle cStamp/stamp on fetch
             if __id not in todoA:
-                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], task[sqn['ustamp']].timetuple(), self.parentDB)
+                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], time.localtime(task[sqn['gstamp']]), self.parentDB)
 
             __state= True
             if task[sqn['namestate']]=='False':
                 __state= False
-            todoA[__id].set(__state, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], task[sqn['ustamp']].timetuple())
+            todoA[__id].set(__state, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], time.localtime(task[sqn['gstamp']]))
 
         return todoA

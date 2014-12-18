@@ -85,8 +85,6 @@ class TodoDbHttp():
             curTodo= self.todoA[iT]
             if curTodo.savedA[_dbN]: continue
 
-            print iT
-
             postList.append(str(curTodo.id))
             postData['state' +str(curTodo.id)]= urllib2.quote(str(curTodo.state).encode('utf-8'))
             postData['file' +str(curTodo.id)]= urllib2.quote(curTodo.fileName.encode('utf-8'))
@@ -166,18 +164,18 @@ class TodoDbHttp():
         try:
             todoA= {}
             response= bytes.decode( urllib2.urlopen(req).read() )
-                
+
             for task in json.loads(response):
                 __id= int(task['id'])
 
-    #todo 143 (multidb) +0: http; handle cStamp/stamp on fetch
+#todo 143 (multidb) +0: http; handle cStamp/stamp on fetch
                 if __id not in todoA:
-                    todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], time.strptime(task['stamp'],'%Y-%m-%d %H:%M:%S'), self.parentDB)
+                    todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], time.localtime(int(task['gstamp'])), self.parentDB)
 
                     __state= True
                     if task['namestate']=='False':
                         __state= False
-                    todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], time.strptime(task['stamp'],'%Y-%m-%d %H:%M:%S'))
+                    todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], time.localtime(int(task['gstamp'])))
 
             return todoA
 

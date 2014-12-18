@@ -58,7 +58,12 @@ class TodoDbFile():
 
                     lvl= curTodo.lvl
                     if curTodo.lvl>=0: lvl= '+' +str(curTodo.lvl)
-                    f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), curTodo.creator, time.strftime('%y/%m/%d %H:%M', curTodo.cStamp), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M', curTodo.stamp)]) +"\n\t" +curTodo.comment +"\n\n")
+
+                    #runtime GMT time to local
+                    gmtCtime= time.localtime( time.mktime (curTodo.cStamp) -time.timezone)
+                    gmtEtime= time.localtime( time.mktime (curTodo.stamp) -time.timezone)
+
+                    f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), curTodo.creator, time.strftime('%y/%m/%d %H:%M', gmtCtime), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M', gmtEtime)]) +"\n\t" +curTodo.comment +"\n\n")
 
             return True
 
@@ -87,8 +92,12 @@ class TodoDbFile():
                         if _id and _id!=__id: #pick one
                             continue
 
+                        #file holds local time, need to convert to GMT for runtime
+                        gmtCtime= time.localtime( time.mktime (time.strptime(matchParse.group(6), '%y/%m/%d %H:%M')) +time.timezone)
+                        gmtEtime= time.localtime( time.mktime (time.strptime(matchParse.group(9), '%y/%m/%d %H:%M')) +time.timezone)
+
                         if __id not in todoA:
-                            todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), time.strptime(matchParse.group(6),'%y/%m/%d %H:%M'), self.parentDB)
+                            todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), gmtCtime, self.parentDB)
                         ctxTodo= matchParse
 
                         self.maxId= max(self.maxId, __id)
@@ -98,7 +107,7 @@ class TodoDbFile():
                         __state= False
                         if ctxTodo.group(1)=='+': __state= True
                         matchComment= self.reCommentParse.match(ln)
-                        todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), time.strptime(ctxTodo.group(9),'%y/%m/%d %H:%M'))
+                        todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), gmtEtime)
                         ctxTodo= None
             return todoA
 

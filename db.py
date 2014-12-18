@@ -136,7 +136,6 @@ if sys.version < '3':
    Read config and set up db engine
 '''
 
-#todo 109 (multidb) +5: Make multiple .db connectons for one base.
 '''
     Read and hold all latest versions of tasks at reset()
      from all specified engines.
@@ -156,15 +155,20 @@ class TodoDb():
     dirty= False
 
     dbA= {}
+    dbEngineA= {}
     todoA= None
 
 
     def __init__(self, _root, _name):
+        self.dbA= {}
+        self.dbEngineA= {}
+
         self.timerFlush = Timer(0, None) #dummy
 
         self.todoA= {}
         self.update(_root, _name)
         self.reset()
+        
 
     def update(self, _root, _name):
         if 'USERNAME' in os.environ: self.projUser= os.environ['USERNAME']
@@ -191,7 +195,7 @@ class TodoDb():
             if not cfgFound:
                 return
 
-#todo 118 (multidb) +0: check why only 'file' mode
+#todo 118 (multidb) +0: check why only 'file' model
             if cfgFound['engine'] != '': #save new project .do
                 with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
                   f.write(cfgFound['header'])
@@ -202,12 +206,16 @@ class TodoDb():
 
         self.cfgA= cfgFound
 
-        self.dbA= {}
-        self.dbA['file']= TodoDbFile(self.todoA, self.projUser, self.projectName, cfgPath, cfgFound['header']) #throw in cfgString to restore it in file
+        self.dbA.clear()
+        self.dbA['file']= TodoDbFile(self.todoA, self.projUser, self.projectName, cfgPath, cfgFound['header'], self) #throw in cfgString to restore it in file
         if cfgFound['engine']== 'mysql':
-            self.dbA['mysql']= TodoDbSql(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'])
+            self.dbA['mysql']= TodoDbSql(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'], self)
         if cfgFound['engine']== 'http':
-            self.dbA['http']= TodoDbHttp(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['base'], cfgFound['login'], cfgFound['passw'])
+            self.dbA['http']= TodoDbHttp(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['base'], cfgFound['login'], cfgFound['passw'], self)
+
+        self.dbEngineA.clear()
+        for dbEN in self.dbA:
+            self.dbEngineA[dbEN]= True
 
         self.fetch() #sync all db at first
         self.flush(True)
@@ -238,7 +246,7 @@ class TodoDb():
 
 #todo 71 (db) +0: instantly remove blank new task from cache before saving if set to +
         if newId not in self.todoA: #for new and repairing tasks
-            self.todoA[newId]= TodoTask(newId, self.projectName, self.projUser, strStamp)
+            self.todoA[newId]= TodoTask(newId, self.projectName, self.projUser, strStamp, self)
 
         if _id:
             self.dirty= True
@@ -253,16 +261,12 @@ class TodoDb():
         self.timerFlush.cancel()
 
         flushOk= True
-        for db in self.dbA:
-            if self.dirty or db=='file':
-                flushOk= flushOk and self.dbA[db].flush()
+        for dbN in self.dbA:
+            if (self.dirty) or (dbN=='file'):
+                flushOk= flushOk and self.dbA[dbN].flush(dbN)
         
         if flushOk:
             sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
-
-#todo 69 (multidb) +0: behave at individual save results of each db
-            for iT in self.todoA:
-                self.todoA[iT].setSaved(True)
 
             self.dirty= False
             return
@@ -276,34 +280,43 @@ class TodoDb():
             sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s')
 
 
+#macro
+#   1. roll over all db's
+#   2. fetch unbinded task lists
+#   3. compare if new or updated
+#       3.1. join int working list
+#       3.2. unset other db's 'saved' flag
+
     def fetch(self, _id=False):
         success= True
 
 #todo 119 (multidb) +0: check if self.todoA need to be wiped
-        for db in self.dbA:
-
-            todoA= self.dbA[db].fetch(_id)
-            if not todoA:
-                print(db)
+        for dbN in self.dbA:
+            todoA= self.dbA[dbN].fetch(_id)
+            if todoA==False:
                 return False
 
             for iT in todoA: #each fetched task have to be compared to existing
                 task= todoA[iT]
                 __id= task.id
 
-#todo 112 (multidb) +0: Use and check tasks .version x
+#todo 112 (multidb) +0: Use and check tasks .version
 
-                if __id not in self.todoA:
-                    task.setSaved(True)
+                isNew= __id not in self.todoA
+                isUpdated= False
+                if not isNew:
+                    isUpdated= task.stamp > self.todoA[__id].stamp
+
+                if isNew or isUpdated:
+#todo 146 (multidb) +5: check timezone when fetching from distant source
+                    if isUpdated:
+                        print ('DB\'s differs at ' +str(dbN) +':' +str(__id))
+                    task.setSaved(False) #all but current db are saved for task
+                    if not dbN=='file':
+                        task.setSaved(True, dbN)
                     self.todoA[__id]= task
 
-#todo 146 (multidb) +5: check timezone when fetching from distant source
-#todo 147 (multidb) +10: item should be unsaved for incomplete db; manage saved[] for different db's
-                else:
-                    if task.stamp > self.todoA[__id].stamp:
-                        task.setSaved(False)
-                        self.dirty= True
-                        self.todoA[__id]= task
+                self.dirty= True
 
         return success
 
@@ -329,22 +342,22 @@ class TodoTask():
     stamp= False
     version= 1
 
-    canSave= False #for skipping at file mode
-    saved= True
+    savedA= {} #['engine']= state; cleared at reseting db's
 
-    def __init__(self, _id, _project, _creator, _stamp):
-        self.canSave= False
-        self.saved= True
+    parentDb= False #used to set saved[] state from parentDb.dbEngineA
 
+    def __init__(self, _id, _project, _creator, _stamp, _parentDB):
         self.id= _id
         self.project= _project
         self.creator= _creator
         self.cStamp= _stamp
 
+        self.savedA= {}
+        self.parentDb= _parentDB.dbEngineA
+        self.setSaved(True) #'file' indicates it is initial; not set True at flush to save bulk every time after first .set()
 
     def set(self, _state, _cat, _lvl, _fileName, _comment, _editor, _stamp):
-        self.canSave= True
-        self.saved= False
+        self.setSaved(False)
 
         if _state != '': self.state= _state
         self.cat= _cat or ''
@@ -354,6 +367,10 @@ class TodoTask():
         self.editor= _editor
         self.stamp= _stamp
 
-    def setSaved(self, _state=True):
-        self.saved= _state
-
+    def setSaved(self, _state=True, _engine=False):
+        if _engine==False: #set all
+            for dbEN in self.parentDb:
+                self.savedA[dbEN]= _state
+        else:
+            self.savedA[_engine]= _state
+        return True

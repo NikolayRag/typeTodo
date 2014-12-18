@@ -60,8 +60,10 @@ class TodoDbHttp():
     httpUname= ''
     httpPass= ''
 
+    parentDB= False
 
-    def __init__(self, _todoA, _uname, _name, _httpAddr, _httpRepository, _httpUname, _httpPass):
+
+    def __init__(self, _todoA, _uname, _name, _httpAddr, _httpRepository, _httpUname, _httpPass, _parentDB):
         self.todoA= _todoA
         self.userName= _uname
         self.projectName= _name
@@ -73,13 +75,17 @@ class TodoDbHttp():
         self.httpUname= _httpUname
         self.httpPass= _httpPass
 
+        self.parentDB= _parentDB
 
-    def flush(self):
+
+    def flush(self, _dbN):
         postData= {}
         postList= list()
         for iT in self.todoA:
             curTodo= self.todoA[iT]
-            if curTodo.saved: continue
+            if curTodo.savedA[_dbN]: continue
+
+            print iT
 
             postList.append(str(curTodo.id))
             postData['state' +str(curTodo.id)]= urllib2.quote(str(curTodo.state).encode('utf-8'))
@@ -113,6 +119,10 @@ class TodoDbHttp():
                     print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
                     allOk= False
 
+#todo 69 (multidb) +0: behave at individual save results of each dbx
+                else:
+                    self.todoA[int(respId)].setSaved(True, _dbN)
+                
             return allOk
 
         except:
@@ -156,18 +166,18 @@ class TodoDbHttp():
         try:
             todoA= {}
             response= bytes.decode( urllib2.urlopen(req).read() )
-            
+                
             for task in json.loads(response):
                 __id= int(task['id'])
 
-#todo 143 (multidb) +0: http; handle cStamp/stamp on fetch
+    #todo 143 (multidb) +0: http; handle cStamp/stamp on fetch
                 if __id not in todoA:
-                    todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], time.strptime(task['stamp'],'%Y-%m-%d %H:%M:%S'))
+                    todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], time.strptime(task['stamp'],'%Y-%m-%d %H:%M:%S'), self.parentDB)
 
-                __state= True
-                if task['namestate']=='False':
-                    __state= False
-                todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], time.strptime(task['stamp'],'%Y-%m-%d %H:%M:%S'))
+                    __state= True
+                    if task['namestate']=='False':
+                        __state= False
+                    todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], time.strptime(task['stamp'],'%Y-%m-%d %H:%M:%S'))
 
             return todoA
 

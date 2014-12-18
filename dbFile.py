@@ -21,23 +21,23 @@ class TodoDbFile():
     projectFname= ''
     maxId= 0
 
+    parentDB= False
 
-    def __init__(self, _todoA, _uname, _name, _fname, _cfgStr):
+    def __init__(self, _todoA, _uname, _name, _fname, _cfgStr, _parentDB):
         self.todoA= _todoA
         self.projectName= _name
         self.projectFname= _fname
         self.cfgString= _cfgStr
 
-        #{id: TodoTask()}
-
+        self.parentDB= _parentDB
 
 
 #public#
 
 
-    def flush(self):
+    def flush(self, _dbN):
         if not self.dbOk:
-            print("TypeTodo: 'file' db was not properly inited. Disabled.")
+            print("TypeTodo: 'file' db was not properly inited. Saving disabled.")
 
             return False
 
@@ -48,7 +48,7 @@ class TodoDbFile():
 
                 for iT in self.todoA:
                     curTodo= self.todoA[iT]
-                    if not curTodo.canSave:
+                    if curTodo.savedA[_dbN]: #stands for 'if just inited'
                         continue
 
                     self.maxId= max(self.maxId, curTodo.id)
@@ -88,7 +88,7 @@ class TodoDbFile():
                             continue
 
                         if __id not in todoA:
-                            todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), time.strptime(matchParse.group(6),'%y/%m/%d %H:%M'))
+                            todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), time.strptime(matchParse.group(6),'%y/%m/%d %H:%M'), self.parentDB)
                         ctxTodo= matchParse
 
                         self.maxId= max(self.maxId, __id)

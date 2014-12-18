@@ -96,7 +96,10 @@ class TodoDbSql():
 
     dbConn= None
 
-    def __init__(self, _todoA, _uname, _name, _dbAddr, _dbUname, _dbPass, _dbScheme):
+    parentDB= False
+
+
+    def __init__(self, _todoA, _uname, _name, _dbAddr, _dbUname, _dbPass, _dbScheme, _parentDB):
         self.todoA= _todoA
         self.userName= _uname
         self.projectName= _name
@@ -105,6 +108,8 @@ class TodoDbSql():
         self.dbUname= _dbUname
         self.dbPass= _dbPass
         self.dbScheme= _dbScheme
+
+        self.parentDB= _parentDB
 
 
     def reconnect(self):
@@ -164,14 +169,14 @@ class TodoDbSql():
 #public#
 
 
-    def flush(self):
+    def flush(self, _dbN):
         if not self.reconnect():
             return False
         cur = self.dbConn.cursor()
 
         for iT in self.todoA:
             curTodo= self.todoA[iT]
-            if curTodo.saved: continue
+            if curTodo.savedA[_dbN]: continue
 
             cur.execute(
                 "INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
@@ -205,6 +210,8 @@ class TodoDbSql():
                 "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                 (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment)
             )
+
+            curTodo.setSaved(True, _dbN)
 
         cur.close()
 
@@ -241,7 +248,7 @@ class TodoDbSql():
         cur = self.dbConn.cursor()
 
         cur.execute(
-            "SELECT * FROM (\
+            "SELECT *,UNIX_TIMESTAMP(stamp) ustamp FROM (\
               SELECT id_project maxp,id maxi,max(version) maxv FROM tasks WHERE id_project=%s GROUP BY id\
             ) maxv INNER JOIN tasks ON id_project=maxp AND id=maxi AND version=maxv AND version>0\
             LEFT JOIN (SELECT id idproject, name nameproject FROM projects) _projects ON idproject=id_project\
@@ -261,11 +268,11 @@ class TodoDbSql():
             __id= int(task[sqn['id']])
 #todo 144 (multidb) +0: sql; handle cStamp/stamp on fetch
             if __id not in todoA:
-                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], task[sqn['stamp']].timetuple())
+                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], task[sqn['ustamp']].timetuple(), self.parentDB)
 
             __state= True
             if task[sqn['namestate']]=='False':
                 __state= False
-            todoA[__id].set(__state, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], task[sqn['stamp']].timetuple())
+            todoA[__id].set(__state, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], task[sqn['ustamp']].timetuple())
 
         return todoA

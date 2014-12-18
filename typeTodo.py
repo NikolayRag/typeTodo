@@ -107,24 +107,6 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
         cDb.flush(True)
 
 
-class TypetodoTransferCommand(sublime_plugin.TextCommand):
-    def run(self, _edit):
-        cDb= getDB(self.view)
-        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tCurrent project\'s TypeTodo settings\n\twill be reset using current global settings.\n\tProject\'s database content\n\twill be copied to new location.'):
-            return
-
-        cDb.flush(True)
-        if not cDb.fetch():
-            sublime.error_message('TypeTodo Error:\n\n\tCannot transfer,\n\tall remain intact.')
-            return
-
-#todo 103 (command) +0: make fallback on transfer
-        cDb.reset(True)
-        for iT in cDb.todoA:
-            curTodo= cDb.todoA[iT].setSaved(False)
-        cDb.dirty= True
-        cDb.flush(True)
-
 
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1

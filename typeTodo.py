@@ -92,19 +92,17 @@ class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
 class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= getDB(False,'')
-        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tGlobal database content\n\twill be copied to new location.\n\n\tProcceed anyway?'):
+        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings.\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tGlobal database content\n\twill be copied to new location.\n\n\tProcceed?'):
             return
 
-        cDb.flush(True)
-        if not cDb.fetch() or not initGlobalDo(True):
+        if not initGlobalDo(True):
             sublime.message_dialog('TypeTodo error:\n\tCannot reset global .do file,\n\tall remain intact.')
             return
 
-        cDb.reset()
         for iT in cDb.todoA:
             curTodo= cDb.todoA[iT].setSaved(False)
-        cDb.dirty= True
-        cDb.flush(True)
+#todo 164 (command) +0: only 'file' mode is saved instantly, additional dbs saved at exit/edit
+        cDb.reset()
 
 
 

@@ -242,7 +242,7 @@ class TodoDb():
             sublime.status_message('Todo creation failed, see console for info')
             return False
 
-        strStamp= time.localtime( time.mktime(time.localtime()) +time.timezone)
+        strStamp= time.gmtime()
 
 #todo 71 (db) +0: instantly remove blank new task from cache before saving if set to +
         if newId not in self.todoA: #for new and repairing tasks
@@ -301,7 +301,6 @@ class TodoDb():
                 __id= task.id
 
 #todo 112 (multidb) +0: Use and check tasks .version
-
                 isNew= __id not in self.todoA
                 isUpdated= False
                 if not isNew:

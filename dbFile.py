@@ -93,8 +93,8 @@ class TodoDbFile():
                             continue
 
                         #file holds local time, need to convert to GMT for runtime
-                        gmtCtime= time.localtime( time.mktime (time.strptime(matchParse.group(6), '%y/%m/%d %H:%M')) +time.timezone)
-                        gmtEtime= time.localtime( time.mktime (time.strptime(matchParse.group(9), '%y/%m/%d %H:%M')) +time.timezone)
+                        gmtCtime= time.gmtime( time.mktime (time.strptime(matchParse.group(6), '%y/%m/%d %H:%M')))
+                        gmtEtime= time.gmtime( time.mktime (time.strptime(matchParse.group(9), '%y/%m/%d %H:%M')))
 
                         if __id not in todoA:
                             todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), gmtCtime, self.parentDB)

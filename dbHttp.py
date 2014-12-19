@@ -170,12 +170,12 @@ class TodoDbHttp():
 
 #todo 143 (multidb) +0: http; handle cStamp/stamp on fetch
                 if __id not in todoA:
-                    todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], time.localtime(int(task['gstamp'])), self.parentDB)
+                    todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], time.gmtime(int(task['ustamp'])), self.parentDB)
 
                     __state= True
                     if task['namestate']=='False':
                         __state= False
-                    todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], time.localtime(int(task['gstamp'])))
+                    todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], time.gmtime(int(task['ustamp'])))
 
             return todoA
 

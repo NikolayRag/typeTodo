@@ -59,11 +59,11 @@ class TodoDbHttp():
     parentDB= False
 
 
-    def __init__(self, _httpAddr, _httpRepository, _httpUname, _httpPass, _parentDB):
-        self.httpAddr= _httpAddr
-        self.httpRepository= _httpRepository
-        self.httpUname= _httpUname
-        self.httpPass= _httpPass
+    def __init__(self, _cfg, _parentDB):
+        self.httpAddr= _cfg['addr']
+        self.httpRepository= _cfg['base']
+        self.httpUname= _cfg['login']
+        self.httpPass= _cfg['passw']
 
         self.parentDB= _parentDB
 

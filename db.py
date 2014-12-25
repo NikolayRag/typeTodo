@@ -80,6 +80,7 @@ def readCfg(_cfgPath):
                 }
 
     foundCfg['header']= headerCollect
+    foundCfg['file']= _cfgPath
     return foundCfg
 
 
@@ -203,13 +204,13 @@ class TodoDb():
         self.dbA.clear() #new db array
 
         if True:
-            self.dbA[dbId]= TodoDbFile(cfgPath, cfgFound['header'], self) #throw in cfgString to restore it in file
+            self.dbA[dbId]= TodoDbFile(cfgFound, self)
             dbId+= 1
         if cfgFound['engine']== 'mysql':
-            self.dbA[dbId]= TodoDbSql(cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'], self)
+            self.dbA[dbId]= TodoDbSql(cfgFound, self)
             dbId+= 1
         if cfgFound['engine']== 'http':
-            self.dbA[dbId]= TodoDbHttp(cfgFound['addr'], cfgFound['base'], cfgFound['login'], cfgFound['passw'], self)
+            self.dbA[dbId]= TodoDbHttp(cfgFound, self)
             dbId+= 1
 
         for iT in self.todoA: #set all unsaved

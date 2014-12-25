@@ -93,11 +93,11 @@ class TodoDbSql():
     parentDB= False
 
 
-    def __init__(self, _dbAddr, _dbUname, _dbPass, _dbScheme, _parentDB):
-        self.dbAddr= _dbAddr
-        self.dbUname= _dbUname
-        self.dbPass= _dbPass
-        self.dbScheme= _dbScheme
+    def __init__(self, _cfg, _parentDB):
+        self.dbAddr= _cfg['addr']
+        self.dbUname= _cfg['login']
+        self.dbPass= _cfg['passw']
+        self.dbScheme= _cfg['base']
 
         self.parentDB= _parentDB
 

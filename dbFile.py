@@ -21,9 +21,9 @@ class TodoDbFile():
 
     parentDB= False
 
-    def __init__(self, _fname, _cfgStr, _parentDB):
-        self.projectFname= _fname
-        self.cfgString= _cfgStr
+    def __init__(self, _cfg, _parentDB):
+        self.projectFname= _cfg['file']
+        self.cfgString= _cfg['header']
 
         self.parentDB= _parentDB
 

@@ -187,11 +187,19 @@ class TodoDb():
         if not _force: #else skip directly to global init
             cfgFound= readCfg(cfgPath)
 
+
         if not cfgFound: 
             cfgFound= initGlobalDo()
 
             if not cfgFound:
                 return
+
+            if self.projectName != '': #save new named project .do
+                self.todoA.clear() #old tasks are trash
+                
+                cfgFound['file']= cfgPath
+                with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
+                  f.write(cfgFound['header'])
 
         if cfgFound == self.cfgA: #no changes
             return

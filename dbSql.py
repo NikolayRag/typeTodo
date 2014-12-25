@@ -206,9 +206,10 @@ class TodoDbSql():
             if recentTask and recentTask[0]:
                 newVersion= recentTask[0]+1
 
+#todo 167 (sql) +5: insert with explicit stamps
             cur.execute(
-                "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment)
+                "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment,stamp) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s))",
+                (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment, curTodo.stamp)
             )
 
             curTodo.setSaved(True, _dbN)
@@ -266,13 +267,13 @@ class TodoDbSql():
         todoA= {}
         for task in cur.fetchall():
             __id= int(task[sqn['id']])
-#todo 144 (multidb) +0: sql; handle cStamp/stamp on fetch
+#todo 144 (multidb) -1: sql; handle cStamp on fetch
             if __id not in todoA:
-                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], time.gmtime(task[sqn['ustamp']]), self.parentDB)
+                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], int(task[sqn['ustamp']]), self.parentDB)
 
             __state= True
             if task[sqn['namestate']]=='False':
                 __state= False
-            todoA[__id].set(__state, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], time.gmtime(task[sqn['ustamp']]))
+            todoA[__id].set(__state, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
 
         return todoA

@@ -240,7 +240,7 @@ class TodoDb():
             sublime.status_message('Todo creation failed, see console for info')
             return False
 
-        strStamp= time.gmtime()
+        strStamp= int(time.time())
 
 #todo 71 (db) +0: instantly remove blank new task from cache before saving if set to +
         if newId not in self.todoA: #for new and repairing tasks
@@ -326,7 +326,7 @@ class TodoTask():
     project= ''
     creator= ''
 
-    cStamp= False #used only for dbFile; GMT!
+    cStamp= False #used only for dbFile; unix time
 
     #updatable
     state= False
@@ -335,7 +335,7 @@ class TodoTask():
     fileName= ''
     comment= ''
     editor= ''
-    stamp= False # GMT!
+    stamp= False # unix time
     version= 1
 
     savedA= {} #['engine']= state; cleared at reseting db's

@@ -60,10 +60,10 @@ class TodoDbFile():
                     if curTodo.lvl>=0: lvl= '+' +str(curTodo.lvl)
 
                     #runtime GMT time to local
-                    gmtCtime= time.localtime( time.mktime (curTodo.cStamp) -time.timezone)
-                    gmtEtime= time.localtime( time.mktime (curTodo.stamp) -time.timezone)
+                    gmtCtime= time.localtime(curTodo.cStamp)
+                    gmtTime= time.localtime(curTodo.stamp)
 
-                    f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), curTodo.creator, time.strftime('%y/%m/%d %H:%M', gmtCtime), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M', gmtEtime)]) +"\n\t" +curTodo.comment +"\n\n")
+                    f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), curTodo.creator, time.strftime('%y/%m/%d %H:%M', gmtCtime), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
 
             return True
 
@@ -93,8 +93,8 @@ class TodoDbFile():
                             continue
 
                         #file holds local time, need to convert to GMT for runtime
-                        gmtCtime= time.gmtime( time.mktime (time.strptime(matchParse.group(6), '%y/%m/%d %H:%M')))
-                        gmtEtime= time.gmtime( time.mktime (time.strptime(matchParse.group(9), '%y/%m/%d %H:%M')))
+                        gmtCtime= time.mktime (time.strptime(matchParse.group(6), '%y/%m/%d %H:%M'))
+                        gmtTime= time.mktime (time.strptime(matchParse.group(9), '%y/%m/%d %H:%M'))
 
                         if __id not in todoA:
                             todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), gmtCtime, self.parentDB)
@@ -107,7 +107,7 @@ class TodoDbFile():
                         __state= False
                         if ctxTodo.group(1)=='+': __state= True
                         matchComment= self.reCommentParse.match(ln)
-                        todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), gmtEtime)
+                        todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), gmtTime)
                         ctxTodo= None
             return todoA
 

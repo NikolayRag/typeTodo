@@ -81,6 +81,7 @@ class TodoDbHttp():
     def flush(self, _dbN):
         postData= {}
         postList= list()
+
         for iT in self.todoA:
             curTodo= self.todoA[iT]
             if curTodo.savedA[_dbN]: continue
@@ -91,6 +92,7 @@ class TodoDbHttp():
             postData['cat' +str(curTodo.id)]= urllib2.quote(curTodo.cat.encode('utf-8'))
             postData['lvl' +str(curTodo.id)]= curTodo.lvl
             postData['comm' +str(curTodo.id)]= urllib2.quote(curTodo.comment.encode('utf-8'))
+            postData['stamp' +str(curTodo.id)]= curTodo.stamp
 
         postData['ids']= ','.join(postList)
         postData['user']= urllib2.quote(self.userName.encode('utf-8'))
@@ -117,7 +119,6 @@ class TodoDbHttp():
                     print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
                     allOk= False
 
-#todo 69 (multidb) +0: behave at individual save results of each dbx
                 else:
                     self.todoA[int(respId)].setSaved(True, _dbN)
                 
@@ -168,14 +169,14 @@ class TodoDbHttp():
             for task in json.loads(response):
                 __id= int(task['id'])
 
-#todo 143 (multidb) +0: http; handle cStamp/stamp on fetch
+#todo 143 (multidb) -1: http; handle cStamp on fetch
                 if __id not in todoA:
-                    todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], time.gmtime(int(task['ustamp'])), self.parentDB)
+                    todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], int(task['ustamp']), self.parentDB)
 
                     __state= True
                     if task['namestate']=='False':
                         __state= False
-                    todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], time.gmtime(int(task['ustamp'])))
+                    todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
 
             return todoA
 

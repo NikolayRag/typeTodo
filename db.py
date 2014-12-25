@@ -288,7 +288,7 @@ class TodoDb():
     def fetch(self, _id=False):
         success= True
 
-#todo 119 (multidb) +0: check if self.todoA need to be wiped2
+#todo 119 (multidb) +0: check if self.todoA need to be wiped
         for dbN in self.dbA:
             todoA= self.dbA[dbN].fetch(_id)
             if todoA==False:
@@ -302,6 +302,7 @@ class TodoDb():
                 isNew= __id not in self.todoA
                 isUpdated= False
                 if not isNew:
+#todo 174 (multidb) +10: if compared against 'file', must be at least +1 in minutes digit to suppress warning
                     isUpdated= task.stamp > self.todoA[__id].stamp
 
                 if isNew or isUpdated:

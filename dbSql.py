@@ -206,7 +206,6 @@ class TodoDbSql():
             if recentTask and recentTask[0]:
                 newVersion= recentTask[0]+1
 
-#todo 167 (sql) +5: insert with explicit stamps
             cur.execute(
                 "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment,stamp) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s))",
                 (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment, curTodo.stamp)

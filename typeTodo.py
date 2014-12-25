@@ -111,7 +111,9 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
     def on_deactivated(self,_view):
 #todo 148 (general) +10: handle fucking unresponsive servers! Especially http
-        getDB(_view).flush(True)
+        db= getDB(_view)
+        db.reset()
+        db.flush(True)
 
 #todo 86 (issue) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
     def on_activated(self, _view):

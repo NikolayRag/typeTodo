@@ -203,13 +203,13 @@ class TodoDb():
         self.dbA.clear() #new db array
 
         if True:
-            self.dbA[dbId]= TodoDbFile(self.todoA, self.projUser, self.projectName, cfgPath, cfgFound['header'], self) #throw in cfgString to restore it in file
+            self.dbA[dbId]= TodoDbFile(cfgPath, cfgFound['header'], self) #throw in cfgString to restore it in file
             dbId+= 1
         if cfgFound['engine']== 'mysql':
-            self.dbA[dbId]= TodoDbSql(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'], self)
+            self.dbA[dbId]= TodoDbSql(cfgFound['addr'], cfgFound['login'], cfgFound['passw'], cfgFound['base'], self)
             dbId+= 1
         if cfgFound['engine']== 'http':
-            self.dbA[dbId]= TodoDbHttp(self.todoA, self.projUser, self.projectName, cfgFound['addr'], cfgFound['base'], cfgFound['login'], cfgFound['passw'], self)
+            self.dbA[dbId]= TodoDbHttp(cfgFound['addr'], cfgFound['base'], cfgFound['login'], cfgFound['passw'], self)
             dbId+= 1
 
         for iT in self.todoA: #set all unsaved

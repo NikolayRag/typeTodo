@@ -83,27 +83,17 @@ class TodoDbSql():
     db_pid= 0
     db_uid= 0
 
-
-    todoA= None
-    projectName= ''
-    userName= ''
-
     dbAddr= ''
     dbUname= ''
     dbPass= ''
     dbScheme= ''
-
 
     dbConn= None
 
     parentDB= False
 
 
-    def __init__(self, _todoA, _uname, _name, _dbAddr, _dbUname, _dbPass, _dbScheme, _parentDB):
-        self.todoA= _todoA
-        self.userName= _uname
-        self.projectName= _name
-
+    def __init__(self, _dbAddr, _dbUname, _dbPass, _dbScheme, _parentDB):
         self.dbAddr= _dbAddr
         self.dbUname= _dbUname
         self.dbPass= _dbPass
@@ -150,14 +140,14 @@ class TodoDbSql():
 
         cur.execute(
             "INSERT INTO projects (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-            self.projectName
+            self.parentDB.projectName
         )
         self.db_pid= self.dbConn._result.insert_id
 
 
         cur.execute(
             "INSERT INTO users (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-            self.userName
+            self.parentDB.projUser
         )
         self.db_uid= self.dbConn._result.insert_id
 
@@ -174,8 +164,8 @@ class TodoDbSql():
             return False
         cur = self.dbConn.cursor()
 
-        for iT in self.todoA:
-            curTodo= self.todoA[iT]
+        for iT in self.parentDB.todoA:
+            curTodo= self.parentDB.todoA[iT]
             if curTodo.savedA[_dbN]: continue
 
             cur.execute(

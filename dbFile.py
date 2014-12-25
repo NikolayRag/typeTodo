@@ -10,8 +10,6 @@ else:
 class TodoDbFile():
     dbOk= True
 
-    todoA= None
-    projectName= ''
     cfgString= ''
 
     #db related
@@ -23,9 +21,7 @@ class TodoDbFile():
 
     parentDB= False
 
-    def __init__(self, _todoA, _uname, _name, _fname, _cfgStr, _parentDB):
-        self.todoA= _todoA
-        self.projectName= _name
+    def __init__(self, _fname, _cfgStr, _parentDB):
         self.projectFname= _fname
         self.cfgString= _cfgStr
 
@@ -46,8 +42,8 @@ class TodoDbFile():
                 f.write(self.cfgString)
                 f.write("\n")
 
-                for iT in self.todoA:
-                    curTodo= self.todoA[iT]
+                for iT in self.parentDB.todoA:
+                    curTodo= self.parentDB.todoA[iT]
                     if curTodo.savedA[_dbN]: #stands for 'if just inited'
                         continue
 
@@ -97,7 +93,7 @@ class TodoDbFile():
                         gmtTime= time.mktime (time.strptime(matchParse.group(9), '%y/%m/%d %H:%M'))
 
                         if __id not in todoA:
-                            todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), gmtCtime, self.parentDB)
+                            todoA[__id]= TodoTask(__id, self.parentDB.projectName, matchParse.group(5), gmtCtime, self.parentDB)
                         ctxTodo= matchParse
 
                         self.maxId= max(self.maxId, __id)

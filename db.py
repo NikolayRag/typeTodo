@@ -302,8 +302,7 @@ class TodoDb():
                 isNew= __id not in self.todoA
                 isUpdated= False
                 if not isNew:
-#todo 174 (multidb) +10: if compared against 'file', must be at least +1 in minutes digit to suppress warning
-                    isUpdated= task.stamp > self.todoA[__id].stamp
+                    isUpdated= task.stamp > (self.todoA[__id].stamp +60)
 
                 if isNew or isUpdated:
                     if isUpdated:

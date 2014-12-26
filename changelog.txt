@@ -1,3 +1,21 @@
+v1.5.0
+
+new:
+- Multiple DB allowed. Task will be saved to all specified DB's at one time.
+- 'File' mode DB is always on and dont have any explicit settings.
+- Specified DB's are synchronized at ST start and at flush points.
+
+change:
+- 'Transfer' command is obsolete and removed, due to ability to set multiple synchronized DB's.
+
+fix:
+- HTTP is now fetched/synchronized.
+
+issue:
+- At the moment only one external DB (in addition fo 'File') is allowed; It is defined by last config string, as before. Removing this limitation is low-priority, tho all code preparations are done.
+- Synchronizing only last version of each task is desired behaviour from now.
+
+
 v1.4.0
 
 new:

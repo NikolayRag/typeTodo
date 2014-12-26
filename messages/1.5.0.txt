@@ -1,0 +1,8 @@
+TypeTodo v1.5.0 important notice:
+
+'File' mode is now always on. So regardless of configuring remote DB's, all tasks will be stored in .do file.
+
+If additional DB's configured, all of them, including 'File' are synchronized at ST start and other flush points.
+Due to implemented synchronizing, Transfer command is removed.
+
+WARNING: Number of external DB that is allowed at the moment is one (1), also it is issue to remove that limitation some day (low priority, but all code is prepaired).

@@ -16,7 +16,7 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
        TypeTodo stores and updates verbose TODO comments to external per-project database and leaves breef version inlined in the code.
        
 1.2.
-       Available database modes are *.do* raw text **File**, **MySQL** or **HTTP** (new in v1.4.0)
+       Available database modes are *.do* raw text **File**, **MySQL** or **HTTP**
 
 1.3.
        Most interaction is done by ordinary inline source code commenting,
@@ -30,20 +30,20 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
 ----------------------------
 
 2.1.
-       As colon ':' is typed after ``//todo:`` (or ``#todo:`` here and later) comment,
-       line is instantly expanded with additional fields:
+       Type ``//todo:`` or ``#todo:`` according to used language.
+       As colon ``:`` is typed, line is instantly expanded with additional fields:
        ``//todo:`` expands to ``//todo XXXX (category) [+-]N:``
        
 * detailed fields description found in section 3
 
 2.2.
        and stored within user-specified database.
-       Database is specified within *[projectName].do* text file which is placed right above first folder, included in project.
+       Database is specified within *[projectName].do* text file which is placed inside the first folder, included in project.
 
 * database configuration is described in section 4
        
 2.3.
-       If at a moment there's no project used, then all-in-one *.do* file is used as a database.
+       If at a moment there's no project used, then global *.do* file is used as a database.
        (for win7 it's stored in *[user]\\AppData\\Roaming\\Sublime Text 2\\Packages\\User\\*)
 
 2.4.
@@ -59,7 +59,7 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
 
 3.1.
        TODO is a comment in form of ``//todo XXXX (tag) [+-]N: comment`` with following fields used:
-
+       
 * XXXX
        - **mandatory**
        - would be auto-generated sequential number, unique within project
@@ -82,24 +82,25 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
        *[projectName].do* file is used both as configuration and storage database.
 
 4.2.
-       It is placed within the parent of first project's folder.
-       That is, if first folder included in project is */stuff/project-1*, then */stuff/project-1.do* file will be used as config.
-       *[projectName].do* is automatically created if none as project is loaded.
+       It is placed inside the first project's folder.
+       That is, if first folder included in project is */project-1*, then */project-1/project-1.do* file will be used as config.
+       *[projectName].do* is automatically created if none found, when project is loaded, and it's config is copied from global *.do*.
 
 4.3.
-       If there's no project in Sublime, then *[sublimePackage]/typeTodo/.do* is used.
+       If there's no current project in Sublime, then *[sublimePackage]/typeTodo/.do* is used as configuration and DB itself.
        
 4.4.
-       First non-blank lines of *.do* file are used to configure database itself.
-       The configuration is taken from **last** line within this block that matches supported settings.
-       *.do* file is checked periodically for database configuration, and it reapplies if changed
+       First non-blank lines of *.do* file are used to configure external database.
+       The configuration is taken from **last** line within this block, that matches supported settings.
+       *.do* file is checked periodically for database configuration, and it reapplies on fly if changed
       
 4.5.
-       **.do** default configuration is HTTP, using http://typetodo.com as database.
+       **.do** default configuration is external HTTP DB, using http://typetodo.com as database.
 
 4.6.
        **FILE** mode todo uses same *.do* file as default configuration.
-       *.do* file holds tasks using following format in that case:
+       It is always enabled (from v1.5.0), no matter if external DB is specified or not.
+       *.do* file holds tasks using following format:
        
 ``+|-category XXXX: [+|-N] creatorName creationStamp filename editorName editionStamp``
 
@@ -147,7 +148,7 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
        Repository can be **public** or **personal**.
 
 * public repository
-       - is created new at first run or can be recreated new using *TypeTodo: Reset Global config* Sublime command. It is free to read and write by everyone who knows it's name.
+       - is created at first run or can be recreated using *TypeTodo: Reset Global config* Sublime command. It is free to read and write by everyone who knows it's name.
        - public repository is accessible at http://typetodo.com/[repname] where [repname] looks like *~exwvpaytkfs6*
 * personal repository
        - have same name as registered user. It is readable by everyone (yet) but can be written only when username/pass is provided.
@@ -173,7 +174,8 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
 
 6.1.
        As NO (no) consistency checking is performed between db and source files,
-       any ``//todo`` comments editing outside Sublime will easily make things inconsistent and unpredictable.
+       any ``//todo`` comments editing outside ST will easily make things inconsistent.
+
        Also all changes to comments are flushed to database without saving source file itself.
        Reload file without save will result in inconsistence.
        This behavior will remain till synchronizing back FROM database will be done

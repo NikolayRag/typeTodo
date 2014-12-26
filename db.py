@@ -243,7 +243,10 @@ class TodoDb():
         newId= _id or 0
         if not _id:
             for db in self.dbA:
-                newId= int(max(newId, self.dbA[db].newId()))
+                tryMaxId= self.dbA[db].newId()
+                if not tryMaxId:
+                    continue
+                newId= max(newId, tryMaxId)
 
         if not newId:
             sublime.status_message('Todo creation failed, see console for info')

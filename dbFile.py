@@ -10,8 +10,6 @@ else:
 class TodoDbFile():
     dbOk= True
 
-    todoA= None
-    projectName= ''
     cfgString= ''
 
     #db related
@@ -21,26 +19,21 @@ class TodoDbFile():
     projectFname= ''
     maxId= 0
 
+    parentDB= False
 
-    def __init__(self, _todoA, _uname, _name, _fname, _cfgStr):
-        self.todoA= _todoA
-        self.projectName= _name
-        self.projectFname= _fname
-        self.cfgString= _cfgStr
+    def __init__(self, _cfg, _parentDB):
+        self.projectFname= _cfg['file']
+        self.cfgString= _cfg['header']
 
-        #{id: TodoTask()}
-        self.fetch()
-        self.flush()
-
-
+        self.parentDB= _parentDB
 
 
 #public#
 
 
-    def flush(self):
+    def flush(self, _dbN):
         if not self.dbOk:
-            print("TypeTodo: 'file' db was not properly inited. Disabled.")
+            print("TypeTodo: 'file' db was not properly inited. Saving disabled.")
 
             return False
 
@@ -49,20 +42,24 @@ class TodoDbFile():
                 f.write(self.cfgString)
                 f.write("\n")
 
-                for iT in self.todoA:
-                    curTodo= self.todoA[iT]
+                for iT in self.parentDB.todoA:
+                    curTodo= self.parentDB.todoA[iT]
+                    if curTodo.savedA[_dbN]: #stands for 'if just inited'
+                        continue
+
                     self.maxId= max(self.maxId, curTodo.id)
 
                     stateSign= '-'
                     if curTodo.state: stateSign= '+'
 
-                    if not curTodo.cat: curTodo.cat= ''
+                    lvl= curTodo.lvl
+                    if curTodo.lvl>=0: lvl= '+' +str(curTodo.lvl)
 
+                    #runtime GMT time to local
+                    gmtCtime= time.localtime(curTodo.cStamp)
+                    gmtTime= time.localtime(curTodo.stamp)
 
-                    curTodo.lvl= int(curTodo.lvl)
-                    if curTodo.lvl>=0: curTodo.lvl= '+' +str(curTodo.lvl)
-
-                    f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(curTodo.lvl), curTodo.creator, curTodo.cStamp, '"'+curTodo.fileName+'"', curTodo.editor, curTodo.stamp]) +"\n\t" +curTodo.comment +"\n\n")
+                    f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), curTodo.creator, time.strftime('%y/%m/%d %H:%M', gmtCtime), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
 
             return True
 
@@ -79,6 +76,7 @@ class TodoDbFile():
 
     def fetch(self, _id=False):
         try:
+            todoA= {}
             with codecs.open(self.projectFname, 'r', 'UTF-8') as f:
                 ctxTodo= None
                 for ln in f:
@@ -90,8 +88,12 @@ class TodoDbFile():
                         if _id and _id!=__id: #pick one
                             continue
 
-                        if __id not in self.todoA:
-                            self.todoA[__id]= TodoTask(__id, self.projectName, matchParse.group(5), matchParse.group(6))
+                        #file holds local time, need to convert to GMT for runtime
+                        gmtCtime= time.mktime (time.strptime(matchParse.group(6), '%y/%m/%d %H:%M'))
+                        gmtTime= time.mktime (time.strptime(matchParse.group(9), '%y/%m/%d %H:%M'))
+
+                        if __id not in todoA:
+                            todoA[__id]= TodoTask(__id, self.parentDB.projectName, matchParse.group(5), gmtCtime, self.parentDB)
                         ctxTodo= matchParse
 
                         self.maxId= max(self.maxId, __id)
@@ -101,10 +103,10 @@ class TodoDbFile():
                         __state= False
                         if ctxTodo.group(1)=='+': __state= True
                         matchComment= self.reCommentParse.match(ln)
-                        self.todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), ctxTodo.group(9))
+                        todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), gmtTime)
                         ctxTodo= None
+            return todoA
+
         except:
             self.dbOk= False
             return False
-
-        return True

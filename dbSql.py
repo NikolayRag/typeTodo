@@ -8,7 +8,7 @@
 '''
 
 import sublime
-import sys, os
+import sys, os, time
 
 if sys.version < '3':
     sys.path.append('PyMySQL-master')
@@ -83,28 +83,23 @@ class TodoDbSql():
     db_pid= 0
     db_uid= 0
 
-
-    todoA= None
-    projectName= ''
-    userName= ''
-
     dbAddr= ''
     dbUname= ''
     dbPass= ''
     dbScheme= ''
 
-
     dbConn= None
 
-    def __init__(self, _todoA, _uname, _name, _dbAddr, _dbUname, _dbPass, _dbScheme):
-        self.todoA= _todoA
-        self.userName= _uname
-        self.projectName= _name
+    parentDB= False
 
-        self.dbAddr= _dbAddr
-        self.dbUname= _dbUname
-        self.dbPass= _dbPass
-        self.dbScheme= _dbScheme
+
+    def __init__(self, _cfg, _parentDB):
+        self.dbAddr= _cfg['addr']
+        self.dbUname= _cfg['login']
+        self.dbPass= _cfg['passw']
+        self.dbScheme= _cfg['base']
+
+        self.parentDB= _parentDB
 
 
     def reconnect(self):
@@ -145,14 +140,14 @@ class TodoDbSql():
 
         cur.execute(
             "INSERT INTO projects (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-            self.projectName
+            self.parentDB.projectName
         )
         self.db_pid= self.dbConn._result.insert_id
 
 
         cur.execute(
             "INSERT INTO users (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-            self.userName
+            self.parentDB.projUser
         )
         self.db_uid= self.dbConn._result.insert_id
 
@@ -164,14 +159,14 @@ class TodoDbSql():
 #public#
 
 
-    def flush(self):
+    def flush(self, _dbN):
         if not self.reconnect():
             return False
         cur = self.dbConn.cursor()
 
-        for iT in self.todoA:
-            curTodo= self.todoA[iT]
-            if curTodo.saved: continue
+        for iT in self.parentDB.todoA:
+            curTodo= self.parentDB.todoA[iT]
+            if curTodo.savedA[_dbN]: continue
 
             cur.execute(
                 "INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
@@ -202,12 +197,11 @@ class TodoDbSql():
                 newVersion= recentTask[0]+1
 
             cur.execute(
-                "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment)
+                "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment,stamp) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s))",
+                (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment, curTodo.stamp)
             )
 
-#todo 69 (sql) +0: behave at individual save result
-            curTodo.setSaved()
+            curTodo.setSaved(True, _dbN)
 
         cur.close()
 
@@ -244,7 +238,7 @@ class TodoDbSql():
         cur = self.dbConn.cursor()
 
         cur.execute(
-            "SELECT * FROM (\
+            "SELECT *, UNIX_TIMESTAMP(stamp) ustamp FROM (\
               SELECT id_project maxp,id maxi,max(version) maxv FROM tasks WHERE id_project=%s GROUP BY id\
             ) maxv INNER JOIN tasks ON id_project=maxp AND id=maxi AND version=maxv AND version>0\
             LEFT JOIN (SELECT id idproject, name nameproject FROM projects) _projects ON idproject=id_project\
@@ -255,18 +249,20 @@ class TodoDbSql():
             (self.db_pid)
         )
 
-        sqn= {}
+        sqn= {} #get id for field names
         for field in cur.description:
             sqn[field[0]]= len(sqn)
 
+        todoA= {}
         for task in cur.fetchall():
             __id= int(task[sqn['id']])
-            if __id not in self.todoA:
-                self.todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], task[sqn['stamp']])
+#todo 144 (multidb) -1: sql; handle cStamp on fetch
+            if __id not in todoA:
+                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], int(task[sqn['ustamp']]), self.parentDB)
 
             __state= True
             if task[sqn['namestate']]=='False':
                 __state= False
-            self.todoA[__id].set(__state, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], task[sqn['stamp']])
+            todoA[__id].set(__state, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
 
-        return True
+        return todoA

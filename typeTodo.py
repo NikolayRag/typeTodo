@@ -40,7 +40,7 @@ def getDB(_view=False, _folder=False):
 
     if _folder!=False:
         firstFolderA=(_folder,)
-    elif _view and _view.window:
+    elif _view!=False and _view.window():
         firstFolderA= _view.window().folders()
     else:
         return False
@@ -92,46 +92,28 @@ class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
 class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= getDB(False,'')
-        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tGlobal database content\n\twill be copied to new location.\n\n\tProcceed anyway?'):
+        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings.\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tGlobal database content\n\twill be copied to new location.\n\n\tProcceed?'):
             return
 
-        cDb.flush(True)
-        if not cDb.fetch() or not initGlobalDo(True):
+        if not initGlobalDo(True):
             sublime.message_dialog('TypeTodo error:\n\tCannot reset global .do file,\n\tall remain intact.')
             return
 
+        for iT in cDb.todoA:
+            curTodo= cDb.todoA[iT].setSaved(False)
+#todo 164 (command) +0: only 'file' mode is saved instantly, additional dbs saved at exit/edit
         cDb.reset()
-        for iT in cDb.todoA:
-            curTodo= cDb.todoA[iT].setSaved(False)
-        cDb.dirty= True
-        cDb.flush(True)
 
-
-class TypetodoTransferCommand(sublime_plugin.TextCommand):
-    def run(self, _edit):
-        cDb= getDB(self.view)
-        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tCurrent project\'s TypeTodo settings\n\twill be reset using current global settings.\n\tProject\'s database content\n\twill be copied to new location.'):
-            return
-
-        cDb.flush(True)
-        if not cDb.fetch():
-            sublime.error_message('TypeTodo Error:\n\n\tCannot transfer,\n\tall remain intact.')
-            return
-
-#todo 103 (command) +0: make fallback on transfer
-        cDb.reset(True)
-        for iT in cDb.todoA:
-            curTodo= cDb.todoA[iT].setSaved(False)
-        cDb.dirty= True
-        cDb.flush(True)
 
 
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
     def on_deactivated(self,_view):
-        for curDB in projectDbCache:
-            projectDbCache[curDB].flush(True)
+#todo 148 (general) +10: handle fucking unresponsive servers! Especially http
+        db= getDB(_view)
+        db.reset()
+        db.flush(True)
 
 #todo 86 (issue) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
     def on_activated(self, _view):

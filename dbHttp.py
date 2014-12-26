@@ -44,37 +44,37 @@ else:
     import urllib.request as urllib2
     import urllib.parse as urllib
 
+if sys.version < '3':
+    from db import *
+else:
+    from .db import *
 
 
 class TodoDbHttp():
-    todoA= None
-    projectName= ''
-    userName= ''
-
     httpAddr= ''
     httpRepository= ''
     httpUname= ''
     httpPass= ''
 
+    parentDB= False
 
-    def __init__(self, _todoA, _uname, _name, _httpAddr, _httpRepository, _httpUname, _httpPass):
-        self.todoA= _todoA
-        self.userName= _uname
-        self.projectName= _name
-        if self.projectName== '':
-            self.projectName= '*'
 
-        self.httpAddr= _httpAddr
-        self.httpRepository= _httpRepository
-        self.httpUname= _httpUname
-        self.httpPass= _httpPass
+    def __init__(self, _cfg, _parentDB):
+        self.httpAddr= _cfg['addr']
+        self.httpRepository= _cfg['base']
+        self.httpUname= _cfg['login']
+        self.httpPass= _cfg['passw']
 
-    def flush(self):
+        self.parentDB= _parentDB
+
+
+    def flush(self, _dbN):
         postData= {}
         postList= list()
-        for iT in self.todoA:
-            curTodo= self.todoA[iT]
-            if curTodo.saved: continue
+
+        for iT in self.parentDB.todoA:
+            curTodo= self.parentDB.todoA[iT]
+            if curTodo.savedA[_dbN]: continue
 
             postList.append(str(curTodo.id))
             postData['state' +str(curTodo.id)]= urllib2.quote(str(curTodo.state).encode('utf-8'))
@@ -82,11 +82,12 @@ class TodoDbHttp():
             postData['cat' +str(curTodo.id)]= urllib2.quote(curTodo.cat.encode('utf-8'))
             postData['lvl' +str(curTodo.id)]= curTodo.lvl
             postData['comm' +str(curTodo.id)]= urllib2.quote(curTodo.comment.encode('utf-8'))
+            postData['stamp' +str(curTodo.id)]= curTodo.stamp
 
         postData['ids']= ','.join(postList)
-        postData['user']= urllib2.quote(self.userName.encode('utf-8'))
+        postData['user']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
         postData['rep']= self.httpRepository
-        postData['project']= urllib2.quote(self.projectName.encode('utf-8'))
+        postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
         if self.httpUname!='' and self.httpPass!='':
             postData['logName']= urllib2.quote(self.httpUname)
             postData['logPass']= urllib2.quote(self.httpPass)
@@ -101,16 +102,16 @@ class TodoDbHttp():
             allOk= True
             response= json.loads(response)
             for respId in response:
-                if not self.todoA[int(respId)]:
+                if not self.parentDB.todoA[int(respId)]:
                     print ('TypeTodo: Server responded task ' +respId +' that doesn\'t exists. Skipping')
 
-                elif response[respId]==0:
-                    self.todoA[int(respId)].setSaved()
-
-                else:
+                elif response[respId]!=0:
                     print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
                     allOk= False
 
+                else:
+                    self.parentDB.todoA[int(respId)].setSaved(True, _dbN)
+                
             return allOk
 
         except:
@@ -123,9 +124,9 @@ class TodoDbHttp():
 
     def newId(self):
         postData= {}
-        postData['user']= urllib2.quote(self.userName.encode('utf-8'))
+        postData['user']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
         postData['rep']= self.httpRepository
-        postData['project']= urllib2.quote(self.projectName.encode('utf-8'))
+        postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
         if self.httpUname!='' and self.httpPass!='':
             postData['logName']= urllib2.quote(self.httpUname)
             postData['logPass']= urllib2.quote(self.httpPass)
@@ -143,6 +144,32 @@ class TodoDbHttp():
         return response
 
 
-#todo 105 (http) +0: make fetch()
     def fetch(self, _id=False):
-        return False
+        postData= {}
+        postData['rep']= self.httpRepository
+        postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
+        if self.httpUname!='' and self.httpPass!='':
+            postData['logName']= urllib2.quote(self.httpUname)
+            postData['logPass']= urllib2.quote(self.httpPass)
+        req = urllib2.Request('http://' +self.httpAddr +'/?=fetchtasks', str.encode(urllib.urlencode(postData)))
+        try:
+            todoA= {}
+            response= bytes.decode( urllib2.urlopen(req).read() )
+
+            for task in json.loads(response):
+                __id= int(task['id'])
+
+#todo 143 (multidb) -1: http; handle cStamp on fetch
+                if __id not in todoA:
+                    todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], int(task['ustamp']), self.parentDB)
+
+                    __state= True
+                    if task['namestate']=='False':
+                        __state= False
+                    todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
+
+            return todoA
+
+        except:
+            print('Cant fetch http')
+            return False

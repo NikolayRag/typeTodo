@@ -31,6 +31,11 @@ else:
 #{projectFolder: TodoDb} cache
 projectDbCache= {}
 
+def exitHandler(): # one for all, at very exit
+    if len(sublime.windows())==0:
+        for dbI in projectDbCache:
+           projectDbCache[dbI].flush()
+
 def getDB(_view=False, _folder=False):
 #todo 74 (db) -1: make better caching of projectDbCache
 #    if _view.TTDB: return _view.TTDB
@@ -109,15 +114,16 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
+
     def on_deactivated(self,_view):
 #todo 148 (general) +10: handle fucking unresponsive servers! Especially http
-        db= getDB(_view)
-        db.reset()
-        db.flush(True)
+        sublime.set_timeout(exitHandler, 0) #timeout is needed to loose sublime.windows() at exit
 
 #todo 86 (issue) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
     def on_activated(self, _view):
-        getDB(_view)
+        db=getDB(_view)
+        if db:
+            sublime.set_timeout(db.reset, 0)
 
     #maybe lil overheat here, but it works
     def on_selection_modified(self, _view):

@@ -95,28 +95,27 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=flush', str.encode(urllib.urlencode(postData)))
         try:
             response = bytes.decode( urllib2.urlopen(req).read() )
-            if response=='':
-                print('TypeTodo: HTTP server flushing returns unexpected result. Repository: ' +self.httpRepository)
-                return False
-
-            allOk= True
-            response= json.loads(response)
-            for respId in response:
-                if not self.parentDB.todoA[int(respId)]:
-                    print ('TypeTodo: Server responded task ' +respId +' that doesn\'t exists. Skipping')
-
-                elif response[respId]!=0:
-                    print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
-                    allOk= False
-
-                else:
-                    self.parentDB.todoA[int(respId)].setSaved(True, _dbN)
-                
-            return allOk
-
         except:
             print('TypeTodo: HTTP server error while flushing. Repository: ' +self.httpRepository)
             return False
+        if response=='':
+            print('TypeTodo: HTTP server flushing returns unexpected result. Repository: ' +self.httpRepository)
+            return False
+
+        allOk= True
+        response= json.loads(response)
+        for respId in response:
+            if not self.parentDB.todoA[int(respId)]:
+                print ('TypeTodo: Server responded task ' +respId +' that doesn\'t exists. Skipping')
+
+            elif response[respId]!=0:
+                print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
+                allOk= False
+
+            else:
+                self.parentDB.todoA[int(respId)].setSaved(True, _dbN)
+            
+        return allOk
 
 # reserve new db entry
 # returned value:
@@ -133,13 +132,12 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=newid', str.encode(urllib.urlencode(postData)))
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
-            if str(int(response)) != response:
-                response= False
-                print('TypeTodo: HTTP server fails creating doplet. Repository: ' +self.httpRepository)
-
         except:
             response= False;
             print('TypeTodo: HTTP server error while creating doplet. Repository: ' +self.httpRepository)
+        if str(int(response)) != response:
+            response= False
+            print('TypeTodo: HTTP server fails creating doplet. Repository: ' +self.httpRepository)
 
         return int(response)
 
@@ -153,23 +151,22 @@ class TodoDbHttp():
             postData['logPass']= urllib2.quote(self.httpPass)
         req = urllib2.Request('http://' +self.httpAddr +'/?=fetchtasks', str.encode(urllib.urlencode(postData)))
         try:
-            todoA= {}
             response= bytes.decode( urllib2.urlopen(req).read() )
-
-            for task in json.loads(response):
-                __id= int(task['id'])
-
-#todo 143 (multidb) -1: http; handle cStamp on fetch
-                if __id not in todoA:
-                    todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], int(task['ustamp']), self.parentDB)
-
-                    __state= True
-                    if task['namestate']=='False':
-                        __state= False
-                    todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
-
-            return todoA
-
         except:
             print('Cant fetch http')
             return False
+
+        todoA= {}
+        for task in json.loads(response):
+            __id= int(task['id'])
+
+#todo 143 (multidb) -1: http; handle cStamp on fetch
+            if __id not in todoA:
+                todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], int(task['ustamp']), self.parentDB)
+
+                __state= True
+                if task['namestate']=='False':
+                    __state= False
+                todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
+
+        return todoA

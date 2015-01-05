@@ -71,23 +71,25 @@ class TodoDbHttp():
     def flush(self, _dbN):
         postData= {}
         postList= list()
+        postTodoA= {}
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
             if curTodo.savedA[_dbN]: continue
 
             postList.append(str(curTodo.id))
-            postData['state' +str(curTodo.id)]= urllib2.quote(str(curTodo.state).encode('utf-8'))
-            postData['file' +str(curTodo.id)]= urllib2.quote(curTodo.fileName.encode('utf-8'))
-            postData['cat' +str(curTodo.id)]= urllib2.quote(curTodo.cat.encode('utf-8'))
-            postData['lvl' +str(curTodo.id)]= curTodo.lvl
-            postData['comm' +str(curTodo.id)]= urllib2.quote(curTodo.comment.encode('utf-8'))
-            postData['stamp' +str(curTodo.id)]= curTodo.stamp
+            postTodoA['state' +str(curTodo.id)]= urllib2.quote(str(curTodo.state).encode('utf-8'))
+            postTodoA['file' +str(curTodo.id)]= urllib2.quote(curTodo.fileName.encode('utf-8'))
+            postTodoA['cat' +str(curTodo.id)]= urllib2.quote(curTodo.cat.encode('utf-8'))
+            postTodoA['lvl' +str(curTodo.id)]= curTodo.lvl
+            postTodoA['comm' +str(curTodo.id)]= urllib2.quote(curTodo.comment.encode('utf-8'))
+            postTodoA['stamp' +str(curTodo.id)]= curTodo.stamp
 
-        postData['ids']= ','.join(postList)
+        postTodoA['ids']= ','.join(postList)
         postData['user']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
         postData['rep']= self.httpRepository
         postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
+        postData['todoa']= json.dumps(postTodoA)
         if self.httpUname!='' and self.httpPass!='':
             postData['logName']= urllib2.quote(self.httpUname)
             postData['logPass']= urllib2.quote(self.httpPass)

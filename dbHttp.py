@@ -85,6 +85,9 @@ class TodoDbHttp():
             postTodoA['comm' +str(curTodo.id)]= urllib2.quote(curTodo.comment.encode('utf-8'))
             postTodoA['stamp' +str(curTodo.id)]= curTodo.stamp
 
+        if not len(postList):
+            return True
+
         postTodoA['ids']= ','.join(postList)
         postData['user']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
         postData['rep']= self.httpRepository

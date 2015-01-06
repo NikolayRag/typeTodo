@@ -153,13 +153,10 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
     }
 
     prevTriggerNew= None
-#todo 2 (interaction) -1: midline TODO
     reTodoNew= re.compile('(?P<prefix>.*(?://|#)\s*)todo(?P<trigger>:)?\s*(?P<comment>.*)')
-#    reTodoNew= re.compile('^(\s*(?://|#)\s*)todo(:)?$')
 
     prevStateMod= None
     reTodoExisting= re.compile('(?P<prefix>.*)(?://|#)\s*(?P<state>[\+\-])?todo\s+(?P<id>\d+)(?:\s+\((?P<tags>.*)\))?(?:\s+(?P<priority>[\+\-]\d+))?\s*:\s*(?P<comment>.*)\s*$')
-#    reTodoExisting= re.compile('^(?:\s*(?://|#)\s*)([\+\-])?todo\s+(\d+)(?:\s+\((.*)\))?(?:\s+([\+\-]\d+))?\s*:\s*(.*)\s*$')
 
     prevText= ''
 

@@ -31,6 +31,11 @@ else:
 #{projectFolder: TodoDb} cache
 projectDbCache= {}
 
+def exitHandler(): # one for all, at very exit
+    if len(sublime.windows())==0:
+        for dbI in projectDbCache:
+           projectDbCache[dbI].flush()
+
 def getDB(_view=False, _folder=False):
 #todo 74 (db) -1: make better caching of projectDbCache
 #    if _view.TTDB: return _view.TTDB
@@ -109,15 +114,16 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
+
     def on_deactivated(self,_view):
 #todo 148 (general) +10: handle fucking unresponsive servers! Especially http
-        db= getDB(_view)
-        db.reset()
-        db.flush(True)
+        sublime.set_timeout(exitHandler, 0) #timeout is needed to loose sublime.windows() at exit
 
 #todo 86 (issue) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
     def on_activated(self, _view):
-        getDB(_view)
+        db=getDB(_view)
+        if db:
+            sublime.set_timeout(db.reset, 0)
 
     #maybe lil overheat here, but it works
     def on_selection_modified(self, _view):
@@ -146,12 +152,11 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
         None: False
     }
 
-    prevMatchNew= None
-#todo 2 (interaction) -1: midline TODO
-    reTodoNew= re.compile('^(\s*(?://|#)\s*)todo(:)?$')
+    prevTriggerNew= None
+    reTodoNew= re.compile('(?P<prefix>.*(?://|#)\s*)todo(?P<trigger>:)?\s*(?P<comment>.*)')
 
-    prevMatchMod= None
-    reTodoExisting= re.compile('^(?:\s*(?://|#)\s*)([\+\-])?todo\s+(\d+)(?:\s+\((.*)\))?(?:\s+([\+\-]\d+))?\s*:\s*(.*)\s*$')
+    prevStateMod= None
+    reTodoExisting= re.compile('(?P<prefix>.*)(?://|#)\s*(?P<state>[\+\-])?todo\s+(?P<id>\d+)(?:\s+\((?P<tags>.*)\))?(?:\s+(?P<priority>[\+\-]\d+))?\s*:\s*(?P<comment>.*)\s*$')
 
     prevText= ''
 
@@ -164,43 +169,50 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
             return
         self.prevText= todoText
 
+        _mod= self.reTodoExisting.match(todoText) #mod goes first to allow midline todo
+        if _mod:
+            reFound= _mod.groupdict()
+            stateMod= self.stateList[reFound['state']]
+            #should trigger if '+' is either absent or was not here;
+            if _modified and (not stateMod or self.prevStateMod):
+                self.substUpdate(stateMod, reFound['id'], reFound['tags'], reFound['priority'], reFound['comment'], reFound['prefix'], _edit, todoRegion)
+
+            self.prevStateMod= stateMod==False
+            return
+
         _new = self.reTodoNew.match(todoText)
         if _new:
+            reFound= _new.groupdict()
             #should trigger if ':' entered but was not here
-            if _modified and (_new.group(2) and self.prevMatchNew):
-                self.substNew(_new.group(1), _edit, todoRegion)
+            triggerNew= reFound['trigger']!=None
+            if _modified and (triggerNew and not self.prevTriggerNew):
+                self.substNew(reFound['prefix'], reFound['comment'], _edit, todoRegion)
 
-            self.prevMatchNew= _new.group(2)==None
+            self.prevTriggerNew= triggerNew
             return
 
-        _mod= self.reTodoExisting.match(todoText)
-        if _mod:
-            state= self.stateList[_mod.group(1)]
-            #should trigger if '+' is either absent or was not here;
-            if _modified and (not state or self.prevMatchMod):
-                self.substUpdate(state, _mod.group(2), _mod.group(3), _mod.group(4), _mod.group(5), _edit, todoRegion)
-
-            self.prevMatchMod= state==False
-            return
- 
     #create new todo in db and return string to replace original 'todo:'
-    def substNew(self, _pfx, _edit, _region):
+    def substNew(self, _prefx, _postfx, _edit, _region):
         todoId= self.cfgStore(0, False, self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 
-        todoComment= _pfx + 'todo ' +str(todoId) +' (' +self.lastCat[0] +') ' +self.lastLvl +': '
+        todoComment= _prefx + 'todo ' +str(todoId) +' (' +self.lastCat[0] +') ' +self.lastLvl +': ' +_postfx
         self.view.replace(_edit, _region, todoComment)
+
+        if _postfx != '':
+            self.substUpdate(self.stateList[None], todoId, self.lastCat[0], self.lastLvl, _postfx, _prefx, _edit, _region)
 
         return todoId
 
-
     #store to db and, if changed state, remove comment
-    def substUpdate(self, _state, _id, _cat, _lvl, _comment, _edit, _region):
+    def substUpdate(self, _state, _id, _cat, _lvl, _comment, _prefix, _edit, _region):
         if _cat != None:
             self.lastCat[0]= _cat
 
         _id= self.cfgStore(_id, _state, _cat, _lvl or 0, self.view.file_name(), _comment)
         if _state:
-            self.view.replace(_edit, self.view.full_line(_region), '')
+            if _prefix!='': #dont compress line for mid-todo
+                _prefix+= "\n"
+            self.view.replace(_edit, self.view.full_line(_region), _prefix)
         return _id
 
     def cfgStore(self, _id, _state, _cat, _lvl, _fileName, _comment):

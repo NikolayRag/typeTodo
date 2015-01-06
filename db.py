@@ -312,17 +312,25 @@ class TodoDb():
 
 #todo 112 (multidb) +0: Use and check tasks .version
                 isNew= __id not in self.todoA
-                isUpdated= False
+                isUpd= False
+                isOutd= False
                 if not isNew:
-                    isUpdated= task.stamp > (self.todoA[__id].stamp +60)
+                    isUpd= task.stamp > self.todoA[__id].stamp
+                    isOutd= task.stamp < self.todoA[__id].stamp
 
-                if isNew or isUpdated:
-                    if isUpdated:
-                        print ('DB\'s differs at ' +str(dbN) +':' +str(__id))
-                    task.setSaved(False) #all but current db are saved for task
-                    if dbN != 0: #'coz file db treat .saved other way
-                        task.setSaved(True, dbN)
+                if not isNew:
+                    self.todoA[__id].setSaved(True, dbN)
+
+                if isNew or isUpd:
+                    if isUpd: #this message could be displayed periodically for same tasks due to unsaved seconds in 'file' db
+                        print ('DB\'s new at ' +str(dbN) +':' +str(__id))
                     self.todoA[__id]= task
+                    self.todoA[__id].setSaved(False) #all but current db are saved for task
+                    self.todoA[__id].setSaved(True, dbN)
+
+                elif isOutd:
+                    print ('DB\'s old at ' +str(dbN) +':' +str(__id))
+                    self.todoA[__id].setSaved(False, dbN)
 
                 self.dirty= True
 
@@ -362,7 +370,8 @@ class TodoTask():
 
         self.savedA= {}
         self.parentDb= _parentDB
-        self.setSaved(True) #'file' (0) indicates it is initial; not set True at flush to save bulk every time after first .set()
+        
+        self.setSaved(True)
 
     def set(self, _state, _cat, _lvl, _fileName, _comment, _editor, _stamp):
         self.setSaved(False)
@@ -375,8 +384,12 @@ class TodoTask():
         self.editor= _editor
         self.stamp= _stamp
 
-    def setSaved(self, _state=True, _engine=False):
-        if _engine==False: #set all
+    def setSaved(self, _state=True, _engine=-1):
+        #'file' (0) indicates it is initial; not set True at flush to save bulk every time after first .set()
+        if _state==True and _engine==0: #skip explicit 'file'->True; #todo 209 (db) -10: make .savedA[] for file treated as for other engines12
+            return True
+
+        if _engine<0: #set all
             for dbEN in self.parentDb.dbA:
                 self.savedA[dbEN]= _state
         else:

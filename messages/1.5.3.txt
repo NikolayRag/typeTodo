@@ -1,0 +1,21 @@
+v1.5.3
+
+new:
+- middle-line todo; '#todo:' can be inserted anywhere, making remaining part of string a saved comment
+
+fix:
+- aggressive HTTP flushing removed; it is only done at start and at exit of last ST window
+- detected limit for count of tasks synchronised (about 200); fixed
+- better comparison for most up-to-date corresponding multidb todo at db.fetch()
+
+
+v1.5.2
+
+crash fix:
+- HTTP newId() was returning wrong value
+
+
+v1.5.1
+
+fix:
+- updated changelog, merely

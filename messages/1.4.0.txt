@@ -1,20 +1,71 @@
-TypeTodo v1.4.0 important notice:
+v1.4.0
 
-HTTP database engine is introduced and become default.
+new:
+- HTTP engine introduced and become default. http://typetodo.com is used as default server
+- HTTP anonymous and registered repositories are supported
+- added command to open current project's HTTP repository in browser, if any
+- added command to open current project's and global .do config files
+- added command to reset global .do config to default.
+  That will be HTTP with new public repository.
+  Existing global tasks will attempt to move to that new repository
+- added command to reset project's .do config.
+  New database settings will be copied from global .do,
+  and project's tasks will attempt to move to new location.
+  
+changes:
+- verbose and dialog messages changed
 
-Default database is configured to be HTTP with http://typetodo.com server if global config doesn't exists.
-New public repository is created and will be used within all upcoming projects. Existing project's configs will remain unchanged.
-HTTP repository is accessable at http://typetodo.com/repname, where repname is same as in .do config (e.g. /~eif9t7kgahvk)
+fix:
+- Strange code preventing SQL table creation is changed to working one.
 
-You can locate and reset TypeTodo's configs using provided Sublime commands that are named "TypeTodo:...".
+known issues:
+- Global reset and project's transfer will NOT work if original database is HTTP.
+  Only File or SQL are supported as source yet.
+  Also if transfering from SQL, ONLY LAST task's version will be copied.
+- Synchronysing changes from database is still not working. It is the issue of next version.
+  Also http://typetodo.com doesn't have any 'modify' tools yet. Be patient.
+  
 
-WARNING: If you loose public repository key, there can be NO WAY to get it back.
+v1.3.1
+
+fixes:
+- all changes are flushed at exit (and at changing window)
+- as flush-at-exit fixed, flushing delay raised to 5 sec's
 
 
-Documentation is available at:
-TypeTodo home,
-	http://typetodo.com/sublime
-Github,
-	https://github.com/NikolayRag/typeTodo
-Package Control,
-	https://sublime.wbond.net/packages/TypeTodo
+v1.3.0
+
+new:
+- internal: TodoTask are managed now from TodoDb. Step toward buffered flush and consistency check.
+- buffered flush introduced; all changes are flushed after 2 seconds of idle
+- as a result of buffered flush, SQL stores full history of TODO changes. No SQL table definitions affected.
+
+fixes:
+- idented doplets doesnt seems to be saved as edited; Now they do
+
+known issues:
+- (fixed in v1.3.1) changes flushed in 2 seconds of idle, so they will be lost if ST is exited in that time.
+
+
+v1.2.6
+
+- fixed bug with creating .do for blank projects
+- fixed bug with undoing done (+) doplets
+- .todo files renamed to .do
+- .do color markup added
+- bugfixes
+
+
+v1.2.0
+
+- ST3 supported
+
+
+v1.1.0
+
+- MySQL support added
+
+
+v1.0.0
+- basic #todo recognising and editing
+- .todo database

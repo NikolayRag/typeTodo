@@ -1,8 +1,17 @@
-TypeTodo v1.5.0 important notice:
+v1.5.0
 
-'File' mode is now always on. So regardless of configuring remote DB's, all tasks will be stored in .do file.
+new:
+- Multiple DB allowed. Task will be saved to all specified DB's at one time.
+- 'File' mode DB is always on and dont have any explicit settings.
+- Specified DB's are synchronized at ST start and at flush points.
 
-If additional DB's configured, all of them, including 'File' are synchronized at ST start and other flush points.
-Due to implemented synchronizing, Transfer command is removed.
+change:
+- 'Transfer' command is obsolete and removed, due to ability to set multiple synchronized DB's.
 
-WARNING: Number of external DB that is allowed at the moment is one (1), also it is issue to remove that limitation some day (low priority, but all code is prepaired).
+fix:
+- HTTP is now fetched/synchronized.
+
+issue:
+- At the moment only one external DB (in addition fo 'File') is allowed; It is defined by last config string, as before. Removing this limitation is low-priority, tho all code preparations are done.
+- Synchronizing only last version of each task is desired behaviour from now.
+

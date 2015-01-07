@@ -7,6 +7,7 @@ fix:
 - aggressive HTTP flushing removed; it is only done at start and at exit of last ST window
 - detected limit for count of tasks synchronised (about 200); fixed
 - better comparison for most up-to-date corresponding multidb todo at db.fetch()
+- removed back 60sec gap while comparing multidb todo's, due to saving stamps from same time value
 
 
 v1.5.2

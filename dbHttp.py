@@ -51,6 +51,8 @@ else:
 
 
 class TodoDbHttp():
+    name= 'Http'
+
     httpAddr= ''
     httpRepository= ''
     httpUname= ''

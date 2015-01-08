@@ -114,10 +114,9 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
-
     def on_deactivated(self,_view):
 #todo 148 (general) +10: handle fucking unresponsive servers! Especially http
-        sublime.set_timeout(exitHandler, 0) #timeout is needed to loose sublime.windows() at exit
+        sublime.set_timeout(exitHandler, 0) #timeout is needed to let sublime.windows() be [] at exit
 
 #todo 86 (issue) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
     def on_activated(self, _view):
@@ -129,17 +128,17 @@ class TypetodoEvent(sublime_plugin.EventListener):
     def on_selection_modified(self, _view):
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
-            if len(_view.sel())==1: #more than one cursors skipped for number of reasons
-                _view.run_command('typetodo_subst')
+            _view.run_command('typetodo_subst')
             self.mutexUnlocked= 1
 
     def on_modified(self, _view):
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
-            if len(_view.sel())==1: #more than one cursors skipped for number of reasons
-                _view.run_command('typetodo_subst', {'_modified': True})
+            _view.run_command('typetodo_subst', {'_modified': True})
             self.mutexUnlocked= 1
 
+
+#todo 210 (general) +0: implement editing of project .do file
 
 class TypetodoSubstCommand(sublime_plugin.TextCommand):
 #todo: make cached stuff per-project (or not?)
@@ -161,6 +160,9 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
     prevText= ''
 
     def run(self, _edit, _modified= False):
+        if len(self.view.sel())!=1: #more than one cursors skipped for number of reasons
+            return;
+            
         todoRegion = self.view.line(self.view.sel()[0])
         todoText = self.view.substr(todoRegion)
 

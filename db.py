@@ -120,7 +120,6 @@ def initGlobalDo(_force=False):
 
     return cfgFoundTry
 
-
 def plugin_loaded():
     defaultCfg['path']= os.path.join(sublime.packages_path(), 'User')
     defaultCfg['file']= os.path.join(defaultCfg['path'], '.do')
@@ -300,39 +299,42 @@ class TodoDb():
     def fetch(self, _id=False):
         success= True
 
-#todo 119 (multidb) +0: check if self.todoA need to be wiped
         for dbN in self.dbA:
             todoA= self.dbA[dbN].fetch(_id)
             if todoA==False:
                 return False
 
+            maybeNew= 0
             for iT in todoA: #each fetched task have to be compared to existing
                 task= todoA[iT]
                 __id= task.id
 
 #todo 112 (multidb) +0: Use and check tasks .version
                 isNew= __id not in self.todoA
-                isUpd= False
-                isOutd= False
+                diffStamp= 0
                 if not isNew:
-                    isUpd= task.stamp > self.todoA[__id].stamp
-                    isOutd= task.stamp < self.todoA[__id].stamp
+                    diffStamp= task.stamp -self.todoA[__id].stamp
 
                 if not isNew:
                     self.todoA[__id].setSaved(True, dbN)
 
-                if isNew or isUpd:
-                    if isUpd: #this message could be displayed periodically for same tasks due to unsaved seconds in 'file' db
-                        print ('DB\'s new at ' +str(dbN) +':' +str(__id))
+                if isNew or diffStamp>0:
+                    if diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
+                        print ('TypeTodo: \'' +self.dbA[dbN].name +'\' DB is new at ' +str(__id))
+                    elif diffStamp>0:
+                        maybeNew+= 1
                     self.todoA[__id]= task
                     self.todoA[__id].setSaved(False) #all but current db are saved for task
                     self.todoA[__id].setSaved(True, dbN)
 
-                elif isOutd:
-                    print ('DB\'s old at ' +str(dbN) +':' +str(__id))
+                elif diffStamp<0:
+                    print ('TypeTodo: \'' +self.dbA[dbN].name +'\' DB is old at ' +str(__id))
                     self.todoA[__id].setSaved(False, dbN)
 
                 self.dirty= True
+
+            if maybeNew>0:
+                print ('TypeTodo: \'' +self.dbA[dbN].name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
 
         return success
 
@@ -358,9 +360,8 @@ class TodoTask():
     stamp= False # unix time
     version= 1
 
-    savedA= {} #['engine']= state; cleared at reseting db's
-
     parentDb= False #used to set saved[] state per db engine
+    savedA= {} #[DBId]= state; cleared at reseting db's
 
     def __init__(self, _id, _project, _creator, _stamp, _parentDB):
         self.id= _id
@@ -385,8 +386,8 @@ class TodoTask():
         self.stamp= _stamp
 
     def setSaved(self, _state=True, _engine=-1):
-        #'file' (0) indicates it is initial; not set True at flush to save bulk every time after first .set()
-        if _state==True and _engine==0: #skip explicit 'file'->True; #todo 209 (db) -10: make .savedA[] for file treated as for other engines12
+        #'file' (0) indicates it is initial; dont set True at flush to save bulk every time after first .set()
+        if _state==True and _engine==0: #skip explicit 'file'->True; #todo 209 (db) -10: make .savedA[] for file treated as for other engines
             return True
 
         if _engine<0: #set all

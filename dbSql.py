@@ -25,6 +25,7 @@ else:
 #todo 95 (store) +0: add more 'context' using SQL
     
 class TodoDbSql():
+    name= 'Sql'
 
     dbTablesSrc= {
         "categories": "\

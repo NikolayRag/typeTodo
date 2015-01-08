@@ -8,13 +8,14 @@ else:
     from .db import *
 
 class TodoDbFile():
-    dbOk= True
+    name= 'File'
 
+    dbOk= True
     cfgString= ''
 
     #db related
     reTodoParse= re.compile('^([+-])(.*) (\d+): ([+-]\d+) (.+) (\d\d/\d\d/\d\d \d\d:\d\d) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d)$')
-    reCommentParse= re.compile('^\t(.*)$')
+    reCommentParse= re.compile('^\t?(.*)$')
 
     projectFname= ''
     maxId= 0

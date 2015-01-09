@@ -32,17 +32,14 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
         self.setStateChars= []
         menuItems= []
 
-        for state in STATE_LIST:
-            if state==(_mod.group('state') or ''):
-                continue #todo 213 (command) +0: filter current state out of command menu
+        for state in STATE_LIST: #collect menu list, excluding current state
+            if state==_mod.group('state'):
+                continue
             self.setStateChars.append(state)
             menuItems.append('\'' +state +'\': ' +str(STATE_LIST[state]))
 
         self.edit= _edit
-        if _mod.span('state')== (-1,-1):
-            self.setStateRegion= sublime.Region(_mod.span('doplet')[0] +todoRegion.a, _mod.span('doplet')[0] +todoRegion.a)
-        else:
-            self.setStateRegion= sublime.Region(_mod.span('state')[0] +todoRegion.a, _mod.span('state')[1] +todoRegion.a)
+        self.setStateRegion= sublime.Region(_mod.span('state')[0] +todoRegion.a, _mod.span('state')[1] +todoRegion.a)
 
         self.view.window().show_quick_panel(menuItems, self.setChar, sublime.MONOSPACE_FONT)
 
@@ -55,7 +52,6 @@ class TypetodoWwwCommand(sublime_plugin.TextCommand):
             sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
             return
         webbrowser.open_new_tab('http://' +cCfg['addr'] +'/' +cCfg['base'] +'/' +cDb.projectName)
-
 
 
 class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
@@ -76,6 +72,7 @@ class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
             sublime.message_dialog('TypeTodo:\n\tNo global .do file,\n\tplease restart Sublime')
             return
         sublime.active_window().open_file(fn, sublime.TRANSIENT)
+
 
 class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
     def run(self, _edit):

@@ -18,8 +18,10 @@ import pymysql
 
 if sys.version < '3':
     from task import *
+    from c import *
 else:
     from .task import *
+    from .c import *
 
 #todo 95 (store) +0: add more 'context' using SQL
     
@@ -92,6 +94,7 @@ class TodoDbSql():
 
     parentDB= False
 
+    migrate=False
 
     def __init__(self, _cfg, _parentDB):
         self.dbAddr= _cfg['addr']
@@ -164,13 +167,17 @@ class TodoDbSql():
             return False
         cur = self.dbConn.cursor()
 
+        if self.migrate:
+            print 'Sql migrating'
+
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if curTodo.savedA[_dbN]: continue
+            if not self.migrate:
+                if curTodo.savedA[_dbN]: continue
 
             cur.execute(
                 "INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-                str(curTodo.state)
+                STATE_LIST[curTodo.state]
             )
             db_stateId= self.dbConn._result.insert_id
 
@@ -260,9 +267,23 @@ class TodoDbSql():
             if __id not in todoA:
                 todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], int(task[sqn['ustamp']]), self.parentDB)
 
-            __state= True
-            if task[sqn['namestate']]=='False':
-                __state= False
-            todoA[__id].set(__state, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
+            fetchedStateName= task[sqn['namestate']]
+#subject to remove after state names migration+
+            if fetchedStateName=='False':
+                self.migrate= True
+                fetchedStateName= 'Open'
+            if fetchedStateName=='True':
+                self.migrate= True
+                fetchedStateName= 'Close'
+#subject to remove after state names migration-
+            stateFound= False
+            for stateIdx in STATE_LIST:
+                if STATE_LIST[stateIdx]==fetchedStateName:
+                    stateFound= True
+                    break
+            if not stateFound: #defaults to 'opened' todo
+                stateIdx= ''
+
+            todoA[__id].set(stateIdx, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
 
         return todoA

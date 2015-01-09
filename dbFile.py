@@ -4,8 +4,10 @@ import re, os, time, codecs, sys
 
 if sys.version < '3':
     from task import *
+    from c import *
 else:
     from .task import *
+    from .c import *
 
 class TodoDbFile():
     name= 'File'
@@ -50,8 +52,8 @@ class TodoDbFile():
 
                     self.maxId= max(self.maxId, curTodo.id)
 
-                    stateSign= '-'
-                    if curTodo.state: stateSign= '+'
+                    stateSign= curTodo.state
+                    if stateSign=='': stateSign='-'
 
                     lvl= curTodo.lvl
                     if curTodo.lvl>=0: lvl= '+' +str(curTodo.lvl)
@@ -101,8 +103,8 @@ class TodoDbFile():
                         continue
 
                     if ctxTodo:
-                        __state= False
-                        if ctxTodo.group(1)=='+': __state= True
+                        __state= ctxTodo.group(1)
+                        if ctxTodo.group(1)=='-': __state= ''
                         matchComment= self.reCommentParse.match(ln)
                         todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), gmtTime)
                         ctxTodo= None

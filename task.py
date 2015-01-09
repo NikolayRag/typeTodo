@@ -10,7 +10,7 @@ class TodoTask():
     cStamp= False #used only for dbFile; unix time
 
     #updatable
-    state= False
+    state= ''
     cat= ''
     lvl= ''
     fileName= ''
@@ -36,7 +36,7 @@ class TodoTask():
     def set(self, _state, _cat, _lvl, _fileName, _comment, _editor, _stamp):
         self.setSaved(False)
 
-        if _state != '': self.state= _state
+        self.state= _state
         self.cat= _cat or ''
         self.lvl= int(_lvl) or 0
         self.fileName= _fileName or ''

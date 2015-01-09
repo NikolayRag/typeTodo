@@ -46,8 +46,10 @@ else:
 
 if sys.version < '3':
     from task import *
+    from c import *
 else:
     from .task import *
+    from .c import *
 
 
 class TodoDbHttp():
@@ -59,7 +61,7 @@ class TodoDbHttp():
     httpPass= ''
 
     parentDB= False
-
+    migrate= False
 
     def __init__(self, _cfg, _parentDB):
         self.httpAddr= _cfg['addr']
@@ -75,12 +77,16 @@ class TodoDbHttp():
         postList= list()
         postTodoA= {}
 
+        if self.migrate:
+            print 'Http migrating'
+
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if curTodo.savedA[_dbN]: continue
+            if not self.migrate: 
+                if curTodo.savedA[_dbN]: continue
 
             postList.append(str(curTodo.id))
-            postTodoA['state' +str(curTodo.id)]= urllib2.quote(str(curTodo.state).encode('utf-8'))
+            postTodoA['state' +str(curTodo.id)]= urllib2.quote(STATE_LIST[curTodo.state].encode('utf-8'))
             postTodoA['file' +str(curTodo.id)]= urllib2.quote(curTodo.fileName.encode('utf-8'))
             postTodoA['cat' +str(curTodo.id)]= urllib2.quote(curTodo.cat.encode('utf-8'))
             postTodoA['lvl' +str(curTodo.id)]= curTodo.lvl
@@ -171,9 +177,23 @@ class TodoDbHttp():
             if __id not in todoA:
                 todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], int(task['ustamp']), self.parentDB)
 
-                __state= True
-                if task['namestate']=='False':
-                    __state= False
-                todoA[__id].set(__state, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
+                fetchedStateName= task['namestate']
+#subject to remove after state names migration+
+                if fetchedStateName=='False':
+                    self.migrate= True
+                    fetchedStateName= 'Open'
+                if fetchedStateName=='True':
+                    self.migrate= True
+                    fetchedStateName= 'Close'
+#subject to remove after state names migration-
+                stateFound= False
+                for stateIdx in STATE_LIST:
+                    if STATE_LIST[stateIdx]==fetchedStateName:
+                        stateFound= True
+                        break
+                if not stateFound: #defaults to 'opened' todo
+                    stateIdx= ''
+
+                todoA[__id].set(stateIdx, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
 
         return todoA

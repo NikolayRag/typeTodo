@@ -81,43 +81,45 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
 
         _mod= RE_TODO_EXISTING.match(todoText) #mod goes first to allow midline todo
         if _mod:
-            stateMod= STATE_LIST[_mod.group('state') or '']
-            #should trigger if '+' is either absent or was not here;
-            if _modified and (not stateMod or self.prevStateMod):
-                self.substUpdate(stateMod, _mod.group('id'), _mod.group('tags'), _mod.group('priority'), _mod.group('comment'), _mod.group('prefix'), _edit, todoRegion)
+            #should trigger at '+' entered
+            doWipe= _mod.group('state')=='+' and self.prevStateMod!='+'
+            self.prevStateMod= _mod.group('state')
 
-            self.prevStateMod= stateMod==False
+            if _modified:
+                self.substUpdate(_mod.group('state'), _mod.group('id'), _mod.group('tags'), _mod.group('priority'), _mod.group('comment'), _mod.group('prefix'), _edit, todoRegion, doWipe)
+
             return
 
         _new = RE_TODO_NEW.match(todoText)
         if _new:
-            #should trigger if ':' entered but was not here
-            triggerNew= _new.group('trigger')!=None
-            if _modified and (triggerNew and not self.prevTriggerNew):
+            #should trigger at ':' entered
+            doTrigger= _new.group('trigger')==':' and self.prevTriggerNew!=':'
+            self.prevTriggerNew= _new.group('trigger')
+
+            if _modified and doTrigger:
                 self.substNew(_new.group('prefix'), _new.group('comment'), _edit, todoRegion)
 
-            self.prevTriggerNew= triggerNew
             return
 
     #create new todo in db and return string to replace original 'todo:'
     def substNew(self, _prefx, _postfx, _edit, _region):
-        todoId= self.cfgStore(0, False, self.lastCat[0], self.lastLvl, self.view.file_name(), '')
+        todoId= self.cfgStore(0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 
         todoComment= _prefx + 'todo ' +str(todoId) +' (' +self.lastCat[0] +') ' +self.lastLvl +': ' +_postfx
         self.view.replace(_edit, _region, todoComment)
 
         if _postfx != '': #need to save if have comment at creation
-            self.substUpdate(STATE_LIST[''], todoId, self.lastCat[0], self.lastLvl, _postfx, _prefx, _edit, _region)
+            self.substUpdate('', todoId, self.lastCat[0], self.lastLvl, _postfx, _prefx, _edit, _region)
 
         return todoId
 
     #store to db and, if changed state, remove comment
-    def substUpdate(self, _state, _id, _cat, _lvl, _comment, _prefix, _edit, _region):
+    def substUpdate(self, _state, _id, _cat, _lvl, _comment, _prefix, _edit, _region, _wipe=False):
         if _cat != None:
             self.lastCat[0]= _cat
 
         _id= self.cfgStore(_id, _state, _cat, _lvl or 0, self.view.file_name(), _comment)
-        if _state:
+        if _wipe:
             if _prefix!='': #dont compress line for mid-todo
                 _prefix+= "\n"
             self.view.replace(_edit, self.view.full_line(_region), _prefix)

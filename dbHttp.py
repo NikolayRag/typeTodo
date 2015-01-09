@@ -45,9 +45,9 @@ else:
     import urllib.parse as urllib
 
 if sys.version < '3':
-    from db import *
+    from task import *
 else:
-    from .db import *
+    from .task import *
 
 
 class TodoDbHttp():

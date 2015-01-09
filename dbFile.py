@@ -3,9 +3,9 @@
 import re, os, time, codecs, sys
 
 if sys.version < '3':
-    from db import *
+    from task import *
 else:
-    from .db import *
+    from .task import *
 
 class TodoDbFile():
     name= 'File'

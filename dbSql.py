@@ -7,8 +7,7 @@
     project's page is located at http://www.pymysql.org/
 '''
 
-import sublime
-import sys, os, time
+import sys, os
 
 if sys.version < '3':
     sys.path.append('PyMySQL-master')
@@ -18,9 +17,9 @@ else:
 import pymysql
 
 if sys.version < '3':
-    from db import *
+    from task import *
 else:
-    from .db import *
+    from .task import *
 
 #todo 95 (store) +0: add more 'context' using SQL
     

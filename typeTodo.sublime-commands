@@ -17,6 +17,10 @@
     {
         "caption": "TypeTodo: Reset Global config. Read warning!",
         "command": "typetodo_global_reset"
-    }
+    },
 
+    {
+        "caption": "TypeTodo: Set state",
+        "command": "typetodo_set_state"
+    }
 ]

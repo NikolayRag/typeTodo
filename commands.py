@@ -4,10 +4,47 @@ import sys, os
 if sys.version < '3':
     from db import *
     from cache import *
+    from c import *
 else:
     from .db import *
     from .cache import *
+    from .c import *
 
+
+class TypetodoSetStateCommand(sublime_plugin.TextCommand):
+    setStateChars= []
+    setStateRegion= []
+    edit= None
+
+    def setChar(self, _idx):
+        if _idx==-1:
+            return
+        self.view.replace(self.edit, self.setStateRegion, self.setStateChars[_idx])
+
+    def run(self, _edit):
+        todoRegion = self.view.line(self.view.sel()[0])
+        _mod= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
+        if not _mod:
+            sublime.status_message('Nothing Todo here')
+            return
+
+
+        self.setStateChars= []
+        menuItems= []
+
+        for state in STATE_LIST:
+            if state==(_mod.group('state') or ''):
+                continue #todo 213 (command) +0: filter current state out of command menu
+            self.setStateChars.append(state)
+            menuItems.append('\'' +state +'\': ' +str(STATE_LIST[state]))
+
+        self.edit= _edit
+        if _mod.span('state')== (-1,-1):
+            self.setStateRegion= sublime.Region(_mod.span('doplet')[0] +todoRegion.a, _mod.span('doplet')[0] +todoRegion.a)
+        else:
+            self.setStateRegion= sublime.Region(_mod.span('state')[0] +todoRegion.a, _mod.span('state')[1] +todoRegion.a)
+
+        self.view.window().show_quick_panel(menuItems, self.setChar, sublime.MONOSPACE_FONT)
 
 
 class TypetodoWwwCommand(sublime_plugin.TextCommand):

@@ -6,15 +6,13 @@
 #todo 10 (interaction) +0: colorizing
 #todo 11 (interaction) -2: make more TODO formats available
 #todo 33 (interaction) -10: remove blank TODO from base if set to +
-#todo 50 (interaction) +0: make category into tag list
 
 #todo 3 (consistency) +0: check at start
 #todo 4 (consistency) +0: check as source edited
 #todo 5 (consistency) +0: check as db edited (saved)
 
-#todo 13 (interaction) +0: make 'done' state be dedicated '', '-', '!', 'x' add probably others
-
-#todo 12 (doc) +0: removing TODO from code - dont remove it from db
+#todo 13 (interaction) +5: make 'done' state be dedicated '', '-', '!', 'x' add probably others
+#todo 50 (interaction) +5: make category into tag list
 
 
 import sublime, sublime_plugin
@@ -23,9 +21,11 @@ import sys, re
 if sys.version < '3':
     from db import *
     from cache import *
+    from c import *
 else:
     from .db import *
     from .cache import *
+    from .c import *
 
 
 
@@ -63,18 +63,8 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
     lastCat= ['general']
     lastLvl= '+0'
 
-    stateList= {
-        '+': True,
-        '-': False,
-        None: False
-    }
-
     prevTriggerNew= None
-    reTodoNew= re.compile('(?P<prefix>.*(?://|#)\s*)todo(?P<trigger>:)?\s*(?P<comment>.*)')
-
     prevStateMod= None
-    reTodoExisting= re.compile('(?P<prefix>.*)(?://|#)\s*(?P<state>[\+\-])?todo\s+(?P<id>\d+)(?:\s+\((?P<tags>.*)\))?(?:\s+(?P<priority>[\+\-]\d+))?\s*:\s*(?P<comment>.*)\s*$')
-
     prevText= ''
 
     def run(self, _edit, _modified= False):
@@ -89,24 +79,22 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
             return
         self.prevText= todoText
 
-        _mod= self.reTodoExisting.match(todoText) #mod goes first to allow midline todo
+        _mod= RE_TODO_EXISTING.match(todoText) #mod goes first to allow midline todo
         if _mod:
-            reFound= _mod.groupdict()
-            stateMod= self.stateList[reFound['state']]
+            stateMod= STATE_LIST[_mod.group('state') or '']
             #should trigger if '+' is either absent or was not here;
             if _modified and (not stateMod or self.prevStateMod):
-                self.substUpdate(stateMod, reFound['id'], reFound['tags'], reFound['priority'], reFound['comment'], reFound['prefix'], _edit, todoRegion)
+                self.substUpdate(stateMod, _mod.group('id'), _mod.group('tags'), _mod.group('priority'), _mod.group('comment'), _mod.group('prefix'), _edit, todoRegion)
 
             self.prevStateMod= stateMod==False
             return
 
-        _new = self.reTodoNew.match(todoText)
+        _new = RE_TODO_NEW.match(todoText)
         if _new:
-            reFound= _new.groupdict()
             #should trigger if ':' entered but was not here
-            triggerNew= reFound['trigger']!=None
+            triggerNew= _new.group('trigger')!=None
             if _modified and (triggerNew and not self.prevTriggerNew):
-                self.substNew(reFound['prefix'], reFound['comment'], _edit, todoRegion)
+                self.substNew(_new.group('prefix'), _new.group('comment'), _edit, todoRegion)
 
             self.prevTriggerNew= triggerNew
             return
@@ -118,8 +106,8 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
         todoComment= _prefx + 'todo ' +str(todoId) +' (' +self.lastCat[0] +') ' +self.lastLvl +': ' +_postfx
         self.view.replace(_edit, _region, todoComment)
 
-        if _postfx != '':
-            self.substUpdate(self.stateList[None], todoId, self.lastCat[0], self.lastLvl, _postfx, _prefx, _edit, _region)
+        if _postfx != '': #need to save if have comment at creation
+            self.substUpdate(STATE_LIST[''], todoId, self.lastCat[0], self.lastLvl, _postfx, _prefx, _edit, _region)
 
         return todoId
 

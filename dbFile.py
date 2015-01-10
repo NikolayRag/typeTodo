@@ -16,7 +16,7 @@ class TodoDbFile():
     cfgString= ''
 
     #db related
-    reTodoParse= re.compile('^([+-])(.*) (\d+): ([+-]\d+) (.+) (\d\d/\d\d/\d\d \d\d:\d\d) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d)$')
+    reTodoParse= re.compile('^([\+\-\!\=])(.*) (\d+): ([+-]\d+) (.+) (\d\d/\d\d/\d\d \d\d:\d\d) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d)$')
     reCommentParse= re.compile('^\t?(.*)$')
 
     projectFname= ''

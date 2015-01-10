@@ -80,8 +80,9 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
 
         _mod= RE_TODO_EXISTING.match(todoText) #mod goes first to allow midline todo
         if _mod:
-            #should trigger at '+' entered
+            #should trigger at '+' or '!' entered
             doWipe= _mod.group('state')=='+' and self.prevStateMod!='+'
+            if not doWipe: doWipe= _mod.group('state')=='!' and self.prevStateMod!='!'
             self.prevStateMod= _mod.group('state')
 
             if _modified:

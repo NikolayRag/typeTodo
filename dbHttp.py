@@ -145,12 +145,13 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=newid', str.encode(urllib.urlencode(postData)))
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
-        except:
+        except Exception as e:
+            print('TypeTodo: HTTP server error while flushing')
+            print(e)
             response= False;
-            print('TypeTodo: HTTP server error while creating doplet. Repository: ' +self.httpRepository)
         if str(int(response)) != response:
             response= False
-            print('TypeTodo: HTTP server fails creating doplet. Repository: ' +self.httpRepository)
+            print('TypeTodo: HTTP server fails while flushing')
 
         return int(response)
 
@@ -165,8 +166,9 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=fetchtasks', str.encode(urllib.urlencode(postData)))
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
-        except:
-            print('Cant fetch http')
+        except Exception as e:
+            print('TypeTodo: cant fetch http')
+            print(e)
             return False
 
         todoA= {}

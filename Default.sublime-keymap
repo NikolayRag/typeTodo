@@ -1,0 +1,3 @@
+[
+{ "keys": ["alt+d"], "command": "typetodo_set_state", "args": {} }
+]

@@ -1,3 +1,15 @@
+v1.5.4
+
+new:
+- Todo's states expanded and up to grow more
+- Added 'Cancel' and 'Progress' states for '!' and '=' prefixes respectively
+- Added SetState command; It duplicates changing states by entering symbol, and mostly added for those who dont want to remember prefixes
+- added <alt+d> binding to SetState command
+
+issues:
+- External DB states will now be 'Open' and 'Close' with newly created id's, and state name migration is done at first access to every one project by saving all tasks with +1 version and refering to new id_state. Old names (True and False) are stayed with their id's, so if you're using SQL db, you may want to check id_state reassignment for all tasks within project.
+
+
 v1.5.3
 
 new:

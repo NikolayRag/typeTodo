@@ -11,8 +11,7 @@
 #todo 4 (consistency) +0: check as source edited
 #todo 5 (consistency) +0: check as db edited (saved)
 
-#todo 13 (interaction) +5: make 'done' state be dedicated '', '-', '!', 'x' add probably others
-#todo 50 (interaction) +5: make category into tag list
+#=todo 50 (interaction) +5: make category into tag list
 
 
 import sublime, sublime_plugin

@@ -66,9 +66,10 @@ class TodoDbFile():
 
             return True
 
-        except:
+        except Exception as e:
             print("TypeTodo: 'file' db experienced error while flushing")
-
+            print(e)
+            
             return False
 
 
@@ -110,6 +111,9 @@ class TodoDbFile():
                         ctxTodo= None
             return todoA
 
-        except:
+        except Exception as e:
+            print("TypeTodo: 'file' db experienced error while fetching")
+            print(e)
+
             self.dbOk= False
             return False

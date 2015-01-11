@@ -1,3 +1,5 @@
+# coding= utf-8
+
 import sublime
 import sys, re, os, time, codecs
 from threading import Timer

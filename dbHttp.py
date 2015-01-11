@@ -108,8 +108,9 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=flush', str.encode(urllib.urlencode(postData)))
         try:
             response = bytes.decode( urllib2.urlopen(req).read() )
-        except:
+        except Exception as e:
             print('TypeTodo: HTTP server error while flushing. Repository: ' +self.httpRepository)
+            print(e)
             return False
         if response=='':
             print('TypeTodo: HTTP server flushing returns unexpected result. Repository: ' +self.httpRepository)
@@ -147,12 +148,12 @@ class TodoDbHttp():
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
         except Exception as e:
-            print('TypeTodo: HTTP server error while flushing')
+            print('TypeTodo: HTTP server error creating todo')
             print(e)
             response= False;
         if str(int(response)) != response:
+            print('TypeTodo: HTTP server fails creating todo')
             response= False
-            print('TypeTodo: HTTP server fails while flushing')
 
         return int(response)
 

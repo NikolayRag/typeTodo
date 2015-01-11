@@ -48,7 +48,7 @@ class TodoDbSql():
                 "`version` int(10) unsigned NOT NULL DEFAULT '0'"
             ],
             'suffix': "\
-                UNIQUE KEY `Index_2` (`id_task`,`id_cat`,`version`) USING BTREE\
+                UNIQUE KEY `Index_2` (`id_task`,`id_tag`,`version`) USING BTREE\
             "
         },
 
@@ -240,7 +240,7 @@ class TodoDbSql():
 
             newVersion= 1
             cur.execute(
-                "SELECT max(version) FROM tasks WHERE id=%s AND id_project=%s",
+                "SELECT max(version),max(version_tag) FROM tasks WHERE id=%s AND id_project=%s",
                 (curTodo.id, self.db_pid)
             )
             recentTask= cur.fetchone()

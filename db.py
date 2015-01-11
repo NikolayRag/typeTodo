@@ -117,7 +117,7 @@ class TodoDb():
         self.flush(True)
 
 
-    def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
+    def store(self, _id, _state, _tags, _lvl, _fileName, _comment):
         self.timerFlush.cancel()
         self.reset()
 
@@ -149,7 +149,7 @@ class TodoDb():
 
         if _id:
             self.dirty= True
-            self.todoA[newId].set(_state, _cat, _lvl, _fileName, _comment, self.projUser, strStamp)
+            self.todoA[newId].set(_state, _tags, _lvl, _fileName, _comment, self.projUser, strStamp)
 
         self.timerFlush = Timer(self.flushTimeout, self.flush)
         self.timerFlush.start()

@@ -24,62 +24,97 @@ else:
     from .c import *
 
 #todo 95 (store) +0: add more 'context' using SQL
-    
+
 class TodoDbSql():
     name= 'Sql'
 
     dbTablesSrc= {
-        "categories": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `id_project` int(10) unsigned NOT NULL,\
-          `name` varchar(45) NOT NULL,\
-          PRIMARY KEY (`id`),\
-          UNIQUE KEY `Index_2` (`id_project`,`name`) USING BTREE\
-        ",
+        "categories": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`id_project` int(10) unsigned NOT NULL",
+                "`name` varchar(45) NOT NULL"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`),\
+                UNIQUE KEY `Index_2` (`id_project`,`name`) USING BTREE\
+            "
+        },
 
-        "files": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `id_project` int(10) unsigned NOT NULL,\
-          `name` varchar(255) NOT NULL,\
-          PRIMARY KEY (`id`),\
-          UNIQUE KEY `Index_2` (`id_project`,`name`) USING BTREE\
-        ",
+        "tag2ref": {
+            'fields': [
+                "`id_task` int(10) unsigned NOT NULL",
+                "`id_tag` int(10) unsigned NOT NULL",
+                "`version` int(10) unsigned NOT NULL DEFAULT '0'"
+            ],
+            'suffix': "\
+                UNIQUE KEY `Index_2` (`id_task`,`id_cat`,`version`) USING BTREE\
+            "
+        },
 
-        "projects": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `name` varchar(45) NOT NULL,\
-          PRIMARY KEY (`id`),\
-          UNIQUE KEY `Index_2` (`name`)\
-        ",
+        "files": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`id_project` int(10) unsigned NOT NULL",
+                "`name` varchar(255) NOT NULL"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`),\
+                UNIQUE KEY `Index_2` (`id_project`,`name`) USING BTREE\
+            "
+        },
 
-        "users": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `name` varchar(45) NOT NULL,\
-          PRIMARY KEY (`id`),\
-          UNIQUE KEY `Index_2` (`name`)\
-        ",
+        "projects": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`name` varchar(45) NOT NULL"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`),\
+                UNIQUE KEY `Index_2` (`name`)\
+            "
+        },
 
-        "states": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `name` varchar(45) NOT NULL,\
-          PRIMARY KEY (`id`),\
-          UNIQUE KEY `Index_2` (`name`)\
-        ",
+        "users": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`name` varchar(45) NOT NULL"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`),\
+                UNIQUE KEY `Index_2` (`name`)\
+            "
+        },
 
-        "tasks": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `version` int(10) unsigned NOT NULL,\
-          `id_project` int(10) unsigned NOT NULL,\
-          `id_state` int(10) unsigned NOT NULL,\
-          `id_category` int(10) unsigned NOT NULL,\
-          `priority` int(11) NOT NULL DEFAULT '0',\
-          `id_user` int(10) unsigned NOT NULL,\
-          `stamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
-          `id_filename` int(10) unsigned NOT NULL,\
-          `comment` text,\
-          PRIMARY KEY (`id`,`version`,`id_project`) USING BTREE\
-        "
+        "states": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`name` varchar(45) NOT NULL"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`),\
+                UNIQUE KEY `Index_2` (`name`)\
+            "
+        },
 
+        "tasks": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`version` int(10) unsigned NOT NULL",
+                "`id_project` int(10) unsigned NOT NULL",
+                "`id_state` int(10) unsigned NOT NULL",
+                "`id_category` int(10) unsigned NOT NULL",
+                "`priority` int(11) NOT NULL DEFAULT '0'",
+                "`id_user` int(10) unsigned NOT NULL",
+                "`stamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+                "`id_filename` int(10) unsigned NOT NULL",
+                "`version_tag` int(10) unsigned NOT NULL DEFAULT '0'",
+                "`comment` text"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`,`version`,`id_project`) USING BTREE\
+            "
+        }
     }
 
     db_pid= 0
@@ -122,19 +157,28 @@ class TodoDbSql():
         #check table
         cur = self.dbConn.cursor()
         for tName in self.dbTablesSrc:
+            tableDesc= self.dbTablesSrc[tName]
+
             #if exists
             flagTableOk= True
-            try:
+            try: #check bad table and insert absent fields
                 cur.execute("DESCRIBE " +tName)
+                fields= []
+                for task in cur.fetchall():
+                    fields.append(task[0])
 
-#todo 36 (sql) +0: check bad table and do something with it (upgrade? kill?)
-#                flagTableOk= False
+                for testField in tableDesc['fields']:
+                    testFieldName= testField.split()[0].strip('`')
+                    if not unicode(testFieldName) in fields:
+                        cur.execute("ALTER TABLE " +tName +" ADD COLUMN " +testField)
+                        print ('TypeTodo MySQL: added `' +testFieldName +'` field into `' +tName +'` table')
             except:
                 flagTableOk= False
 
             if not flagTableOk:
                 try:
-                    cur.execute("CREATE TABLE  `" +tName +"` (" +self.dbTablesSrc[tName] +") DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1")
+                    cur.execute("CREATE TABLE  `" +tName +"` (" +','.join(tableDesc['fields']+[tableDesc['suffix']]) +") DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1")
+                    print ('TypeTodo MySQL: created `' +tName +'` table')
                 except Exception as e:
                     print('TypeTodo: MySQL error, Table \'' +tName +'\' cannot be created:')
                     print(e)
@@ -189,7 +233,7 @@ class TodoDbSql():
 
             cur.execute(
                 "INSERT INTO categories (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-                (curTodo.cat, self.db_pid)
+                (', '.join(curTodo.tagsA), self.db_pid)
             )
             db_catId= self.dbConn._result.insert_id
 
@@ -284,6 +328,6 @@ class TodoDbSql():
             if not stateFound: #defaults to 'opened' todo
                 stateIdx= ''
 
-            todoA[__id].set(stateIdx, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
+            todoA[__id].set(stateIdx, task[sqn['namecat']].split(','), task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
 
         return todoA

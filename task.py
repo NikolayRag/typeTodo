@@ -11,7 +11,7 @@ class TodoTask():
 
     #updatable
     state= ''
-    cat= ''
+    tagsA= []
     lvl= ''
     fileName= ''
     comment= ''
@@ -33,11 +33,14 @@ class TodoTask():
         
         self.setSaved(True)
 
-    def set(self, _state, _cat, _lvl, _fileName, _comment, _editor, _stamp):
+    def set(self, _state, _tagsA, _lvl, _fileName, _comment, _editor, _stamp):
         self.setSaved(False)
 
         self.state= _state
-        self.cat= _cat or ''
+        
+        self.tagsA= []
+        for tIdx in _tagsA: self.tagsA.append(tIdx.strip())
+        
         self.lvl= int(_lvl) or 0
         self.fileName= _fileName or ''
         self.comment= _comment

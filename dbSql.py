@@ -234,15 +234,13 @@ class TodoDbSql():
             )
             db_fileId= self.dbConn._result.insert_id
 
-            db_tagId= False
-            db_tagIdA= {}
+            db_tagIdA= []
             for tag in curTodo.tagsA: #insert all tags by one, holding 
                 cur.execute(
                     "INSERT INTO categories (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
                     (tag, self.db_pid)
                 )
-                db_tagIdA[tag]= self.dbConn._result.insert_id
-                db_tagId= db_tagId or db_tagIdA[tag] #only first stored directly; subject to wipe
+                db_tagIdA.append(self.dbConn._result.insert_id)
 
             newVersion= 1
             newTagVersion= 1
@@ -257,14 +255,14 @@ class TodoDbSql():
 
             cur.execute(
                 "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment,stamp,version_tag) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s),%s)",
-                (curTodo.id, db_stateId, db_tagId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment, curTodo.stamp, newTagVersion)
+                (curTodo.id, db_stateId, db_tagIdA[0], curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment, curTodo.stamp, newTagVersion)
             )
 
             tagOrder= 0
-            for tag in db_tagIdA:
+            for tagId in db_tagIdA:
                 cur.execute(
                     "INSERT INTO tag2task (id_tag,id_task,version,`order`) VALUES (%s,%s,%s,%s)",
-                    (db_tagIdA[tag], curTodo.id, newTagVersion, tagOrder)
+                    (tagId, curTodo.id, newTagVersion, tagOrder)
                 )
                 tagOrder+= 1
 

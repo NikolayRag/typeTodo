@@ -33,14 +33,15 @@ class TodoTask():
         
         self.setSaved(True)
 
+    def setTags(self, _tagsA):
+        self.tagsA= []
+        for tagName in _tagsA: self.tagsA.append(tagName.strip())
+
     def set(self, _state, _tagsA, _lvl, _fileName, _comment, _editor, _stamp):
         self.setSaved(False)
 
         self.state= _state
-        
-        self.tagsA= []
-        for tIdx in _tagsA: self.tagsA.append(tIdx.strip())
-        
+        self.setTags(_tagsA)
         self.lvl= int(_lvl) or 0
         self.fileName= _fileName or ''
         self.comment= _comment

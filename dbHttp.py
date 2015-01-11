@@ -78,7 +78,7 @@ class TodoDbHttp():
         postTodoA= {}
 
         if self.migrate:
-            print 'Http migrating'
+            print 'TypeTodo Http: migrating'
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
@@ -127,7 +127,8 @@ class TodoDbHttp():
 
             else:
                 self.parentDB.todoA[int(respId)].setSaved(True, _dbN)
-            
+
+        self.migrate= False
         return allOk
 
 # reserve new db entry

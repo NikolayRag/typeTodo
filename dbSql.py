@@ -320,8 +320,10 @@ class TodoDbSql():
             sqn[field[0]]= len(sqn)
 
         todoA= {}
+        ver_tags= {}
         for task in cur.fetchall():
             __id= int(task[sqn['id']])
+            ver_tags[__id]= task[sqn['version_tag']]
 #todo 144 (multidb) -1: sql; handle cStamp on fetch
             if __id not in todoA:
                 todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], int(task[sqn['ustamp']]), self.parentDB)
@@ -343,6 +345,21 @@ class TodoDbSql():
             if not stateFound: #defaults to 'opened' todo
                 stateIdx= ''
 
-            todoA[__id].set(stateIdx, task[sqn['namecat']].split(','), task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
+            todoA[__id].set(stateIdx, [task[sqn['namecat']]], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
+
+
+        for taskId in todoA: #read multitags over
+            multitags= []
+            cur.execute(
+                "SELECT nametag FROM tag2task \
+                LEFT JOIN (SELECT id idtag, name nametag FROM categories) _tags ON idtag=id_tag\
+                WHERE id_task=%s AND version=%s ORDER BY `order` ASC",
+                (taskId, ver_tags[taskId])
+            )
+            for tagnRow in cur.fetchall():
+                multitags.append(tagnRow[0])
+
+            if len(multitags)>0:
+                todoA[taskId].setTags(multitags)
 
         return todoA

@@ -41,11 +41,12 @@ class TodoDbSql():
             "
         },
 
-        "tag2ref": {
+        "tag2task": {
             'fields': [
                 "`id_task` int(10) unsigned NOT NULL",
                 "`id_tag` int(10) unsigned NOT NULL",
-                "`version` int(10) unsigned NOT NULL DEFAULT '0'"
+                "`version` int(10) unsigned NOT NULL DEFAULT '0'",
+                "`order` int(10) unsigned NOT NULL DEFAULT '0'"
             ],
             'suffix': "\
                 UNIQUE KEY `Index_2` (`id_task`,`id_tag`,`version`) USING BTREE\
@@ -170,9 +171,11 @@ class TodoDbSql():
                 for testField in tableDesc['fields']:
                     testFieldName= testField.split()[0].strip('`')
                     if not unicode(testFieldName) in fields:
+                        self.migrate= True
                         cur.execute("ALTER TABLE " +tName +" ADD COLUMN " +testField)
                         print ('TypeTodo MySQL: added `' +testFieldName +'` field into `' +tName +'` table')
             except:
+                self.migrate= True
                 flagTableOk= False
 
             if not flagTableOk:
@@ -212,7 +215,7 @@ class TodoDbSql():
         cur = self.dbConn.cursor()
 
         if self.migrate:
-            print 'Sql migrating'
+            print 'TypeTodo Sql: migrating'
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
@@ -231,14 +234,18 @@ class TodoDbSql():
             )
             db_fileId= self.dbConn._result.insert_id
 
-            cur.execute(
-                "INSERT INTO categories (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-                (', '.join(curTodo.tagsA), self.db_pid)
-            )
-            db_catId= self.dbConn._result.insert_id
-
+            db_tagId= False
+            db_tagIdA= {}
+            for tag in curTodo.tagsA: #insert all tags by one, holding 
+                cur.execute(
+                    "INSERT INTO categories (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
+                    (tag, self.db_pid)
+                )
+                db_tagIdA[tag]= self.dbConn._result.insert_id
+                db_tagId= db_tagId or db_tagIdA[tag] #only first stored directly; subject to wipe
 
             newVersion= 1
+            newTagVersion= 1
             cur.execute(
                 "SELECT max(version),max(version_tag) FROM tasks WHERE id=%s AND id_project=%s",
                 (curTodo.id, self.db_pid)
@@ -246,16 +253,26 @@ class TodoDbSql():
             recentTask= cur.fetchone()
             if recentTask and recentTask[0]:
                 newVersion= recentTask[0]+1
+                newTagVersion= recentTask[1]+1
 
             cur.execute(
-                "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment,stamp) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s))",
-                (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment, curTodo.stamp)
+                "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment,stamp,version_tag) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s),%s)",
+                (curTodo.id, db_stateId, db_tagId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment, curTodo.stamp, newTagVersion)
             )
+
+            tagOrder= 0
+            for tag in db_tagIdA:
+                cur.execute(
+                    "INSERT INTO tag2task (id_tag,id_task,version,`order`) VALUES (%s,%s,%s,%s)",
+                    (db_tagIdA[tag], curTodo.id, newTagVersion, tagOrder)
+                )
+                tagOrder+= 1
 
             curTodo.setSaved(True, _dbN)
 
         cur.close()
 
+        self.migrate= False
         return True
 
 

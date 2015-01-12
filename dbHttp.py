@@ -88,7 +88,7 @@ class TodoDbHttp():
             postList.append(str(curTodo.id))
             postTodoA['state' +str(curTodo.id)]= urllib2.quote(STATE_LIST[curTodo.state].encode('utf-8'))
             postTodoA['file' +str(curTodo.id)]= urllib2.quote(curTodo.fileName.encode('utf-8'))
-            postTodoA['cat' +str(curTodo.id)]= urllib2.quote(', '.join(curTodo.tagsA).encode('utf-8'))
+            postTodoA['cat' +str(curTodo.id)]= urllib2.quote(','.join(curTodo.tagsA).encode('utf-8'))
             postTodoA['lvl' +str(curTodo.id)]= curTodo.lvl
             postTodoA['comm' +str(curTodo.id)]= urllib2.quote(curTodo.comment.encode('utf-8'))
             postTodoA['stamp' +str(curTodo.id)]= curTodo.stamp

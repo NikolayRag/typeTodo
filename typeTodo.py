@@ -5,12 +5,12 @@
 #todo 9 (interaction) -1: using snippets
 #todo 10 (interaction) +0: colorizing
 #todo 11 (interaction) -2: make more TODO formats available
-#todo 33 (interaction) -10: remove blank TODO from base if set to +
 
-#todo 3 (consistency) +0: check at start
-#todo 4 (consistency) +0: check as source edited
-#todo 5 (consistency) +0: check as db edited (saved)
+#todo 3 (consistency,v2) -10: check at start
+#todo 4 (consistency,v2) -10: check as source edited
+#todo 5 (consistency,v2) -10: check as db edited (saved)
 
+#=todo 225 (interaction) +0: ask the reason for 'Cancel'
 
 import sublime, sublime_plugin
 import sys, re
@@ -23,6 +23,43 @@ else:
     from .db import *
     from .cache import *
     from .c import *
+
+
+#todo 65 (code) -1: make class for db cache
+#{projectFolder: TodoDb} cache
+projectDbCache= {}
+
+def exitHandler(): # one for all, at very exit
+    if len(sublime.windows())==0:
+        for dbI in projectDbCache:
+           projectDbCache[dbI].flush()
+
+def getDB(_view=False, _folder=False):
+#todo 74 (db) -1: make better caching of projectDbCache
+#    if _view.TTDB: return _view.TTDB
+#todo 46 (assure) +0: is .window() a sufficient condition?
+    curRoot= ''
+    curName= ''
+
+    if _folder!=False:
+        firstFolderA=(_folder,)
+    elif _view!=False and _view.window():
+        firstFolderA= _view.window().folders()
+    else:
+        return False
+
+    if len(firstFolderA) and (firstFolderA[0] != ''):
+        curRoot= firstFolderA[0]
+        curName= os.path.split(firstFolderA[0])[1]
+
+    #cache time
+    if curRoot not in projectDbCache:
+        projectDbCache[curRoot]= TodoDb(curRoot, curName)
+    else:
+        projectDbCache[curRoot].update(curRoot, curName)
+
+#    _view.TTDB= projectDbCache[curRoot]
+    return projectDbCache[curRoot]
 
 
 

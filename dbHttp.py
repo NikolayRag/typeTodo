@@ -78,7 +78,7 @@ class TodoDbHttp():
         postTodoA= {}
 
         if self.migrate:
-            print 'TypeTodo Http: migrating'
+            print('TypeTodo Http: migrating')
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]

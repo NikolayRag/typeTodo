@@ -216,7 +216,7 @@ class TodoDbSql():
         cur = self.dbConn.cursor()
 
         if self.migrate:
-            print 'TypeTodo Sql: migrating'
+            print('TypeTodo Sql: migrating')
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]

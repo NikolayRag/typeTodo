@@ -117,7 +117,7 @@ class TodoDb():
         self.flush(True)
 
 
-    def store(self, _id, _state, _cat, _lvl, _fileName, _comment):
+    def store(self, _id, _state, _tags, _lvl, _fileName, _comment):
         self.timerFlush.cancel()
         self.reset()
 
@@ -149,7 +149,7 @@ class TodoDb():
 
         if _id:
             self.dirty= True
-            self.todoA[newId].set(_state, _cat, _lvl, _fileName, _comment, self.projUser, strStamp)
+            self.todoA[newId].set(_state, _tags, _lvl, _fileName, _comment, self.projUser, strStamp)
 
         self.timerFlush = Timer(self.flushTimeout, self.flush)
         self.timerFlush.start()
@@ -223,6 +223,7 @@ class TodoDb():
 
                 self.dirty= True
 
+            #'apparently new' mean that stamp difference is less than 60s. It is likely a subject, when comparing with 'file' DB with seconds truncated. In this case 'file' is treated as little older and is replaced. As 'file' is anyway replaced at each flush, it doesn't make any difference to normal behavior and is messaged just in case.
             if maybeNew>0:
                 print ('TypeTodo: \'' +self.dbA[dbN].name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
 

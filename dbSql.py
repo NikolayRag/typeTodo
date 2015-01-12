@@ -24,62 +24,99 @@ else:
     from .c import *
 
 #todo 95 (store) +0: add more 'context' using SQL
-    
+
 class TodoDbSql():
     name= 'Sql'
 
     dbTablesSrc= {
-        "categories": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `id_project` int(10) unsigned NOT NULL,\
-          `name` varchar(45) NOT NULL,\
-          PRIMARY KEY (`id`),\
-          UNIQUE KEY `Index_2` (`id_project`,`name`) USING BTREE\
-        ",
+        "categories": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`id_project` int(10) unsigned NOT NULL",
+                "`name` varchar(45) NOT NULL"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`),\
+                UNIQUE KEY `Index_2` (`id_project`,`name`) USING BTREE\
+            "
+        },
 
-        "files": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `id_project` int(10) unsigned NOT NULL,\
-          `name` varchar(255) NOT NULL,\
-          PRIMARY KEY (`id`),\
-          UNIQUE KEY `Index_2` (`id_project`,`name`) USING BTREE\
-        ",
+        "tag2task": {
+            'fields': [
+                "`id_task` int(10) unsigned NOT NULL",
+                "`id_tag` int(10) unsigned NOT NULL",
+                "`version` int(10) unsigned NOT NULL DEFAULT '0'",
+                "`order` int(10) unsigned NOT NULL DEFAULT '0'",
+                "`id_project` int(10) unsigned NOT NULL"
+            ],
+            'suffix': "\
+                UNIQUE KEY `Index_2` (`id_task`,`id_tag`,`version`,`id_project`) USING BTREE\
+            "
+        },
 
-        "projects": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `name` varchar(45) NOT NULL,\
-          PRIMARY KEY (`id`),\
-          UNIQUE KEY `Index_2` (`name`)\
-        ",
+        "files": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`id_project` int(10) unsigned NOT NULL",
+                "`name` varchar(255) NOT NULL"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`),\
+                UNIQUE KEY `Index_2` (`id_project`,`name`) USING BTREE\
+            "
+        },
 
-        "users": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `name` varchar(45) NOT NULL,\
-          PRIMARY KEY (`id`),\
-          UNIQUE KEY `Index_2` (`name`)\
-        ",
+        "projects": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`name` varchar(45) NOT NULL"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`),\
+                UNIQUE KEY `Index_2` (`name`)\
+            "
+        },
 
-        "states": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `name` varchar(45) NOT NULL,\
-          PRIMARY KEY (`id`),\
-          UNIQUE KEY `Index_2` (`name`)\
-        ",
+        "users": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`name` varchar(45) NOT NULL"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`),\
+                UNIQUE KEY `Index_2` (`name`)\
+            "
+        },
 
-        "tasks": "\
-          `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\
-          `version` int(10) unsigned NOT NULL,\
-          `id_project` int(10) unsigned NOT NULL,\
-          `id_state` int(10) unsigned NOT NULL,\
-          `id_category` int(10) unsigned NOT NULL,\
-          `priority` int(11) NOT NULL DEFAULT '0',\
-          `id_user` int(10) unsigned NOT NULL,\
-          `stamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\
-          `id_filename` int(10) unsigned NOT NULL,\
-          `comment` text,\
-          PRIMARY KEY (`id`,`version`,`id_project`) USING BTREE\
-        "
+        "states": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`name` varchar(45) NOT NULL"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`),\
+                UNIQUE KEY `Index_2` (`name`)\
+            "
+        },
 
+        "tasks": {
+            'fields': [
+                "`id` int(10) unsigned NOT NULL AUTO_INCREMENT",
+                "`version` int(10) unsigned NOT NULL",
+                "`id_project` int(10) unsigned NOT NULL",
+                "`id_state` int(10) unsigned NOT NULL",
+                "`id_category` int(10) unsigned NOT NULL",
+                "`priority` int(11) NOT NULL DEFAULT '0'",
+                "`id_user` int(10) unsigned NOT NULL",
+                "`stamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+                "`id_filename` int(10) unsigned NOT NULL",
+                "`version_tag` int(10) unsigned NOT NULL DEFAULT '0'",
+                "`comment` text"
+            ],
+            'suffix': "\
+                PRIMARY KEY (`id`,`version`,`id_project`) USING BTREE\
+            "
+        }
     }
 
     db_pid= 0
@@ -122,19 +159,30 @@ class TodoDbSql():
         #check table
         cur = self.dbConn.cursor()
         for tName in self.dbTablesSrc:
+            tableDesc= self.dbTablesSrc[tName]
+
             #if exists
             flagTableOk= True
-            try:
+            try: #check bad table and insert absent fields
                 cur.execute("DESCRIBE " +tName)
+                fields= []
+                for task in cur.fetchall():
+                    fields.append(task[0])
 
-#todo 36 (sql) +0: check bad table and do something with it (upgrade? kill?)
-#                flagTableOk= False
+                for testField in tableDesc['fields']:
+                    testFieldName= testField.split()[0].strip('`')
+                    if not unicode(testFieldName) in fields:
+                        self.migrate= True
+                        cur.execute("ALTER TABLE " +tName +" ADD COLUMN " +testField)
+                        print ('TypeTodo MySQL: added `' +testFieldName +'` field into `' +tName +'` table')
             except:
+                self.migrate= True
                 flagTableOk= False
 
             if not flagTableOk:
                 try:
-                    cur.execute("CREATE TABLE  `" +tName +"` (" +self.dbTablesSrc[tName] +") DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1")
+                    cur.execute("CREATE TABLE  `" +tName +"` (" +','.join(tableDesc['fields']+[tableDesc['suffix']]) +") DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1")
+                    print ('TypeTodo MySQL: created `' +tName +'` table')
                 except Exception as e:
                     print('TypeTodo: MySQL error, Table \'' +tName +'\' cannot be created:')
                     print(e)
@@ -168,7 +216,7 @@ class TodoDbSql():
         cur = self.dbConn.cursor()
 
         if self.migrate:
-            print 'Sql migrating'
+            print 'TypeTodo Sql: migrating'
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
@@ -187,31 +235,43 @@ class TodoDbSql():
             )
             db_fileId= self.dbConn._result.insert_id
 
-            cur.execute(
-                "INSERT INTO categories (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-                (curTodo.cat, self.db_pid)
-            )
-            db_catId= self.dbConn._result.insert_id
-
+            db_tagIdA= []
+            for tag in curTodo.tagsA: #insert all tags by one, holding 
+                cur.execute(
+                    "INSERT INTO categories (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
+                    (tag, self.db_pid)
+                )
+                db_tagIdA.append(self.dbConn._result.insert_id)
 
             newVersion= 1
+            newTagVersion= 1
             cur.execute(
-                "SELECT max(version) FROM tasks WHERE id=%s AND id_project=%s",
+                "SELECT max(version),max(version_tag) FROM tasks WHERE id=%s AND id_project=%s",
                 (curTodo.id, self.db_pid)
             )
             recentTask= cur.fetchone()
             if recentTask and recentTask[0]:
                 newVersion= recentTask[0]+1
+                newTagVersion= recentTask[1]+1
 
             cur.execute(
-                "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment,stamp) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s))",
-                (curTodo.id, db_stateId, db_catId, curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment, curTodo.stamp)
+                "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment,stamp,version_tag) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s),%s)",
+                (curTodo.id, db_stateId, db_tagIdA[0], curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment, curTodo.stamp, newTagVersion)
             )
+
+            tagOrder= 0
+            for tagId in db_tagIdA:
+                cur.execute(
+                    "INSERT INTO tag2task (id_tag,id_task,version,`order`,id_project) VALUES (%s,%s,%s,%s,%s)",
+                    (tagId, curTodo.id, newTagVersion, tagOrder, self.db_pid)
+                )
+                tagOrder+= 1
 
             curTodo.setSaved(True, _dbN)
 
         cur.close()
 
+        self.migrate= False
         return True
 
 
@@ -261,8 +321,10 @@ class TodoDbSql():
             sqn[field[0]]= len(sqn)
 
         todoA= {}
+        ver_tags= {}
         for task in cur.fetchall():
             __id= int(task[sqn['id']])
+            ver_tags[__id]= task[sqn['version_tag']]
 #todo 144 (multidb) -1: sql; handle cStamp on fetch
             if __id not in todoA:
                 todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], int(task[sqn['ustamp']]), self.parentDB)
@@ -284,6 +346,21 @@ class TodoDbSql():
             if not stateFound: #defaults to 'opened' todo
                 stateIdx= ''
 
-            todoA[__id].set(stateIdx, task[sqn['namecat']], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
+            todoA[__id].set(stateIdx, [task[sqn['namecat']]], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
+
+
+        for taskId in todoA: #read multitags over
+            multitags= []
+            cur.execute(
+                "SELECT nametag FROM tag2task \
+                LEFT JOIN (SELECT id idtag, name nametag FROM categories) _tags ON idtag=id_tag\
+                WHERE id_task=%s AND version=%s AND id_project=%s ORDER BY `order` ASC",
+                (taskId, ver_tags[taskId], self.db_pid)
+            )
+            for tagnRow in cur.fetchall():
+                multitags.append(tagnRow[0])
+
+            if len(multitags)>0:
+                todoA[taskId].setTags(multitags)
 
         return todoA

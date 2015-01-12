@@ -78,7 +78,7 @@ class TodoDbHttp():
         postTodoA= {}
 
         if self.migrate:
-            print 'Http migrating'
+            print 'TypeTodo Http: migrating'
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
@@ -88,7 +88,7 @@ class TodoDbHttp():
             postList.append(str(curTodo.id))
             postTodoA['state' +str(curTodo.id)]= urllib2.quote(STATE_LIST[curTodo.state].encode('utf-8'))
             postTodoA['file' +str(curTodo.id)]= urllib2.quote(curTodo.fileName.encode('utf-8'))
-            postTodoA['cat' +str(curTodo.id)]= urllib2.quote(curTodo.cat.encode('utf-8'))
+            postTodoA['cat' +str(curTodo.id)]= urllib2.quote(','.join(curTodo.tagsA).encode('utf-8'))
             postTodoA['lvl' +str(curTodo.id)]= curTodo.lvl
             postTodoA['comm' +str(curTodo.id)]= urllib2.quote(curTodo.comment.encode('utf-8'))
             postTodoA['stamp' +str(curTodo.id)]= curTodo.stamp
@@ -108,8 +108,9 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.httpAddr +'/?=flush', str.encode(urllib.urlencode(postData)))
         try:
             response = bytes.decode( urllib2.urlopen(req).read() )
-        except:
+        except Exception as e:
             print('TypeTodo: HTTP server error while flushing. Repository: ' +self.httpRepository)
+            print(e)
             return False
         if response=='':
             print('TypeTodo: HTTP server flushing returns unexpected result. Repository: ' +self.httpRepository)
@@ -127,7 +128,8 @@ class TodoDbHttp():
 
             else:
                 self.parentDB.todoA[int(respId)].setSaved(True, _dbN)
-            
+
+        self.migrate= False
         return allOk
 
 # reserve new db entry
@@ -146,12 +148,12 @@ class TodoDbHttp():
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
         except Exception as e:
-            print('TypeTodo: HTTP server error while flushing')
+            print('TypeTodo: HTTP server error creating todo')
             print(e)
             response= False;
         if str(int(response)) != response:
+            print('TypeTodo: HTTP server fails creating todo')
             response= False
-            print('TypeTodo: HTTP server fails while flushing')
 
         return int(response)
 
@@ -196,6 +198,6 @@ class TodoDbHttp():
                 if not stateFound: #defaults to 'opened' todo
                     stateIdx= ''
 
-                todoA[__id].set(stateIdx, task['nametag'], task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
+                todoA[__id].set(stateIdx, task['nametag'].split(','), task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
 
         return todoA

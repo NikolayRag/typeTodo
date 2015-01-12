@@ -62,14 +62,14 @@ class TodoDbFile():
                     gmtCtime= time.localtime(curTodo.cStamp)
                     gmtTime= time.localtime(curTodo.stamp)
 
-                    f.write(stateSign +curTodo.cat +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), curTodo.creator, time.strftime('%y/%m/%d %H:%M', gmtCtime), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
+                    f.write(stateSign +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), curTodo.creator, time.strftime('%y/%m/%d %H:%M', gmtCtime), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
 
             return True
 
         except Exception as e:
             print("TypeTodo: 'file' db experienced error while flushing")
             print(e)
-            
+
             return False
 
 
@@ -107,7 +107,7 @@ class TodoDbFile():
                         __state= ctxTodo.group(1)
                         if ctxTodo.group(1)=='-': __state= ''
                         matchComment= self.reCommentParse.match(ln)
-                        todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), gmtTime)
+                        todoA[int(ctxTodo.group(3))].set(__state, ctxTodo.group(2).split(','), int(ctxTodo.group(4)), ctxTodo.group(7), matchComment.group(1), ctxTodo.group(8), gmtTime)
                         ctxTodo= None
             return todoA
 

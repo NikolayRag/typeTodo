@@ -11,8 +11,6 @@
 #todo 4 (consistency) +0: check as source edited
 #todo 5 (consistency) +0: check as db edited (saved)
 
-#=todo 50 (interaction) +5: make category into tag list
-
 
 import sublime, sublime_plugin
 import sys, re
@@ -114,18 +112,18 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
         return todoId
 
     #store to db and, if changed state, remove comment
-    def substUpdate(self, _state, _id, _cat, _lvl, _comment, _prefix, _edit, _region, _wipe=False):
-        if _cat != None:
-            self.lastCat[0]= _cat
+    def substUpdate(self, _state, _id, _tags, _lvl, _comment, _prefix, _edit, _region, _wipe=False):
+        if _tags != None:
+            self.lastCat[0]= _tags
 
-        _id= self.cfgStore(_id, _state, _cat, _lvl or 0, self.view.file_name(), _comment)
+        _id= self.cfgStore(_id, _state, _tags, _lvl or 0, self.view.file_name(), _comment)
         if _wipe:
             if _prefix!='': #dont compress line for mid-todo
                 _prefix+= "\n"
             self.view.replace(_edit, self.view.full_line(_region), _prefix)
         return _id
 
-    def cfgStore(self, _id, _state, _cat, _lvl, _fileName, _comment):
-        return getDB(self.view).store(_id, _state, _cat, _lvl, _fileName, _comment)
+    def cfgStore(self, _id, _state, _tags, _lvl, _fileName, _comment):
+        return getDB(self.view).store(_id, _state, (_tags or '').split(','), _lvl, _fileName, _comment)
 
 #todo 21 (general) +0: handle filename change, basically for new unsaved files

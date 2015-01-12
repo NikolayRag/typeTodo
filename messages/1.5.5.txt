@@ -1,0 +1,7 @@
+v1.5.5
+
+new:
+- Category for one todo can be enumerated by comma and now realised as 'tags'
+
+issues:
+- MySql db is affected most by adding 'tag2task' link table; Changes are up to be done automatically, as well as new todo's will be saved in new format. 'tasks'.'id_category' will remain and points to first tag of list.

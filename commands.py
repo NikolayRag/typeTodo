@@ -1,3 +1,5 @@
+# coding= utf-8
+
 import sublime, sublime_plugin, webbrowser
 import sys, os
 

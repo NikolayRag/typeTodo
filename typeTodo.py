@@ -11,8 +11,6 @@
 #todo 4 (consistency) +0: check as source edited
 #todo 5 (consistency) +0: check as db edited (saved)
 
-#=todo 50 (interaction,db) +5: make category into tag list
-
 
 import sublime, sublime_plugin
 import sys, re

@@ -19,6 +19,10 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
     edit= None
 
     def setChar(self, _idx):
+        if sys.version >= '3':
+            sublime.message_dialog('ST3 will be supported very soon')
+            return;
+
         if _idx==-1:
             return
         self.view.replace(self.edit, self.setStateRegion, self.setStateChars[_idx])

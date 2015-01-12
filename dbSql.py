@@ -46,10 +46,11 @@ class TodoDbSql():
                 "`id_task` int(10) unsigned NOT NULL",
                 "`id_tag` int(10) unsigned NOT NULL",
                 "`version` int(10) unsigned NOT NULL DEFAULT '0'",
-                "`order` int(10) unsigned NOT NULL DEFAULT '0'"
+                "`order` int(10) unsigned NOT NULL DEFAULT '0'",
+                "`id_project` int(10) unsigned NOT NULL"
             ],
             'suffix': "\
-                UNIQUE KEY `Index_2` (`id_task`,`id_tag`,`version`) USING BTREE\
+                UNIQUE KEY `Index_2` (`id_task`,`id_tag`,`version`,`id_project`) USING BTREE\
             "
         },
 
@@ -261,8 +262,8 @@ class TodoDbSql():
             tagOrder= 0
             for tagId in db_tagIdA:
                 cur.execute(
-                    "INSERT INTO tag2task (id_tag,id_task,version,`order`) VALUES (%s,%s,%s,%s)",
-                    (tagId, curTodo.id, newTagVersion, tagOrder)
+                    "INSERT INTO tag2task (id_tag,id_task,version,`order`,id_project) VALUES (%s,%s,%s,%s,%s)",
+                    (tagId, curTodo.id, newTagVersion, tagOrder, self.db_pid)
                 )
                 tagOrder+= 1
 
@@ -353,8 +354,8 @@ class TodoDbSql():
             cur.execute(
                 "SELECT nametag FROM tag2task \
                 LEFT JOIN (SELECT id idtag, name nametag FROM categories) _tags ON idtag=id_tag\
-                WHERE id_task=%s AND version=%s ORDER BY `order` ASC",
-                (taskId, ver_tags[taskId])
+                WHERE id_task=%s AND version=%s AND id_project=%s ORDER BY `order` ASC",
+                (taskId, ver_tags[taskId], self.db_pid)
             )
             for tagnRow in cur.fetchall():
                 multitags.append(tagnRow[0])

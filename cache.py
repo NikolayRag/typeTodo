@@ -1,5 +1,5 @@
 # coding= utf-8
-'''
+
 import sublime, sublime_plugin
 import sys, os
 
@@ -45,5 +45,3 @@ def getDB(_view=False, _folder=False):
 
 #    _view.TTDB= projectDbCache[curRoot]
     return projectDbCache[curRoot]
-
-'''

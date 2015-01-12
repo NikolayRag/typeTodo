@@ -171,7 +171,7 @@ class TodoDbSql():
 
                 for testField in tableDesc['fields']:
                     testFieldName= testField.split()[0].strip('`')
-                    if not unicode(testFieldName) in fields:
+                    if not testFieldName in fields:
                         self.migrate= True
                         cur.execute("ALTER TABLE " +tName +" ADD COLUMN " +testField)
                         print ('TypeTodo MySQL: added `' +testFieldName +'` field into `' +tName +'` table')

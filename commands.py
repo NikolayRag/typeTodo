@@ -18,6 +18,7 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
     setStateRegion= []
     edit= None
 
+#=todo 228 (fix) +1: setState for st3
     def setChar(self, _idx):
         if sys.version >= '3':
             sublime.message_dialog('ST3 will be supported very soon')
@@ -92,5 +93,5 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
 
         for iT in cDb.todoA:
             curTodo= cDb.todoA[iT].setSaved(False)
-#todo 164 (command) +0: only 'file' mode is saved instantly, additional dbs saved at exit/edit
+#=todo 164 (fix,command) +0: only 'file' mode is saved instantly, additional dbs saved at exit/edit
         cDb.reset()

@@ -22,7 +22,7 @@ def exitHandler(): # one for all, at very exit
 def getDB(_view=False, _folder=False):
 #todo 74 (db) -1: make better caching of projectDbCache
 #    if _view.TTDB: return _view.TTDB
-#todo 46 (assure) +0: is .window() a sufficient condition?
+#=todo 46 (assure) +0: is .window() a sufficient condition?
     curRoot= ''
     curName= ''
 

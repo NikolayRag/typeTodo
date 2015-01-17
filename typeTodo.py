@@ -34,7 +34,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #todo 148 (general) +10: handle fucking unresponsive servers! Especially http
         sublime.set_timeout(exitHandler, 0) #timeout is needed to let sublime.windows() be [] at exit
 
-#todo 86 (issue) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
+#=todo 86 (fix) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
     def on_activated(self, _view):
         db=getDB(_view)
         if db:
@@ -128,3 +128,12 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
         return getDB(self.view).store(_id, _state, (_tags or '').split(','), _lvl, _fileName, _comment)
 
 #todo 21 (general) +0: handle filename change, basically for new unsaved files
+
+
+try:
+    if sys.version < '3':
+        from test import *
+    else:
+        from .test import *
+except:
+    None

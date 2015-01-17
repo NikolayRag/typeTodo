@@ -121,14 +121,14 @@ class TodoDb():
         self.timerFlush.cancel()
         self.reset()
 
-#todo 82 (fix) +0: error on creating/flushing todos in the file that is placed NOT under project path
+#=todo 82 (fix) +0: error on creating/flushing todos in the file that is placed NOT under project path
         if _fileName and self.projectRoot:
             _fileName= os.path.relpath(_fileName, self.projectRoot)
         _fileName= _fileName or ''
 
         _id= int(_id)
 
-#todo 66 (db) +0: handle unresponsive db task creation
+#todo 66 (db) +5: handle unresponsive db task creation
         newId= _id or 0
         if not _id:
             for db in self.dbA:
@@ -143,7 +143,7 @@ class TodoDb():
 
         strStamp= int(time.time())
 
-#todo 71 (db) +0: instantly remove blank new task from cache before saving if set to +
+#=todo 71 (db) +0: instantly remove blank new task from cache before saving if set to +
         if newId not in self.todoA: #for new and repairing tasks
             self.todoA[newId]= TodoTask(newId, self.projectName, self.projUser, strStamp, self)
 
@@ -170,7 +170,7 @@ class TodoDb():
             self.dirty= False
             return
 
-#todo 92 (flush) +0: limit flush retries
+#=todo 92 (flush) +0: limit flush retries
         if not _atExit:
             sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry in 5 sec\'s'), 0)
             self.timerFlush = Timer(self.flushTimeout, self.flush)

@@ -3,10 +3,10 @@
 import re
 
 STATE_LIST= {
-    '!': 'Cancel',
+    '': 'Open',
     '=': 'Progress',
     '+': 'Close',
-    '': 'Open'
+    '!': 'Cancel'
 }
 
 RE_TODO_NEW= re.compile('(?P<prefix>.*(?://|#)\s*)todo(?P<trigger>:)?\s*(?P<comment>.*)')

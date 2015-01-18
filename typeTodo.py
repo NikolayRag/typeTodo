@@ -6,11 +6,11 @@
 #todo 10 (interaction) +0: colorizing
 #todo 11 (interaction) -2: make more TODO formats available
 
+#todo 232 (general) +0: introduce sub-todo's that are part of other
+
 #todo 3 (consistency,v2) -10: check at start
 #todo 4 (consistency,v2) -10: check as source edited
 #todo 5 (consistency,v2) -10: check as db edited (saved)
-
-#=todo 225 (interaction) +0: ask the reason for 'Cancel'
 
 import sublime, sublime_plugin
 import sys, re
@@ -29,6 +29,8 @@ else:
 
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
+
+#=todo 234 (db) +0: save stuff on view deactivated or changing row; increase saving delay
 
     def on_deactivated(self,_view):
 #todo 148 (general) +10: handle fucking unresponsive servers! Especially http
@@ -55,9 +57,11 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 #todo 210 (general) +0: implement editing of project .do file
+#todo 231 (general) +0: make navigation from/to .do file
 
+#todo 233 (fix) +0: un/re-doing text entering doesnt trigger typetodo saving
 class TypetodoSubstCommand(sublime_plugin.TextCommand):
-#todo: make cached stuff per-project (or not?)
+#todo 229 (ux) +0: make cached stuff per-project (or not?)
     lastCat= ['general']
     lastLvl= '+0'
 
@@ -113,21 +117,39 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
         return todoId
 
     #store to db and, if changed state, remove comment
-    def substUpdate(self, _state, _id, _tags, _lvl, _comment, _prefix, _edit, _region, _wipe=False):
-        if _tags != None:
-            self.lastCat[0]= _tags
+    updVals= None
+    def substDoUpdate(self, _txt=False):
+        if self.updVals['_tags'] != None:
+            self.lastCat[0]= self.updVals['_tags']
 
-        _id= self.cfgStore(_id, _state, _tags, _lvl or 0, self.view.file_name(), _comment)
-        if _wipe:
-            if _prefix!='': #dont compress line for mid-todo
-                _prefix+= "\n"
-            self.view.replace(_edit, self.view.full_line(_region), _prefix)
-        return _id
+        if _txt==False:
+            _txt= self.updVals['_comment']
+        self.updVals['_id']= self.cfgStore(self.updVals['_id'], self.updVals['_state'], self.updVals['_tags'], self.updVals['_lvl'] or 0, self.view.file_name(), _txt)
+
+        if self.updVals['_wipe']:
+            todoRegion= self.view.full_line(self.updVals['_region'])
+            if self.updVals['_prefix']!='':
+                todoRegion= sublime.Region(
+                    todoRegion.a +len(self.updVals['_prefix']),
+                    todoRegion.b -1
+                )
+
+            self.view.run_command('typetodo_reg_replace', {'_regStart': todoRegion.a, '_regEnd': todoRegion.b})
+
+
+    def substUpdate(self, _state, _id, _tags, _lvl, _comment, _prefix, _edit, _region, _wipe=False):
+        self.updVals= {'_state':_state, '_id':_id, '_tags':_tags, '_lvl':_lvl, '_comment':_comment, '_prefix':_prefix, '_edit':_edit, '_region':_region, '_wipe':_wipe}
+
+        if _state=='!':
+            self.view.window().show_input_panel('Reason of canceling:', '', self.substDoUpdate, None, self.substDoUpdate)
+        else:
+            self.substDoUpdate()
+
 
     def cfgStore(self, _id, _state, _tags, _lvl, _fileName, _comment):
         return getDB(self.view).store(_id, _state, (_tags or '').split(','), _lvl, _fileName, _comment)
 
-#todo 21 (general) +0: handle filename change, basically for new unsaved files
+#=todo 21 (general) +0: handle filename change, basically for new unsaved files
 
 
 try:

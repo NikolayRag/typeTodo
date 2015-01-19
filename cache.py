@@ -17,7 +17,7 @@ projectDbCache= {}
 def exitHandler(): # one for all, at very exit
     if len(sublime.windows())==0:
         for dbI in projectDbCache:
-           projectDbCache[dbI].flush()
+           projectDbCache[dbI].flush(True)
 
 def getDB(_view=False, _folder=False):
 #todo 74 (db) -1: make better caching of projectDbCache

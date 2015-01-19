@@ -1,12 +1,12 @@
 # coding= utf-8
 
 #todo 1 (interaction) -1: multiline TODO
-#todo 8 (interaction) +0: category auto-complete
+#todo 8 (interaction) +0: tag auto-complete; or use command to choose tag
 #todo 9 (interaction) -1: using snippets
 #todo 10 (interaction) +0: colorizing
 #todo 11 (interaction) -2: make more TODO formats available
 
-#todo 232 (general) +0: introduce sub-todo's that are part of other
+#todo 232 (feature) +0: introduce sub-todo's that are part of other
 
 #todo 3 (consistency,v2) -10: check at start
 #todo 4 (consistency,v2) -10: check as source edited
@@ -30,10 +30,10 @@ else:
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
-#=todo 234 (db) +0: save stuff on view deactivated or changing row; increase saving delay
+#todo 234 (db, delayed) +0: save stuff on view deactivated or changing row; increase saving delay
 
     def on_deactivated(self,_view):
-#todo 148 (general) +10: handle fucking unresponsive servers! Especially http
+#todo 148 (general) +10: handle unresponsive servers! Especially http
         sublime.set_timeout(exitHandler, 0) #timeout is needed to let sublime.windows() be [] at exit
 
 #=todo 86 (fix) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
@@ -59,7 +59,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #todo 210 (general) +0: implement editing of project .do file
 #todo 231 (general) +0: make navigation from/to .do file
 
-#todo 233 (fix) +0: un/re-doing text entering doesnt trigger typetodo saving
+#=todo 233 (fix) +0: un/re-doing text entering doesnt trigger typetodo saving
 class TypetodoSubstCommand(sublime_plugin.TextCommand):
 #todo 229 (ux) +0: make cached stuff per-project (or not?)
     lastCat= ['general']

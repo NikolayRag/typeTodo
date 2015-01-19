@@ -40,7 +40,8 @@ class TodoDb():
 #todo 67 (general) +0: move cfg to class
     cfgA= None
 
-    flushTimeout= 5 #seconds
+    maxflushRetries= 3
+    flushTimeout= 10 #seconds
     timerFlush= None
     dirty= False
 
@@ -151,12 +152,13 @@ class TodoDb():
             self.dirty= True
             self.todoA[newId].set(_state, _tags, _lvl, _fileName, _comment, self.projUser, strStamp)
 
-        self.timerFlush = Timer(self.flushTimeout, self.flush)
+        self.flushRetries= self.maxflushRetries
+        self.timerFlush= Timer(self.flushTimeout, self.flush)
         self.timerFlush.start()
 
         return newId
 
-    def flush(self, _atExit=False):
+    def flush(self, _runOnce=False):
         self.timerFlush.cancel()
 
         flushOk= True
@@ -170,13 +172,15 @@ class TodoDb():
             self.dirty= False
             return
 
-#=todo 92 (flush) +0: limit flush retries
-        if not _atExit:
-            sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry in 5 sec\'s'), 0)
-            self.timerFlush = Timer(self.flushTimeout, self.flush)
-            self.timerFlush.start()
-        else:
-            sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s')
+        if not _runOnce:
+            self.flushRetries-= 1
+            if self.flushRetries>0:
+                sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry ' +str(self.flushRetries) +' more times in ' +str(self.flushTimeout) +' sec\'s'), 0)
+                self.timerFlush = Timer(self.flushTimeout, self.flush)
+                self.timerFlush.start()
+        
+        if _runOnce or self.flushRetries==0:
+            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s'), 0)
 
 
 #macro

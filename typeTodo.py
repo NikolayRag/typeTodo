@@ -26,21 +26,37 @@ else:
 
 
 
+def exitHandler(): # one for all, at very exit
+    if len(sublime.windows())==0:
+        for dbI in projectDbCache:
+           projectDbCache[dbI].flush(True)
 
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
-#todo 234 (db, delayed) +0: save stuff on view deactivated or changing row; increase saving delay
+#todo 236 (db, config) +0: reset db after editing .do
+    inited= False
 
     def on_deactivated(self,_view):
 #todo 148 (general) +10: handle unresponsive servers! Especially http
-        sublime.set_timeout(exitHandler, 0) #timeout is needed to let sublime.windows() be [] at exit
+        if not self.inited:
+            return
+
+        db=getDB(_view)
+        if db:
+            Timer(1,db.flush).start() #this one for switching windows; cannot be 0
+
+        sublime.set_timeout(exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
 
 #=todo 86 (fix) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
     def on_activated(self, _view):
+        if self.inited:
+            return
+
         db=getDB(_view)
         if db:
-            sublime.set_timeout(db.reset, 0)
+            Timer(0,db.reset).start()
+            self.inited= True
 
     #maybe lil overheat here, but it works
     def on_selection_modified(self, _view):
@@ -56,7 +72,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
             self.mutexUnlocked= 1
 
 
-#todo 210 (general) +0: implement editing of project .do file
+#=todo 210 (general) +0: implement editing of project .do file
 #todo 231 (general) +0: make navigation from/to .do file
 
 #=todo 233 (fix) +0: un/re-doing text entering doesnt trigger typetodo saving

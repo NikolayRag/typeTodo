@@ -41,7 +41,7 @@ class TodoDb():
     cfgA= None
 
     maxflushRetries= 3
-    flushTimeout= 10 #seconds
+    flushTimeout= 30 #seconds
     timerFlush= None
     dirty= False
 
@@ -163,9 +163,12 @@ class TodoDb():
 
         flushOk= True
         for dbN in self.dbA:
-            if (self.dirty) or (dbN==0):
+            if self.dirty or (dbN==0):
                 flushOk= flushOk and self.dbA[dbN].flush(dbN)
         
+        if not self.dirty:
+            return
+            
         if flushOk:
             sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
 

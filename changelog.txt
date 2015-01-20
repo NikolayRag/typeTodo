@@ -1,4 +1,4 @@
-v1.5.6
+v1.5.8
 
 new:
 - Ask the reason for 'Cancel' (may be omited)
@@ -15,6 +15,9 @@ fix:
 change:
 - Db flushing retries are no more infinite
 - save stuff on view deactivated
+
+
+v1.5.6 - 1.5.7 are crashfix
 
 
 v1.5.5

@@ -35,6 +35,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 
 #todo 236 (db, config) +0: reset db after editing .do
+
     inited= False
 
     def on_deactivated(self,_view):
@@ -75,7 +76,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #=todo 210 (general) +0: implement editing of project .do file
 #todo 231 (general) +0: make navigation from/to .do file
 
-#=todo 233 (fix) +0: un/re-doing text entering doesnt trigger typetodo saving
 class TypetodoSubstCommand(sublime_plugin.TextCommand):
 #todo 229 (ux) +0: make cached stuff per-project (or not?)
     lastCat= ['general']
@@ -83,19 +83,13 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
 
     prevTriggerNew= None
     prevStateMod= None
-    prevText= ''
 
     def run(self, _edit, _modified= False):
         if len(self.view.sel())!=1: #more than one cursors skipped for number of reasons
             return;
-            
+
         todoRegion = self.view.line(self.view.sel()[0])
         todoText = self.view.substr(todoRegion)
-
-        #shortcut
-        if todoText == self.prevText:
-            return
-        self.prevText= todoText
 
         _mod= RE_TODO_EXISTING.match(todoText) #mod goes first to allow midline todo
         if _mod:
@@ -105,6 +99,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
             self.prevStateMod= _mod.group('state')
 
             if _modified:
+                print 'mod'
                 self.substUpdate(_mod.group('state'), _mod.group('id'), _mod.group('tags'), _mod.group('priority'), _mod.group('comment'), _mod.group('prefix'), _edit, todoRegion, doWipe)
 
             return
@@ -116,6 +111,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
             self.prevTriggerNew= _new.group('trigger')
 
             if _modified and doTrigger:
+                print 'add'
                 self.substNew(_new.group('prefix'), _new.group('comment'), _edit, todoRegion)
 
             return

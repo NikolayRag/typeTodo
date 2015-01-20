@@ -14,15 +14,10 @@ else:
 #{projectFolder: TodoDb} cache
 projectDbCache= {}
 
-def exitHandler(): # one for all, at very exit
-    if len(sublime.windows())==0:
-        for dbI in projectDbCache:
-           projectDbCache[dbI].flush()
 
 def getDB(_view=False, _folder=False):
 #todo 74 (db) -1: make better caching of projectDbCache
 #    if _view.TTDB: return _view.TTDB
-#todo 46 (assure) +0: is .window() a sufficient condition?
     curRoot= ''
     curName= ''
 

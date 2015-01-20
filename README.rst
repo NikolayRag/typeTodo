@@ -52,19 +52,24 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
 2.5.
        Changing ``//todo...`` to ``//+todo...`` (adding '+' sign) changes state to 'done' in db
        and wipes that comment of the code.
+       Full set of states are:
+       '' - Opened TODO (default)
+       '=' - TODO in progress, used for management of TODOs
+       '+' - Closed TODO, wiped as set
+       '!' - Canceled TODO; As set, you will be asked for reason of canceling. If specified, that reason replaces TODOs comment in database. Then TODO is wiped.
 
 
 3. TODO comment fields
 ----------------------
 
 3.1.
-       TODO is a comment in form of ``//todo XXXX (tag) [+-]N: comment`` with following fields used:
+       TODO is a comment in form of ``//todo XXXX (tags) [+-]N: comment`` with following fields used:
        
 * XXXX
        - **mandatory**
        - would be auto-generated sequential number, unique within project
-* (tag)
-       - *optional*
+* (tags)
+       - *optional*, comma-separated list
        - default: 'general'
        - When you rename it, new name will be reused with next new TODO
 * [+-]N
@@ -75,7 +80,7 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
        - comment is any remaining text till the end of line
 
 
-4. .do database and config file
+4. .do config file and default database
 ---------------------------------
 
 4.1.
@@ -92,26 +97,26 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
 4.4.
        First non-blank lines of *.do* file are used to configure external database.
        The configuration is taken from **last** line within this block, that matches supported settings.
-       *.do* file is checked periodically for database configuration, and it reapplies on fly if changed
+       Temporary suppressed: *.do* file is checked periodically for database configuration, and it reapplies on fly if changed
       
 4.5.
        **.do** default configuration is external HTTP DB, using http://typetodo.com as database.
 
 4.6.
-       **FILE** mode todo uses same *.do* file as default configuration.
+       At **FILE** mode todo uses same *.do* file as one for default configuration.
        It is always enabled (from v1.5.0), no matter if external DB is specified or not.
        *.do* file holds tasks using following format:
        
-``+|-category XXXX: [+|-N] creatorName creationStamp filename editorName editionStamp``
+``(+|-|=|!)tags XXXX: [+|-N] creatorName creationStamp filename editorName editionStamp``
 
 ``comment``
 
 using  following fields:
 
-* +|-
-       - 'done' state; ``-`` indicates open task, ``+`` - closed
-* category
-       - that category tag name from TODO comment format 
+* (+|-|=|!)
+       - TODO state; ``-`` indicates open task, ``+`` - closed, ``=`` - in-progress, and ``!`` stands for canceled.
+* tags
+       - comma-separated tag list
 * XXXX
        - task integer id, unique within project
 * +|-N
@@ -135,7 +140,8 @@ using  following fields:
        Following tables will be created:
 
 * projects
-* categories
+* categories (tags)
+* tag2Task
 * files
 * users
 * states
@@ -144,14 +150,15 @@ using  following fields:
 All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved.
 
 4.8.
-       **HTTP** mode is used if configuration ``http [host] [repository] [user] [pass]`` line is found in *.do* config.
-       Repository can be **public** or **personal**.
+       **HTTP** mode is used if ``http [host] [repository]`` or ``http [host] [repository] [user] [pass]`` configuration line is found in *.do* config.
+       If ``[user] [pass]`` logon credentials are specified, repository is treated as **personal**, otherwise it is **public**.
+       Repository is accessible at http://typetodo.com/[repname]
 
 * public repository
-       - is created at first run or can be recreated using *TypeTodo: Reset Global config* Sublime command. It is free to read and write by everyone who knows it's name.
-       - public repository is accessible at http://typetodo.com/[repname] where [repname] looks like *~exwvpaytkfs6*
+       - Is created at first run or can be recreated using *TypeTodo: Reset Global config* command. It is free to read and write by everyone who knows it's name.
+       - Public repository name looks like *~exwvpaytkfs6*
 * personal repository
-       - have same name as registered user. It is readable by everyone (yet) but can be written only when username/pass is provided.
+       - Have same name as registered user. It is readable by everyone (yet) but can be written only by providing logon username and pass.
        
 All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved.
 
@@ -160,13 +167,13 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
 --------------------
 
 5.1.
-       As TODO is created or edited, any changes are saved to db instantly, even if current source file is not saved.
+       As TODO is created or edited, any changes are saved to db in background, even if current source file is not saved.
 
 5.2.
-       If more than ONE cursor present, nothing is saved to db as typed.
+       If more than ONE cursor present, saving to database is suppressed.
 
 5.3.
-       NO braces/hyphens checking is performed. So if ``#todo:`` line is a part of multiline string, it WILL expand as typed.
+       NO braces/hyphens checking is performed. So if ``#todo:`` line is a part of string, it WILL act as ordinary TODO.
        
 
 6. --> WARNING<--
@@ -181,6 +188,6 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
        This behavior will remain till synchronizing back FROM database will be done
 
 6.2.
-       creating ``//todo XXXX:`` by defining XXXX explicitly will overwrite or create that specified XXXX task in database
+       creating ``//todo XXXX:`` by defining XXXX explicitly will overwrite or create that specified XXXX task in database. Even if specified and deleted back: typing ``123``, then ``1243`` and finally ``124`` will save all three TODOs. Try avoid editing IDs at all.
 
    

@@ -23,4 +23,5 @@
         "caption": "TypeTodo: Set state",
         "command": "typetodo_set_state"
     }
+
 ]

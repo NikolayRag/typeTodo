@@ -1,0 +1,17 @@
+v1.5.6
+
+new:
+- Ask the reason for 'Cancel' (may be omited)
+    
+fix:
+- Fixed 'setState' command (alt+d) for ST3
+- Changed state order for setState command
+- undo/redo of todo-containing line were not flushing
+- 'reset global' was flushing only FILE db
+- flushing todos in the file that is placed under different drive than project crashed
+- urllib2 was missing at cfg.py; subject for 'resetGlobal' command
+
+
+change:
+- Db flushing retries are no more infinite
+- save stuff on view deactivated

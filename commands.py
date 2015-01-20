@@ -13,19 +13,18 @@ else:
     from .c import *
 
 
+class TypetodoRegReplaceCommand(sublime_plugin.TextCommand):
+    def run(self, _edit, _regStart= False, _regEnd= False, _replaceWith=''):
+        self.view.replace(_edit, sublime.Region(int(_regStart), int(_regEnd)), _replaceWith)
+
+
 class TypetodoSetStateCommand(sublime_plugin.TextCommand):
     setStateChars= []
     setStateRegion= []
-    edit= None
 
     def setChar(self, _idx):
-        if sys.version >= '3':
-            sublime.message_dialog('ST3 will be supported very soon')
-            return;
-
-        if _idx==-1:
-            return
-        self.view.replace(self.edit, self.setStateRegion, self.setStateChars[_idx])
+        if _idx>=0:
+            self.view.run_command('typetodo_reg_replace', {'_regStart': self.setStateRegion[0], '_regEnd': self.setStateRegion[1], '_replaceWith': self.setStateChars[_idx]})
 
     def run(self, _edit):
         todoRegion = self.view.line(self.view.sel()[0])
@@ -44,8 +43,7 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
             self.setStateChars.append(state)
             menuItems.append('\'' +state +'\': ' +str(STATE_LIST[state]))
 
-        self.edit= _edit
-        self.setStateRegion= sublime.Region(_mod.span('state')[0] +todoRegion.a, _mod.span('state')[1] +todoRegion.a)
+        self.setStateRegion= (_mod.span('state')[0] +todoRegion.a, _mod.span('state')[1] +todoRegion.a)
 
         self.view.window().show_quick_panel(menuItems, self.setChar, sublime.MONOSPACE_FONT)
 
@@ -92,5 +90,9 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
 
         for iT in cDb.todoA:
             curTodo= cDb.todoA[iT].setSaved(False)
-#todo 164 (command) +0: only 'file' mode is saved instantly, additional dbs saved at exit/edit
+        cDb.dirty= True
+
         cDb.reset()
+
+
+#todo 230 (command) +0: make tool for searching todo's

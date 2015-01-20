@@ -16,7 +16,7 @@ else:
     from .dbHttp import *
     from .task import *
 
-#todo 44 (config) +0: handle saving project - existing and blank
+#=todo 44 (config, doc) +0: handle saving project - existing and blank; transfer db for involved files
 
 #todo 89 (db) +0: save context (+-2 strings of code) with task. NOT for 'file' mode
 
@@ -40,7 +40,8 @@ class TodoDb():
 #todo 67 (general) +0: move cfg to class
     cfgA= None
 
-    flushTimeout= 5 #seconds
+    maxflushRetries= 3
+    flushTimeout= 30 #seconds
     timerFlush= None
     dirty= False
 
@@ -121,14 +122,15 @@ class TodoDb():
         self.timerFlush.cancel()
         self.reset()
 
-#todo 82 (fix) +0: error on creating/flushing todos in the file that is placed NOT under project path
         if _fileName and self.projectRoot:
-            _fileName= os.path.relpath(_fileName, self.projectRoot)
+            if (os.path.splitdrive(_fileName)[0]==os.path.splitdrive(self.projectRoot)[0]):
+                _fileName= os.path.relpath(_fileName, self.projectRoot)
+                
         _fileName= _fileName or ''
 
         _id= int(_id)
 
-#todo 66 (db) +0: handle unresponsive db task creation
+#todo 66 (db) +5: handle unresponsive db task creation
         newId= _id or 0
         if not _id:
             for db in self.dbA:
@@ -143,7 +145,7 @@ class TodoDb():
 
         strStamp= int(time.time())
 
-#todo 71 (db) +0: instantly remove blank new task from cache before saving if set to +
+#=todo 71 (db) -1: instantly remove blank new task from cache before saving if set to +
         if newId not in self.todoA: #for new and repairing tasks
             self.todoA[newId]= TodoTask(newId, self.projectName, self.projUser, strStamp, self)
 
@@ -151,32 +153,38 @@ class TodoDb():
             self.dirty= True
             self.todoA[newId].set(_state, _tags, _lvl, _fileName, _comment, self.projUser, strStamp)
 
-        self.timerFlush = Timer(self.flushTimeout, self.flush)
+        self.flushRetries= self.maxflushRetries
+        self.timerFlush= Timer(self.flushTimeout, self.flush)
         self.timerFlush.start()
 
         return newId
 
-    def flush(self, _atExit=False):
+    def flush(self, _runOnce=False):
         self.timerFlush.cancel()
 
         flushOk= True
         for dbN in self.dbA:
-            if (self.dirty) or (dbN==0):
+            if self.dirty or (dbN==0):
                 flushOk= flushOk and self.dbA[dbN].flush(dbN)
         
+        if not self.dirty:
+            return
+            
         if flushOk:
             sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
 
             self.dirty= False
             return
 
-#todo 92 (flush) +0: limit flush retries
-        if not _atExit:
-            sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry in 5 sec\'s'), 0)
-            self.timerFlush = Timer(self.flushTimeout, self.flush)
-            self.timerFlush.start()
-        else:
-            sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s')
+        if not _runOnce:
+            self.flushRetries-= 1
+            if self.flushRetries>0:
+                sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry ' +str(self.flushRetries) +' more times in ' +str(self.flushTimeout) +' sec\'s'), 0)
+                self.timerFlush = Timer(self.flushTimeout, self.flush)
+                self.timerFlush.start()
+        
+        if _runOnce or self.flushRetries==0:
+            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s'), 0)
 
 
 #macro

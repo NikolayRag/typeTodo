@@ -49,7 +49,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
         sublime.set_timeout(exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
 
-#=todo 86 (fix) +0: db init doesn't run if 2nd sublime window opened with other unconfigured project
     def on_activated(self, _view):
         if self.inited:
             return
@@ -73,7 +72,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
             self.mutexUnlocked= 1
 
 
-#=todo 210 (general) +0: implement editing of project .do file
+#todo 210 (general) +0: implement editing of project .do file
 #todo 231 (general) +0: make navigation from/to .do file
 
 class TypetodoSubstCommand(sublime_plugin.TextCommand):
@@ -99,7 +98,6 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
             self.prevStateMod= _mod.group('state')
 
             if _modified:
-                print 'mod'
                 self.substUpdate(_mod.group('state'), _mod.group('id'), _mod.group('tags'), _mod.group('priority'), _mod.group('comment'), _mod.group('prefix'), _edit, todoRegion, doWipe)
 
             return
@@ -111,7 +109,6 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
             self.prevTriggerNew= _new.group('trigger')
 
             if _modified and doTrigger:
-                print 'add'
                 self.substNew(_new.group('prefix'), _new.group('comment'), _edit, todoRegion)
 
             return

@@ -90,7 +90,8 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
 
         for iT in cDb.todoA:
             curTodo= cDb.todoA[iT].setSaved(False)
-#=todo 164 (fix,command) +0: only 'file' mode is saved instantly, additional dbs saved at exit/edit
+        cDb.dirty= True
+
         cDb.reset()
 
 

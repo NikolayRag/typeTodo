@@ -16,7 +16,7 @@ else:
     from .dbHttp import *
     from .task import *
 
-#=todo 44 (config) +0: handle saving project - existing and blank
+#=todo 44 (config, doc) +0: handle saving project - existing and blank; transfer db for involved files
 
 #todo 89 (db) +0: save context (+-2 strings of code) with task. NOT for 'file' mode
 
@@ -122,9 +122,10 @@ class TodoDb():
         self.timerFlush.cancel()
         self.reset()
 
-#=todo 82 (fix) +0: error on creating/flushing todos in the file that is placed NOT under project path
         if _fileName and self.projectRoot:
-            _fileName= os.path.relpath(_fileName, self.projectRoot)
+            if (os.path.splitdrive(_fileName)[0]==os.path.splitdrive(self.projectRoot)[0]):
+                _fileName= os.path.relpath(_fileName, self.projectRoot)
+                
         _fileName= _fileName or ''
 
         _id= int(_id)
@@ -144,7 +145,7 @@ class TodoDb():
 
         strStamp= int(time.time())
 
-#=todo 71 (db) +0: instantly remove blank new task from cache before saving if set to +
+#=todo 71 (db) -1: instantly remove blank new task from cache before saving if set to +
         if newId not in self.todoA: #for new and repairing tasks
             self.todoA[newId]= TodoTask(newId, self.projectName, self.projUser, strStamp, self)
 

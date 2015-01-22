@@ -40,23 +40,12 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
     def on_deactivated(self,_view):
 #todo 148 (general) +10: handle unresponsive servers! Especially http
-        if not self.inited:
-            return
-
         db=getDB(_view)
         if db:
-            Timer(1,db.flush).start() #this one for switching windows; cannot be 0
+            db.pushReset()
 
         sublime.set_timeout(exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
 
-    def on_activated(self, _view):
-        if self.inited:
-            return
-
-        db=getDB(_view)
-        if db:
-            Timer(0,db.reset).start()
-            self.inited= True
 
     #maybe lil overheat here, but it works
     def on_selection_modified(self, _view):

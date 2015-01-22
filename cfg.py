@@ -2,7 +2,6 @@
 
 import sublime
 import sys, re, os, time, codecs
-from threading import Timer
 
 if sys.version < '3':
     import urllib2, urllib

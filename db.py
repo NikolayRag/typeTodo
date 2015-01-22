@@ -43,6 +43,7 @@ class TodoDb():
     maxflushRetries= 3
     flushTimeout= 30 #seconds
     timerFlush= None
+    timerReset= None
     dirty= False
 
     dbA= {}
@@ -53,10 +54,11 @@ class TodoDb():
         self.dbA= {}
 
         self.timerFlush = Timer(0, None) #dummy
+        self.timerReset = Timer(0, None) #dummy
 
         self.todoA= {}
         self.update(_root, _name)
-        self.reset()
+        self.pushReset()
         
 
     def update(self, _root, _name):
@@ -68,7 +70,17 @@ class TodoDb():
             self.projectRoot= defaultCfg['path']
 
 
-##
+    def pushReset(self, _delay=1): #leave 1 to remove spam
+        self.timerReset.cancel()
+        self.timerReset= Timer(_delay, self.reset)
+        self.timerReset.start()
+
+#Macro:
+#    - get new cfg
+#    - flush using old if any
+#    - fetch using new
+#    - flush using new
+
     def reset(self, _force=False):
         cfgPath= os.path.join(self.projectRoot, self.projectName +'.do')
 
@@ -90,6 +102,10 @@ class TodoDb():
                 cfgFound['file']= cfgPath
                 with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
                   f.write(cfgFound['header'])
+
+        if self.cfgA:
+            self.timerFlush.cancel()
+            self.flush(True)
 
         if cfgFound == self.cfgA: #no changes
             return
@@ -120,7 +136,6 @@ class TodoDb():
 
     def store(self, _id, _state, _tags, _lvl, _fileName, _comment):
         self.timerFlush.cancel()
-        self.reset()
 
         if _fileName and self.projectRoot:
             if (os.path.splitdrive(_fileName)[0]==os.path.splitdrive(self.projectRoot)[0]):
@@ -158,6 +173,7 @@ class TodoDb():
         self.timerFlush.start()
 
         return newId
+
 
     def flush(self, _runOnce=False):
         self.timerFlush.cancel()

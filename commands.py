@@ -92,7 +92,7 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
             curTodo= cDb.todoA[iT].setSaved(False)
         cDb.dirty= True
 
-        cDb.reset()
+        cDb.pushReset(0)
 
 
 #todo 230 (command) +0: make tool for searching todo's

@@ -1,0 +1,9 @@
+v1.5.9
+
+new:
+- Database reset made asyncronous, so it should not hang ST
+    
+fix:
+- Editing of .do updates config onfly (feature is back)
+
+

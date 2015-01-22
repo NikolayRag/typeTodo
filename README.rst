@@ -97,7 +97,7 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
 4.4.
        First non-blank lines of *.do* file are used to configure external database.
        The configuration is taken from **last** line within this block, that matches supported settings.
-       Temporary suppressed: *.do* file is checked periodically for database configuration, and it reapplies on fly if changed
+       *.do* file is checked periodically for database configuration, and it reapplies on fly if changed
       
 4.5.
        **.do** default configuration is external HTTP DB, using http://typetodo.com as database.

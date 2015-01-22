@@ -1,4 +1,4 @@
-v1.5.6
+v1.5.8
 
 new:
 - Ask the reason for 'Cancel' (may be omited)

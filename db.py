@@ -103,9 +103,7 @@ class TodoDb():
                 with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
                   f.write(cfgFound['header'])
 
-        if self.cfgA:
-            self.timerFlush.cancel()
-            self.flush(True)
+        self.flush(True)
 
         if cfgFound == self.cfgA: #no changes
             return
@@ -145,14 +143,10 @@ class TodoDb():
 
         _id= int(_id)
 
-#todo 66 (db) +5: handle unresponsive db task creation
         newId= _id or 0
         if not _id:
             for db in self.dbA:
-                tryMaxId= self.dbA[db].newId()
-                if not tryMaxId:
-                    continue
-                newId= max(newId, tryMaxId)
+                newId= max(newId, self.dbA[db].newId() or 0)
 
         if not newId:
             sublime.status_message('Todo creation failed, see console for info')
@@ -177,13 +171,15 @@ class TodoDb():
 
     def flush(self, _runOnce=False):
         self.timerFlush.cancel()
+        if not self.cfgA:
+            return
 
         flushOk= True
         for dbN in self.dbA:
             if self.dirty or (dbN==0):
                 flushOk= flushOk and self.dbA[dbN].flush(dbN)
         
-        if not self.dirty:
+        if not self.dirty: #todo 240 (db, flush) +0: hadn't to save, needed for file mode;  should be reviewed
             return
             
         if flushOk:

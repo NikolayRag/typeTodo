@@ -136,6 +136,7 @@ class TodoDbHttp():
 # returned value:
 #   int:    new id
 
+#todo 66 (http) +5: implement instant id delivery
     def newId(self):
         postData= {}
         postData['user']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))

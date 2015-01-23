@@ -39,7 +39,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
     inited= False
 
     def on_deactivated(self,_view):
-#todo 148 (general) +10: handle unresponsive servers! Especially http
         db=getDB(_view)
         if db:
             db.pushReset()

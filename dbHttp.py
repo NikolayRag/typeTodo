@@ -36,7 +36,8 @@ either:
 '''
 #todo 96 (store) +0: add more 'context' using HTTP
 
-import sys, json
+import sys, json, threading
+from threading import Timer
 
 if sys.version < '3':
     import urllib2, urllib
@@ -63,6 +64,10 @@ class TodoDbHttp():
     parentDB= False
     migrate= False
 
+    reservedId= 0
+    reserveEvent= None
+    timerReserveId= None
+
     def __init__(self, _cfg, _parentDB):
         self.httpAddr= _cfg['addr']
         self.httpRepository= _cfg['base']
@@ -71,6 +76,14 @@ class TodoDbHttp():
 
         self.parentDB= _parentDB
 
+        self.reservedId= 0
+        self.reserveEvent= threading.Event()
+        self.reserveEvent.set()
+        self.timerReserveId = Timer(0, None) #dummy
+
+        self.newId()
+
+#todo 270 (http) +0: implement http timeout
 
     def flush(self, _dbN):
         postData= {}
@@ -88,7 +101,7 @@ class TodoDbHttp():
             postList.append(str(curTodo.id))
             postTodoA['state' +str(curTodo.id)]= urllib2.quote(STATE_LIST[curTodo.state].encode('utf-8'))
             postTodoA['file' +str(curTodo.id)]= urllib2.quote(curTodo.fileName.encode('utf-8'))
-            postTodoA['cat' +str(curTodo.id)]= urllib2.quote(','.join(curTodo.tagsA).encode('utf-8'))
+            postTodoA['tags' +str(curTodo.id)]= urllib2.quote(','.join(curTodo.tagsA).encode('utf-8'))
             postTodoA['lvl' +str(curTodo.id)]= curTodo.lvl
             postTodoA['comm' +str(curTodo.id)]= urllib2.quote(curTodo.comment.encode('utf-8'))
             postTodoA['stamp' +str(curTodo.id)]= curTodo.stamp
@@ -98,6 +111,7 @@ class TodoDbHttp():
 
         postTodoA['ids']= ','.join(postList)
         postData['user']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
+#=todo 242 (http, api) +5: point at project using URL
         postData['rep']= self.httpRepository
         postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
         postData['todoa']= json.dumps(postTodoA)
@@ -136,8 +150,28 @@ class TodoDbHttp():
 # returned value:
 #   int:    new id
 
-#todo 66 (http) +5: implement instant id delivery
+
+#macro
+#   pre: pick event set
+#   wait for pick event to set
+#   set return cached
+#   go pick next
     def newId(self):
+        self.reserveEvent.wait()
+
+        okId= self.reservedId
+
+        self.reserveEvent.clear()
+        self.timerReserveId= Timer(0, self.newIdGet).start()
+
+        return okId
+
+
+#todo 258 (http) +5: release prefetched id at exit
+    def newIdRelease(self):
+        None
+
+    def newIdGet(self):
         postData= {}
         postData['user']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
         postData['rep']= self.httpRepository
@@ -156,7 +190,9 @@ class TodoDbHttp():
             print('TypeTodo: HTTP server fails creating todo')
             response= False
 
-        return int(response)
+        self.reservedId= int(response)
+        print('TypeTodo: HTTP id reserved: ' +str(self.reservedId))
+        self.reserveEvent.set()
 
 
     def fetch(self, _id=False):
@@ -183,6 +219,7 @@ class TodoDbHttp():
                 todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], int(task['ustamp']), self.parentDB)
 
                 fetchedStateName= task['namestate']
+#todo 257 (http) +0: remove True and False states after migration
 #subject to remove after state names migration+
                 if fetchedStateName=='False':
                     self.migrate= True
@@ -199,6 +236,7 @@ class TodoDbHttp():
                 if not stateFound: #defaults to 'opened' todo
                     stateIdx= ''
 
-                todoA[__id].set(stateIdx, task['nametag'].split(','), task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
+                tags= task['nametag'].split(',')
+                todoA[__id].set(stateIdx, tags, task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
 
         return todoA

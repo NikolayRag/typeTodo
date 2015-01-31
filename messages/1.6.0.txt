@@ -1,0 +1,5 @@
+v1.6.0
+
+new:
+- Added HTTP ID prefetch; Fully async HTTP from now, tho it can hang for a while sometimes when todo's are added rapidly (faster than HTTP request).
+

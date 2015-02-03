@@ -1,0 +1,5 @@
+v1.6.1
+
+fix:
+- concurrent todos could skip saving with SQL and especially HTTP; no more issue
+

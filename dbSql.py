@@ -221,7 +221,8 @@ class TodoDbSql():
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
             if not self.migrate:
-                if curTodo.savedA[_dbN]: continue
+                if curTodo.savedA[_dbN]!=SAVE_STATES.READY: continue
+            curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere
 
             cur.execute(
                 "INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
@@ -267,7 +268,10 @@ class TodoDbSql():
                 )
                 tagOrder+= 1
 
-            curTodo.setSaved(True, _dbN)
+            #todo 285 (sql) +0: detect sql saving error
+            #newState= SAVE_STATES.READY
+            if curTodo.savedA[_dbN]==SAVE_STATES.HOLD: #edited-while-save todo will not become idle here
+                curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
 
         cur.close()
 

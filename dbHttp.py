@@ -96,7 +96,8 @@ class TodoDbHttp():
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
             if not self.migrate: 
-                if curTodo.savedA[_dbN]: continue
+                if curTodo.savedA[_dbN]!=SAVE_STATES.READY: continue
+            curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere
 
             postList.append(str(curTodo.id))
             postTodoA['state' +str(curTodo.id)]= urllib2.quote(STATE_LIST[curTodo.state].encode('utf-8'))
@@ -131,25 +132,26 @@ class TodoDbHttp():
             return False
 
         allOk= True
+#todo 281 (db, flush) +0: compare with postList
         response= json.loads(response)
         for respId in response:
+            curTodo= self.parentDB.todoA[int(respId)]
+
             if not self.parentDB.todoA[int(respId)]:
                 print ('TypeTodo: Server responded task ' +respId +' that doesn\'t exists. Skipping')
+                continue
 
             elif response[respId]!=0:
                 print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
+                curTodo.setSaved(SAVE_STATES.READY, _dbN)
                 allOk= False
-
             else:
-                self.parentDB.todoA[int(respId)].setSaved(True, _dbN)
+                if curTodo.savedA[_dbN]==SAVE_STATES.HOLD: #edited-while-save todo will not become idle here
+                    curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
+
 
         self.migrate= False
         return allOk
-
-# reserve new db entry
-# returned value:
-#   int:    new id
-
 
 #macro
 #   pre: pick event set

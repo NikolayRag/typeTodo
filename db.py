@@ -176,9 +176,9 @@ class TodoDb():
 
         flushOk= True
         for dbN in self.dbA:
-            if self.dirty or (dbN==0):
-                flushOk= flushOk and self.dbA[dbN].flush(dbN)
+            flushOk= flushOk and self.dbA[dbN].flush(dbN)
         
+#todo 280 (db, flush) +0: .dirty used only to display message; should be removed at all
         if not self.dirty: #todo 240 (db, flush) +0: hadn't to save, needed for file mode;  should be reviewed
             return
             
@@ -224,7 +224,7 @@ class TodoDb():
                 diffStamp= 0
                 if not isNew:
                     diffStamp= task.stamp -self.todoA[__id].stamp
-
+#todo 279 (check) +0: see if states dont interfere while task is in-save
                 if not isNew:
                     self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
 

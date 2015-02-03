@@ -2,6 +2,11 @@
 
 import re
 
+class SAVE_STATES:
+	IDLE= 0
+	READY= 1
+	HOLD= 2
+
 STATE_LIST= {
     '': 'Open',
     '=': 'Progress',

@@ -96,7 +96,7 @@ class TodoDbHttp():
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
             if not self.migrate: 
-                if curTodo.savedA[_dbN]: continue
+                if curTodo.savedA[_dbN]==SAVE_STATES.IDLE: continue
 
             postList.append(str(curTodo.id))
             postTodoA['state' +str(curTodo.id)]= urllib2.quote(STATE_LIST[curTodo.state].encode('utf-8'))
@@ -139,16 +139,12 @@ class TodoDbHttp():
             elif response[respId]!=0:
                 print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
                 allOk= False
-
+#todo 273 (http, fix) +0: fix todos that are set saved while waiting for next flush
             else:
-                self.parentDB.todoA[int(respId)].setSaved(True, _dbN)
+                self.parentDB.todoA[int(respId)].setSaved(SAVE_STATES.IDLE, _dbN)
 
         self.migrate= False
         return allOk
-
-# reserve new db entry
-# returned value:
-#   int:    new id
 
 
 #macro

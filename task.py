@@ -1,5 +1,12 @@
 # coding= utf-8
 
+import sys
+
+if sys.version < '3':
+    from c import *
+else:
+    from .c import *
+
 
 
 class TodoTask():
@@ -32,14 +39,14 @@ class TodoTask():
         self.savedA= {}
         self.parentDb= _parentDB
         
-        self.setSaved(True)
+        self.setSaved(SAVE_STATES.IDLE)
 
     def setTags(self, _tagsA):
         self.tagsA= []
         for tagName in _tagsA: self.tagsA.append(tagName.strip())
 
     def set(self, _state, _tagsA, _lvl, _fileName, _comment, _editor, _stamp):
-        self.setSaved(False)
+        self.setSaved(SAVE_STATES.READY)
 
         self.state= _state
         self.setTags(_tagsA)
@@ -49,9 +56,9 @@ class TodoTask():
         self.editor= _editor
         self.stamp= _stamp
 
-    def setSaved(self, _state=True, _engine=-1):
+    def setSaved(self, _state, _engine=-1):
         #'file' (0) indicates it is initial; dont set True at flush to save bulk every time after first .set()
-        if _state==True and _engine==0: #skip explicit 'file'->True; #todo 209 (db) -10: make .savedA[] for file treated as for other engines
+        if _state==SAVE_STATES.IDLE and _engine==0: #skip explicit 'file'->IDLE; #todo 209 (db) -10: make .savedA[] for file treated as for other engines
             return True
 
         if _engine<0: #set all

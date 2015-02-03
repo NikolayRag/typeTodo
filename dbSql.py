@@ -221,7 +221,7 @@ class TodoDbSql():
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
             if not self.migrate:
-                if curTodo.savedA[_dbN]: continue
+                if curTodo.savedA[_dbN]==SAVE_STATES.IDLE: continue
 
             cur.execute(
                 "INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
@@ -267,7 +267,7 @@ class TodoDbSql():
                 )
                 tagOrder+= 1
 
-            curTodo.setSaved(True, _dbN)
+            curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
 
         cur.close()
 

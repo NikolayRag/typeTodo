@@ -126,7 +126,7 @@ class TodoDb():
             dbId+= 1
 
         for iT in self.todoA: #set all unsaved
-            self.todoA[iT].setSaved(False)
+            self.todoA[iT].setSaved(SAVE_STATES.READY)
 
         self.fetch() #sync all db at first
         self.flush(True)
@@ -226,7 +226,7 @@ class TodoDb():
                     diffStamp= task.stamp -self.todoA[__id].stamp
 
                 if not isNew:
-                    self.todoA[__id].setSaved(True, dbN)
+                    self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
 
                 if isNew or diffStamp>0:
                     if diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
@@ -234,12 +234,12 @@ class TodoDb():
                     elif diffStamp>0:
                         maybeNew+= 1
                     self.todoA[__id]= task
-                    self.todoA[__id].setSaved(False) #all but current db are saved for task
-                    self.todoA[__id].setSaved(True, dbN)
+                    self.todoA[__id].setSaved(SAVE_STATES.READY) #all but current db are saved for task
+                    self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
 
                 elif diffStamp<0:
                     print ('TypeTodo: \'' +self.dbA[dbN].name +'\' DB is old at ' +str(__id))
-                    self.todoA[__id].setSaved(False, dbN)
+                    self.todoA[__id].setSaved(SAVE_STATES.READY, dbN)
 
                 self.dirty= True
 

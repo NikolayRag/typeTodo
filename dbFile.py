@@ -47,7 +47,7 @@ class TodoDbFile():
 
                 for iT in self.parentDB.todoA:
                     curTodo= self.parentDB.todoA[iT]
-                    if curTodo.savedA[_dbN]: #stands for 'if just inited'
+                    if curTodo.savedA[_dbN]==SAVE_STATES.IDLE: #stands for 'if just inited'
                         continue
 
                     self.maxId= max(self.maxId, curTodo.id)

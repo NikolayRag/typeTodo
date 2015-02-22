@@ -37,8 +37,18 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
         self.setStateChars= []
         menuItems= []
 
-        for state in STATE_LIST: #collect menu list, excluding current state
-            if state==_mod.group('state'):
+        currentState= _mod.group('state')
+        defaultState= ''
+        if currentState=='':
+            defaultState= '='
+        elif currentState=='=':
+            defaultState= '+'
+
+        self.setStateChars.append(defaultState)
+        menuItems.append('\'' +defaultState +'\': ' +str(STATE_LIST[defaultState]))
+
+        for state in STATE_LIST: #collect menu list, excluding current and default state
+            if state==currentState or state==defaultState:
                 continue
             self.setStateChars.append(state)
             menuItems.append('\'' +state +'\': ' +str(STATE_LIST[state]))

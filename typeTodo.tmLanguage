@@ -28,13 +28,13 @@
 			<key>begin</key>
 			<string>^(\!)(.*) (\d+): ([\+\-]\d+) (.+) (\d\d/\d\d/\d\d \d\d:\d\d) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d)$</string>
 			<key>name</key>
-			<string>meta.tag.preprocessor.xml.typetodo</string>
+			<string>comment.typetodo</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
 				<dict>
 					<key>name</key>
-					<string>invalid.typetodo</string>
+					<string>variable.typetodo</string>
 				</dict>
 			</dict>
 			<key>end</key>

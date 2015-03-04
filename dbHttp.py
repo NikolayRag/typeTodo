@@ -1,13 +1,11 @@
 # coding= utf-8
 
 '''
-scratch of organizing smooth per-project id assigning for (un)registered users at HTTP
-
-unregistered:
-1. at .do creation it is assigned unique hash ID from SITE. So it being per-project.
+unregistered setup:
+1. at .do creation, unique hash ID from SITE is used. So it being per-project.
 2. any access to SITE using that ID is granted to anon
 
-registered:
+registered setup:
 0. user can secure his ID's by applying his hash (username+pass) in config
 1. same as unregistered.1
 2. any access to SITE using that ID is specified by user
@@ -36,7 +34,7 @@ either:
 '''
 #todo 96 (store) +0: add more 'context' using HTTP
 
-import sys, json, threading
+import sys, json, threading, encodings.idna
 from threading import Timer
 
 if sys.version < '3':
@@ -111,14 +109,15 @@ class TodoDbHttp():
             return True
 
         postTodoA['ids']= ','.join(postList)
-        postData['user']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
-#=todo 242 (http, api) +5: point at project using URL
-        postData['rep']= self.httpRepository
-        postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
         postData['todoa']= json.dumps(postTodoA)
+        postData['logName']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
         if self.httpUname!='' and self.httpPass!='':
             postData['logName']= urllib2.quote(self.httpUname)
             postData['logPass']= urllib2.quote(self.httpPass)
+
+#=todo 242 (http, api) +5: point at project using URL
+        postData['rep']= self.httpRepository
+        postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
 
         req = urllib2.Request('http://' +self.httpAddr +'/?=flush', str.encode(urllib.urlencode(postData)))
         try:
@@ -175,12 +174,14 @@ class TodoDbHttp():
 
     def newIdGet(self):
         postData= {}
-        postData['user']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
-        postData['rep']= self.httpRepository
-        postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
+        postData['logName']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
         if self.httpUname!='' and self.httpPass!='':
             postData['logName']= urllib2.quote(self.httpUname)
             postData['logPass']= urllib2.quote(self.httpPass)
+
+        postData['rep']= self.httpRepository
+        postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
+
         req = urllib2.Request('http://' +self.httpAddr +'/?=newid', str.encode(urllib.urlencode(postData)))
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
@@ -218,7 +219,8 @@ class TodoDbHttp():
 
 #todo 143 (multidb) -1: http; handle cStamp on fetch
             if __id not in todoA:
-                todoA[__id]= TodoTask(__id, task['nameproject'], task['nameuser'], int(task['ustamp']), self.parentDB)
+#=todo 307 (http) +0: change URL addressing scheme to rep/proj; join registered/anon name
+                todoA[__id]= TodoTask(__id, self.parentDB.projectName, task['nameuser'], int(task['ustamp']), self.parentDB)
 
                 fetchedStateName= task['namestate']
 #todo 257 (http) +0: remove True and False states after migration

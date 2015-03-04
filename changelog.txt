@@ -1,3 +1,9 @@
+v1.6.2
+
+fix:
+- Patched 'idna' encoding error sometimes shown up
+
+
 v1.6.1
 
 fix:

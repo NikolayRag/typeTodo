@@ -1,7 +1,11 @@
 v1.6.2
 
+new:
+- setState (alt+d) default state depends on current state (open > inprogress > close)
+
 fix:
 - Patched 'idna' encoding error sometimes shown up
+- Colorize: '!' sign for canceled tasks is dedicated; Some color altered
 
 
 v1.6.1

@@ -19,6 +19,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
     newWFlags= sublime.ENCODED_POSITION
 
 
+#todo 348 (command) +0: fix focusing on file open
     def focusTodo(self, _view, _begin, _end):
         _view.sel().clear()
         _view.sel().add(sublime.Region(_begin, _begin))
@@ -39,27 +40,33 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         return False
 
 
+    def findTodoInFile(self, _fn, _test, _id):
+        try:
+            with codecs.open(_fn, 'r', 'UTF-8') as f:
+                lNum= 0
+                for ln in f:
+                    lNum+= 1
+                    foundEntry= _test.match(ln)
+                    if foundEntry and foundEntry.group('id')==_id:
+                        cView= sublime.active_window().open_file(_fn+':'+str(lNum)+':'+str(foundEntry.start('id')), self.newWFlags)
+
+                        #this duplication should stay alone, but it doesnt work itself without timeout
+                        sublime.set_timeout(lambda: self.focusTodo(cView, cView.text_point(lNum-1, foundEntry.start('id')), cView.text_point(lNum, 0) -5), 100)
+
+                        return True
+        except:
+            None
+
+        return False
+
+
     def findTodoInProject(self, _id):
         for cFolder in sublime.active_window().folders():
             for cWalk in os.walk(cFolder):
                 for cFile in cWalk[2]:
                     fn= os.path.join(cWalk[0], cFile)
-
-                    try:
-                        with codecs.open(fn, 'r', 'UTF-8') as f:
-                            lNum= 0
-                            for ln in f:
-                                lNum+= 1
-                                foundIncode= RE_TODO_EXISTING.match(ln)
-                                if foundIncode and foundIncode.group('id')==_id:
-                                    cView= sublime.active_window().open_file(fn+':'+str(lNum)+':'+str(foundIncode.start('id')), self.newWFlags)
-
-                                    #this duplication should stay alone, but it doesnt work itself without timeout
-                                    sublime.set_timeout(lambda: self.focusTodo(cView, cView.text_point(lNum-1, foundIncode.start('id')), cView.text_point(lNum, 0) -5), 100)
-
-                                    return True
-                    except:
-                        None
+                    if self.findTodoInFile(fn, RE_TODO_EXISTING, _id):
+                        return True
 
         return False
 
@@ -90,23 +97,9 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 sublime.message_dialog('TypeTodo error:\n\tCannot find projects .do file')
                 return
 
-            try:
-                with codecs.open(fn, 'r', 'UTF-8') as f:
-                    lNum= 0
-                    for ln in f:
-                        lNum+= 1
-                        foundIndo= RE_TODO_STORED.match(ln)
-                        if foundIndo and foundIndo.group('id')==todoIncode.group('id'):
-                            cView= sublime.active_window().open_file(fn+':'+str(lNum), self.newWFlags)
+            if not self.findTodoInFile(fn, RE_TODO_STORED, todoIncode.group('id')):
+                sublime.message_dialog('TypeTodo error:\n\tDoplet #' +todoIncode.group('id') +' not found in project\'s .do')
 
-                            #this duplication should stay alone, but it doesnt work itself without timeout
-                            sublime.set_timeout(lambda: self.focusTodo(cView, cView.text_point(lNum-1, 0), cView.text_point(lNum, 0) -5), 100)
-
-                            return
-            except:
-                None
-
-            sublime.message_dialog('TypeTodo error:\n\tDoplet #' +todoIncode.group('id') +' not found in project\'s .do')
             return
 
 

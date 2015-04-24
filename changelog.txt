@@ -1,7 +1,16 @@
+v1.6.3
+
+new:
+- 'Find todo' command added and binded to <alt+shift+d>. It is used to navigate through Todos, acting flexible depending on context:
+  * When cursor is at Todo line, then '.do' file is searched for record and it gets focus;
+  * When cursor is over Todo in '.do' file, project files are searched for that Todo and it gets focus;
+  * If neither, text input is offered to find Todo by its number.
+
+
 v1.6.2
 
 new:
-- setState (alt+d) default state depends on current state (open > inprogress > close)
+- SetState (alt+d) default state depends on current state (open > inprogress > close)
 
 fix:
 - Patched 'idna' encoding error sometimes shown up

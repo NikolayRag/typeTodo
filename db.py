@@ -37,7 +37,8 @@ class TodoDb():
     projectRoot= ''
     projectName= ''
 
-#todo 67 (general) +0: move cfg to class
+#todo 67 (cfg) +0: move cfg to class
+#=todo 333 (cfg) +0: make .do read-save cycle more crisp and time-compact
     cfgA= None
 
     maxflushRetries= 3

@@ -83,6 +83,7 @@ class TodoDbHttp():
 
 #todo 270 (http) +0: implement http timeout
 
+#=todo 307 (http) +0: change URL addressing scheme to rep/proj; join registered/anon name
     def flush(self, _dbN):
         postData= {}
         postList= list()
@@ -115,7 +116,6 @@ class TodoDbHttp():
             postData['logName']= urllib2.quote(self.httpUname)
             postData['logPass']= urllib2.quote(self.httpPass)
 
-#=todo 242 (http, api) +5: point at project using URL
         postData['rep']= self.httpRepository
         postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
 
@@ -219,7 +219,6 @@ class TodoDbHttp():
 
 #todo 143 (multidb) -1: http; handle cStamp on fetch
             if __id not in todoA:
-#=todo 307 (http) +0: change URL addressing scheme to rep/proj; join registered/anon name
                 todoA[__id]= TodoTask(__id, self.parentDB.projectName, task['nameuser'], int(task['ustamp']), self.parentDB)
 
                 fetchedStateName= task['namestate']

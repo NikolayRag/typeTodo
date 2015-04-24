@@ -13,10 +13,124 @@ else:
     from .c import *
 
 
+class TypetodoJumpCommand(sublime_plugin.TextCommand):
+#    newWFlags= sublime.ENCODED_POSITION|sublime.TRANSIENT
+#    if sys.version < '3': # ST2 hangs if both flags set
+    newWFlags= sublime.ENCODED_POSITION
+
+
+    def focusTodo(self, _view, _begin, _end):
+        _view.sel().clear()
+        _view.sel().add(sublime.Region(_begin, _begin))
+        _view.show(sublime.Region(_begin, _end))
+        sublime.set_timeout(lambda: sublime.active_window().focus_view(_view), 0)
+
+#todo 341 (command) +0: jump: deal with multiple matches
+    def findTodoInViews(self, _id):
+        for cView in sublime.active_window().views():
+            for cLine in cView.lines(sublime.Region(0,cView.size())):
+                foundIncode= RE_TODO_EXISTING.match(cView.substr(cLine))
+                if foundIncode and foundIncode.group('id')==_id:
+                    foundPos= cLine.a +foundIncode.start('id')
+                    self.focusTodo(cView, foundPos, cLine.b)
+
+                    return True
+
+        return False
+
+
+    def findTodoInProject(self, _id):
+        for cFolder in sublime.active_window().folders():
+            for cWalk in os.walk(cFolder):
+                for cFile in cWalk[2]:
+                    fn= os.path.join(cWalk[0], cFile)
+
+                    try:
+                        with codecs.open(fn, 'r', 'UTF-8') as f:
+                            lNum= 0
+                            for ln in f:
+                                lNum+= 1
+                                foundIncode= RE_TODO_EXISTING.match(ln)
+                                if foundIncode and foundIncode.group('id')==_id:
+                                    cView= sublime.active_window().open_file(fn+':'+str(lNum)+':'+str(foundIncode.start('id')), self.newWFlags)
+
+                                    #this duplication should stay alone, but it doesnt work itself without timeout
+                                    sublime.set_timeout(lambda: self.focusTodo(cView, cView.text_point(lNum-1, foundIncode.start('id')), cView.text_point(lNum, 0) -5), 100)
+
+                                    return True
+                    except:
+                        None
+
+        return False
+
+
+    def findNamed(self, _text):
+        if _text=='':
+            return
+
+        if self.findTodoInViews(_text):
+            return
+        
+        if len(sublime.active_window().folders())>0:
+            if self.findTodoInProject(_text):
+                return
+
+        sublime.message_dialog('TypeTodo error:\n\tDoplet #' +_text +' was not found in source')
+
+
+    def run(self, _edit):
+        todoRegion = self.view.line(self.view.sel()[0])
+
+        #jump to .do file
+        todoIncode= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
+        if todoIncode:
+            cDb= getDB(self.view)
+            fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
+            if not os.path.isfile(fn):
+                sublime.message_dialog('TypeTodo error:\n\tCannot find projects .do file')
+                return
+
+            try:
+                with codecs.open(fn, 'r', 'UTF-8') as f:
+                    lNum= 0
+                    for ln in f:
+                        lNum+= 1
+                        foundIndo= RE_TODO_STORED.match(ln)
+                        if foundIndo and foundIndo.group('id')==todoIncode.group('id'):
+                            cView= sublime.active_window().open_file(fn+':'+str(lNum), self.newWFlags)
+
+                            #this duplication should stay alone, but it doesnt work itself without timeout
+                            sublime.set_timeout(lambda: self.focusTodo(cView, cView.text_point(lNum-1, 0), cView.text_point(lNum, 0) -5), 100)
+
+                            return
+            except:
+                None
+
+            sublime.message_dialog('TypeTodo error:\n\tDoplet #' +todoIncode.group('id') +' not found in project\'s .do')
+            return
+
+
+        #jump to code
+        todoIndo= RE_TODO_STORED.match(self.view.substr(todoRegion))
+        if todoIndo:
+            if self.findTodoInViews(todoIndo.group('id')):
+                return
+            
+            if len(sublime.active_window().folders())>0:
+                if self.findTodoInProject(todoIndo.group('id')):
+                    return
+
+            sublime.message_dialog('TypeTodo error:\n\tDoplet #' +todoIndo.group('id') +' was not found in source')
+            return
+
+        #search by string
+        sublime.active_window().show_input_panel('TypeTodo search for:', '', self.findNamed, None, self.findNamed)
+
+
+
 class TypetodoRegReplaceCommand(sublime_plugin.TextCommand):
     def run(self, _edit, _regStart= False, _regEnd= False, _replaceWith=''):
         self.view.replace(_edit, sublime.Region(int(_regStart), int(_regEnd)), _replaceWith)
-
 
 class TypetodoSetStateCommand(sublime_plugin.TextCommand):
     setStateChars= []
@@ -58,6 +172,7 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
         self.view.window().show_quick_panel(menuItems, self.setChar, sublime.MONOSPACE_FONT)
 
 
+
 class TypetodoWwwCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= getDB(self.view)
@@ -66,6 +181,7 @@ class TypetodoWwwCommand(sublime_plugin.TextCommand):
             sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
             return
         webbrowser.open_new_tab('http://' +cCfg['addr'] +'/' +cCfg['base'] +'/' +cDb.projectName)
+
 
 
 class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
@@ -78,6 +194,7 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
         sublime.active_window().open_file(fn, sublime.TRANSIENT)
 
 
+
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= getDB(False,'')
@@ -86,6 +203,7 @@ class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
             sublime.message_dialog('TypeTodo:\n\tNo global .do file,\n\tplease restart Sublime')
             return
         sublime.active_window().open_file(fn, sublime.TRANSIENT)
+
 
 
 class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
@@ -105,4 +223,3 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
         cDb.pushReset(0)
 
 
-#todo 230 (command) +0: make tool for searching todo's

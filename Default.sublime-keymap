@@ -1,3 +1,4 @@
 [
-{ "keys": ["alt+d"], "command": "typetodo_set_state", "args": {} }
+{ "keys": ["alt+d"], "command": "typetodo_set_state", "args": {} },
+{ "keys": ["alt+shift+d"], "command": "typetodo_jump", "args": {} }
 ]

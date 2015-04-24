@@ -22,6 +22,10 @@
     {
         "caption": "TypeTodo: Set state",
         "command": "typetodo_set_state"
-    }
+    },
 
+    {
+        "caption": "TypeTodo: Find todo",
+        "command": "typetodo_jump"
+    }
 ]

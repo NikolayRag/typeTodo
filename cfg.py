@@ -76,6 +76,7 @@ def readCfg(_cfgPath):
     return foundCfg
 
 
+#todo 351 (cfg) +0: allow skip global configure for HTTP at first start
 def initGlobalDo(_force=False):
     if not _force:
         cfgFoundTry= readCfg(defaultCfg['file'])

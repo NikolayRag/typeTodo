@@ -33,10 +33,9 @@ def exitHandler(): # one for all, at very exit
 
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
+    view= None
 
 #todo 236 (db, config) +0: reset db after editing .do
-
-    inited= False
 
     def on_deactivated(self,_view):
         db=getDB(_view)
@@ -50,18 +49,54 @@ class TypetodoEvent(sublime_plugin.EventListener):
     def on_selection_modified(self, _view):
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
+#            self.view= _view
+#            self.runa(None)
             _view.run_command('typetodo_subst')
             self.mutexUnlocked= 1
 
     def on_modified(self, _view):
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
+#            self.view= _view
+#            self.runa(None, True)
             _view.run_command('typetodo_subst', {'_modified': True})
             self.mutexUnlocked= 1
 
 
+#=todo 377 (interaction) +0: Add +/- shortcut to change priority
+    def on_query_context(self, _view, _key, _op, _val, _match):
+        if _key=='typetodoUp' or _key=='typetodoDown':
+            if len(_view.sel())!=1: #more than one cursors skipped for number of reasons
+                return;
+
+            todoRegion = _view.line(_view.sel()[0])
+            todoText = _view.substr(todoRegion)
+
+            _mod= RE_TODO_EXISTING.match(todoText) #mod goes first to allow midline todo
+            if _mod:
+                selStart= _view.rowcol(_view.sel()[0].a)[1]
+                selEnd= selStart +_view.sel()[0].b -_view.sel()[0].a
+                if selStart>selEnd:
+                    tmp= selStart
+                    selStart= selEnd
+                    selEnd= tmp
+
+                if selStart>=_mod.start('priority') and selEnd<=_mod.end('priority'):
+                    addValue= 1
+                    if _key=='typetodoDown':
+                            addValue= -1
+                    newPriority= int(_mod.group('priority')) +addValue
+                    newPriPfx= ''
+                    if newPriority>=0:
+                        newPriPfx= '+'
+                    newPriority= newPriPfx +str(newPriority)
+                    
+                    _view.run_command('typetodo_reg_replace', {'_regStart': todoRegion.a+_mod.start('priority'), '_regEnd': todoRegion.a+_mod.end('priority'), '_replaceWith': newPriority})
+                    return True
+
+
 #todo 210 (general) +0: implement editing of project .do file
-#todo 231 (general) +0: make navigation from/to .do file
+
 
 class TypetodoSubstCommand(sublime_plugin.TextCommand):
 #todo 229 (ux) +0: make cached stuff per-project (or not?)
@@ -70,6 +105,22 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
 
     prevTriggerNew= None
     prevStateMod= None
+    noundo= False
+
+    def setRO(self, _ro):
+        return
+#        if self.noundo:
+#            self.view.set_read_only(0)
+#            self.view.end_edit(self.noundo)
+#            self.noundo= False
+
+        if _ro:
+#            self.noundo= self.view.begin_edit()
+            self.view.set_read_only(True)
+#            return
+        else:
+            self.view.set_read_only(False)
+
 
     def run(self, _edit, _modified= False):
         if len(self.view.sel())!=1: #more than one cursors skipped for number of reasons
@@ -80,15 +131,39 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
 
         _mod= RE_TODO_EXISTING.match(todoText) #mod goes first to allow midline todo
         if _mod:
+            #set readonly
+            selStart= self.view.rowcol(self.view.sel()[0].a)[1]
+            selEnd= selStart +self.view.sel()[0].b -self.view.sel()[0].a
+            if selStart>selEnd:
+                tmp= selStart
+                selStart= selEnd
+                selEnd= tmp
+
+            allowFlag= False
+            if selStart<=_mod.end('prefix') and selEnd>=_mod.start('postfix'):
+                allowFlag= True
+            else:
+                for rangeName in ('prefix', 'state', 'tags', 'priority', 'postfix'):
+                    if selStart>=_mod.start(rangeName) and selEnd<=_mod.end(rangeName):
+                        allowFlag= True
+                        break
+            self.setRO(not allowFlag)
+
+
+
+
             #should trigger at '+' or '!' entered
             doWipe= _mod.group('state')=='+' and self.prevStateMod!='+'
             if not doWipe: doWipe= _mod.group('state')=='!' and self.prevStateMod!='!'
             self.prevStateMod= _mod.group('state')
 
             if _modified:
-                self.substUpdate(_mod.group('state'), _mod.group('id'), _mod.group('tags'), _mod.group('priority'), _mod.group('comment'), _mod.group('prefix'), _edit, todoRegion, doWipe)
+                self.substUpdate(_mod.group('state'), _mod.group('id'), _mod.group('tags'), _mod.group('priority'), _mod.group('comment'), _mod.group('prefix'), todoRegion, doWipe)
 
             return
+
+        self.setRO(0)
+
 
         _new = RE_TODO_NEW.match(todoText)
         if _new:
@@ -97,19 +172,20 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
             self.prevTriggerNew= _new.group('trigger')
 
             if _modified and doTrigger:
-                self.substNew(_new.group('prefix'), _new.group('comment'), _edit, todoRegion)
+                self.substNew(_new.group('prefix'), _new.group('comment'), todoRegion)
 
             return
 
     #create new todo in db and return string to replace original 'todo:'
-    def substNew(self, _prefx, _postfx, _edit, _region):
+    def substNew(self, _prefx, _postfx, _region):
         todoId= self.cfgStore(0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 
-        todoComment= _prefx + 'todo ' +str(todoId) +' (' +self.lastCat[0] +') ' +self.lastLvl +': ' +_postfx
-        self.view.replace(_edit, _region, todoComment)
+        todoComment= _prefx + 'todo ' +str(todoId) +' (${1:' +self.lastCat[0] +'}) ${2:' +self.lastLvl +'}: ${0:}' +_postfx +''
+        self.view.run_command('typetodo_reg_replace', {'_regStart': _region.a, '_regEnd': _region.b})
+        self.view.run_command("insert_snippet", {"contents": todoComment})
 
         if _postfx != '': #need to save if have comment at creation
-            self.substUpdate('', todoId, self.lastCat[0], self.lastLvl, _postfx, _prefx, _edit, _region)
+            self.substUpdate('', todoId, self.lastCat[0], self.lastLvl, _postfx, _prefx, _region)
 
         return todoId
 
@@ -125,7 +201,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
 
         if self.updVals['_wipe']:
             todoRegion= self.view.full_line(self.updVals['_region'])
-            if self.updVals['_prefix']!='':
+            if self.updVals['_prefix']!='': #midline todo
                 todoRegion= sublime.Region(
                     todoRegion.a +len(self.updVals['_prefix']),
                     todoRegion.b -1
@@ -134,8 +210,8 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
             self.view.run_command('typetodo_reg_replace', {'_regStart': todoRegion.a, '_regEnd': todoRegion.b})
 
 
-    def substUpdate(self, _state, _id, _tags, _lvl, _comment, _prefix, _edit, _region, _wipe=False):
-        self.updVals= {'_state':_state, '_id':_id, '_tags':_tags, '_lvl':_lvl, '_comment':_comment, '_prefix':_prefix, '_edit':_edit, '_region':_region, '_wipe':_wipe}
+    def substUpdate(self, _state, _id, _tags, _lvl, _comment, _prefix, _region, _wipe=False):
+        self.updVals= {'_state':_state, '_id':_id, '_tags':_tags, '_lvl':_lvl, '_comment':_comment, '_prefix':_prefix, '_region':_region, '_wipe':_wipe}
 
         if _state=='!':
             self.view.window().show_input_panel('Reason of canceling:', '', self.substDoUpdate, None, self.substDoUpdate)

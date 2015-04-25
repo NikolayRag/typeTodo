@@ -173,7 +173,7 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
        This command offer list of states to change the state of current doplet. As the states count become more than just Open/Close, this command is going to be more useful.
 
 5.2.
-       **Find todo** (keyboard shortcut ``Alt+Ctrl+d``)
+       **Find todo** (keyboard shortcut ``Alt+Shift+d``)
        Performs searching of current doplet from source in ``.do`` file and visa-versa. If cursor is not placed over doplet, text field is offered, waiting for ID to search.
 
 5.3.

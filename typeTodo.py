@@ -33,8 +33,6 @@ def exitHandler(): # one for all, at very exit
 
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
-    view= None
-
 #todo 236 (db, config) +0: reset db after editing .do
 
     def on_deactivated(self,_view):
@@ -49,17 +47,14 @@ class TypetodoEvent(sublime_plugin.EventListener):
     def on_selection_modified(self, _view):
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
-#            self.view= _view
-#            self.runa(None)
-            _view.run_command('typetodo_subst')
+            sublime.set_timeout(lambda: self.matchTodo(_view), 0) #negative effects at undo if no timeout
             self.mutexUnlocked= 1
+
 
     def on_modified(self, _view):
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
-#            self.view= _view
-#            self.runa(None, True)
-            _view.run_command('typetodo_subst', {'_modified': True})
+            self.matchTodo(_view, True)
             self.mutexUnlocked= 1
 
 
@@ -97,43 +92,29 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 #todo 210 (general) +0: implement editing of project .do file
 
-
-class TypetodoSubstCommand(sublime_plugin.TextCommand):
 #todo 229 (ux) +0: make cached stuff per-project (or not?)
     lastCat= ['general']
     lastLvl= '+0'
 
     prevTriggerNew= None
     prevStateMod= None
-    noundo= False
-
-    def setRO(self, _ro):
-        return
-#        if self.noundo:
-#            self.view.set_read_only(0)
-#            self.view.end_edit(self.noundo)
-#            self.noundo= False
-
-        if _ro:
-#            self.noundo= self.view.begin_edit()
-            self.view.set_read_only(True)
-#            return
-        else:
-            self.view.set_read_only(False)
+    view= None
 
 
-    def run(self, _edit, _modified= False):
-        if len(self.view.sel())!=1: #more than one cursors skipped for number of reasons
+    def matchTodo(self, _view, _modified= False):
+        if len(_view.sel())!=1: #more than one cursors skipped for number of reasons
             return;
 
-        todoRegion = self.view.line(self.view.sel()[0])
-        todoText = self.view.substr(todoRegion)
+        self.view= _view
+        
+        todoRegion = _view.line(_view.sel()[0])
+        todoText = _view.substr(todoRegion)
 
         _mod= RE_TODO_EXISTING.match(todoText) #mod goes first to allow midline todo
         if _mod:
             #set readonly
-            selStart= self.view.rowcol(self.view.sel()[0].a)[1]
-            selEnd= selStart +self.view.sel()[0].b -self.view.sel()[0].a
+            selStart= _view.rowcol(_view.sel()[0].a)[1]
+            selEnd= selStart +_view.sel()[0].b -_view.sel()[0].a
             if selStart>selEnd:
                 tmp= selStart
                 selStart= selEnd
@@ -147,9 +128,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
                     if selStart>=_mod.start(rangeName) and selEnd<=_mod.end(rangeName):
                         allowFlag= True
                         break
-            self.setRO(not allowFlag)
-
-
+            _view.set_read_only(not allowFlag)
 
 
             #should trigger at '+' or '!' entered
@@ -162,7 +141,7 @@ class TypetodoSubstCommand(sublime_plugin.TextCommand):
 
             return
 
-        self.setRO(0)
+        _view.set_read_only(False)
 
 
         _new = RE_TODO_NEW.match(todoText)

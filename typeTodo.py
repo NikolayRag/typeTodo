@@ -2,8 +2,7 @@
 
 #todo 1 (interaction) -1: multiline TODO
 #todo 8 (interaction) +0: tag auto-complete; or use command to choose tag
-#todo 9 (interaction) -1: using snippets
-#todo 10 (interaction) +0: colorizing
+#todo 10 (interaction) -1: in-code colorizing
 #todo 11 (interaction) -2: make more TODO formats available
 
 #todo 232 (feature) +0: introduce sub-todo's that are part of other
@@ -30,6 +29,8 @@ def exitHandler(): # one for all, at very exit
     if len(sublime.windows())==0:
         for dbI in projectDbCache:
            projectDbCache[dbI].flush(True)
+
+
 
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
@@ -58,7 +59,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
             self.mutexUnlocked= 1
 
 
-#=todo 377 (interaction) +0: Add +/- shortcut to change priority
     def on_query_context(self, _view, _key, _op, _val, _match):
         if _key=='typetodoUp' or _key=='typetodoDown':
             if len(_view.sel())!=1: #more than one cursors skipped for number of reasons
@@ -89,8 +89,8 @@ class TypetodoEvent(sublime_plugin.EventListener):
                     _view.run_command('typetodo_reg_replace', {'_regStart': todoRegion.a+_mod.start('priority'), '_regEnd': todoRegion.a+_mod.end('priority'), '_replaceWith': newPriority})
                     return True
 
+#todo 210 (db) -1: implement editing of project .do file
 
-#todo 210 (general) +0: implement editing of project .do file
 
 #todo 229 (ux) +0: make cached stuff per-project (or not?)
     lastCat= ['general']

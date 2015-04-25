@@ -1,0 +1,9 @@
+v1.6.4
+
+new:
+- Doplet is created as snippets with 3 tabs: Tag, Priority and Comment.
+- Restrict doplet editing if selection range is other than Tags, Priority and Comment blocks.
+- Added "+/-" shortcut when over Priority to change it
+
+fix:
+- Previously Undo was implicitly altered so it took in account every changed character instead of word. This is no more issue.

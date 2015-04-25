@@ -1,4 +1,4 @@
-v1.6.4
+v1.6.5
 
 new:
 - Doplet is created as snippets with 3 tabs: Tag, Priority and Comment.

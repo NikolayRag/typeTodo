@@ -1,4 +1,6 @@
 [
+{ "keys": ["+"], "command": "typetodo_repriority", "args": {"_up": 1}, "context": [{"key": "typetodoUp"}] },
+{ "keys": ["-"], "command": "typetodo_repriority", "args": {"_up": 0}, "context": [{"key": "typetodoDown"}] },
 { "keys": ["alt+d"], "command": "typetodo_set_state", "args": {} },
 { "keys": ["alt+shift+d"], "command": "typetodo_jump", "args": {} }
 ]

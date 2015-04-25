@@ -31,13 +31,13 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
 
 2.1.
        Type ``//todo:`` or ``#todo:`` according to used language.
-       As colon ``:`` is typed, line is instantly expanded with additional fields:
+       As colon ``:`` is typed, line is instantly expanded with snippet, having additional fields:
        ``//todo:`` expands to ``//todo XXXX (category) [+-]N:``
        
 * detailed fields description found in section 3
 
 2.2.
-       and stored within user-specified database.
+       ... and stored within user-specified database.
        Database is specified within *[projectName].do* text file which is placed inside the first folder, included in project.
 
 * database configuration is described in section 4
@@ -163,23 +163,56 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
 All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved.
 
 
-5. Meaningful issues
+5. Related Commands
 --------------------
+       
+       While using of TypeTodo is completely implicit, there're some support commands and keyboard shortcuts available:
 
 5.1.
-       As TODO is created or edited, any changes are saved to db in background, even if current source file is not saved.
+       **Set State** (keyboard shortcut ``Alt+d``)
+       This command offer list of states to change the state of current doplet. As the states count become more than just Open/Close, this command is going to be more useful.
 
 5.2.
-       If more than ONE cursor present, saving to database is suppressed.
+       **Find todo** (keyboard shortcut ``Alt+Ctrl+d``)
+       Performs searching of current doplet from source in ``.do`` file and visa-versa. If cursor is not placed over doplet, text field is offered, waiting for ID to search.
 
 5.3.
-       NO braces/hyphens checking is performed. So if ``#todo:`` line is a part of string, it WILL act as ordinary TODO.
-       
+       Open Global/Project config.
+       Command for opening related ``.do`` file. While **Find todo** command is presented, there's no big use of opening config too often.
 
-6. --> WARNING<--
--------------------------
+5.4.
+       **Browse project's repository**
+       Used to open current project within HTTP repository in browser. Server and repository are defined in ``.do` config.
+
+5.5.
+       **Reset Global config**
+       Reinitialise global ``.do`` config while keeping it's doplet records. Mainly reinitialisation means gathering of new public HTTP repository, while old one will remain forgotten on web-server.
+
+5.6.
+       Priority change.
+       This is not a dedicated command, but a behavior, which uses ``+`` and ``-`` keys to increment or decrement doplet priority when focused over it.
+
+
+6. Meaningful issues and behavior
+---------------------------------
 
 6.1.
+       As TODO is created or edited, any changes are saved to db in background, even if current source file is not saved. If Sublime is closed afterall without save, doplet mismatch between source and dbase can occur. Issue will be removed when Consistency Checking will be implemented.
+
+6.2.
+       If more than ONE cursor present, saving to database is suppressed.
+
+6.3.
+       NO braces/hyphens checking is performed. So if ``#todo:`` line is a part of string, it WILL act as ordinary TODO.
+
+6.4.
+       Todo string is mostly protected from editing its structure. Only Tags, Priority and Comment fields are allowed to be changed. This is mainly implemented to keep ID unchanged, because sudden change of it cause overwrite of other dbase entry.
+       
+
+7. --> WARNING<--
+-------------------------
+
+7.1.
        As NO (no) consistency checking is performed between db and source files,
        any ``//todo`` comments editing outside ST will easily make things inconsistent.
 
@@ -187,7 +220,7 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
        Reload file without save will result in inconsistence.
        This behavior will remain till synchronizing back FROM database will be done
 
-6.2.
-       creating ``//todo XXXX:`` by defining XXXX explicitly will overwrite or create that specified XXXX task in database. Even if specified and deleted back: typing ``123``, then ``1243`` and finally ``124`` will save all three TODOs. Try avoid editing IDs at all.
+7.2.
+       Creating ``//todo XXXX:`` by defining XXXX explicitly will overwrite or create that specified XXXX task in database. As being used normally, doplet is protected from editing its ID (see issue 6.4)
 
    

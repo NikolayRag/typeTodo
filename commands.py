@@ -121,6 +121,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
+#command is used to keep python flow unruined
 class TypetodoRegReplaceCommand(sublime_plugin.TextCommand):
     def run(self, _edit, _regStart= False, _regEnd= False, _replaceWith=''):
         self.view.replace(_edit, sublime.Region(int(_regStart), int(_regEnd)), _replaceWith)

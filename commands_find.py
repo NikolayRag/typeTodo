@@ -28,6 +28,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         sublime.active_window().focus_view(_view)
         sublime.set_timeout(lambda: _view.run_command('typetodo_jump_point', {'_line': _line, '_col': _col}), 100)
 
+
 #todo 341 (command) +0: jump: deal with multiple matches
     def findTodoInViews(self, _id):
         for cView in sublime.active_window().views():

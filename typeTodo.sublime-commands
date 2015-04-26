@@ -27,5 +27,10 @@
     {
         "caption": "TypeTodo: Find todo",
         "command": "typetodo_jump"
+    },
+
+    {
+        "caption": "TypeTodo: Toggle Colorize",
+        "command": "typetodo_toggle_colorize"
     }
 ]

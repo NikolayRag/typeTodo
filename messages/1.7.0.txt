@@ -1,0 +1,16 @@
+v1.7.0
+
+new:
+- Doplet highlighting in code. Could slow down if lot of doplets in one file, issue to be fixed.
+- Basic consistency check at startup: doplets that are not equal to those in dbase are highlited red. NOTHING is changed in code, its all up to user. '.do' file contain dbase-version of record, so you can hop using (alt+shift+d) to see differense.
+  Notice, that any edit of inconsistent doplet will overwrite new version into dbase.
+- 'Toggle Colorize' command added which stores it state.
+
+fix:
+- Fixed unstable focusing at 'Find todo' command
+- Canceling doplets with reason failed. Fixed.
+- (alt-d) shortcut more strictly restricted to doplet
+- Entering blank reason when calceling leave doplet comment unchanged
+
+change:
+- No more deleting line itself when calceling doplet, only content is removed.

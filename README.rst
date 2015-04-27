@@ -173,22 +173,26 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
        This command offer list of states to change the state of current doplet. As the states count become more than just Open/Close, this command is going to be more useful.
 
 5.2.
-       **Find todo** (keyboard shortcut ``Alt+Shift+d``)
+       **Find Todo** (keyboard shortcut ``Alt+Shift+d``)
        Performs searching of current doplet from source in ``.do`` file and visa-versa. If cursor is not placed over doplet, text field is offered, waiting for ID to search.
 
 5.3.
-       Open Global/Project config.
-       Command for opening related ``.do`` file. While **Find todo** command is presented, there's no big use of opening config too often.
+       **Toggle Colorize**
+       By default all doplets in code are highlited with three colors: Opened, In-progress and Inconsistent. This can be switched off/on.
 
 5.4.
-       **Browse project's repository**
-       Used to open current project within HTTP repository in browser. Server and repository are defined in ``.do` config.
+       **Open Global/Project Config**
+       Command for opening related ``.do`` file. While **Find todo** command is presented, there's no big use of opening config too often.
 
 5.5.
-       **Reset Global config**
-       Reinitialise global ``.do`` config while keeping it's doplet records. Mainly reinitialisation means gathering of new public HTTP repository, while old one will remain forgotten on web-server.
+       **Browse Project's Repository**
+       Used to open current project within HTTP repository in browser. Server and repository are defined in ``.do` config.
 
 5.6.
+       **Reset Global Config**
+       Reinitialise global ``.do`` config while keeping it's doplet records. Mainly reinitialisation means gathering of new public HTTP repository, while old one will remain forgotten on web-server.
+
+5.7.
        Priority change.
        This is not a dedicated command, but a behavior, which uses ``+`` and ``-`` keys to increment or decrement doplet priority when focused over it.
 
@@ -197,7 +201,7 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
 ---------------------------------
 
 6.1.
-       As TODO is created or edited, any changes are saved to db in background, even if current source file is not saved. If Sublime is closed afterall without save, doplet mismatch between source and dbase can occur. Issue will be removed when Consistency Checking will be implemented.
+       As TODO is created or edited, any changes are saved to dbase in background, even if current source file is not saved. If Sublime is closed afterall without save, doplet mismatch between source and dbase can occur.
 
 6.2.
        If more than ONE cursor present, saving to database is suppressed.
@@ -207,20 +211,21 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
 
 6.4.
        Todo string is mostly protected from editing its structure. Only Tags, Priority and Comment fields are allowed to be changed. This is mainly implemented to keep ID unchanged, because sudden change of it cause overwrite of other dbase entry.
+
+6.5.
+       Consistency is checked periodically and doplets that differs from dbase are highlited. Highlighting occurs only if Colorizing NOT switched off.
        
 
 7. --> WARNING<--
 -------------------------
 
 7.1.
-       As NO (no) consistency checking is performed between db and source files,
-       any ``//todo`` comments editing outside ST will easily make things inconsistent.
-
-       Also all changes to comments are flushed to database without saving source file itself.
-       Reload file without save will result in inconsistence.
-       This behavior will remain till synchronizing back FROM database will be done
+       There're some ways to bring inconsistence between code and dbase, which will result in highlighting problems:
+       * Any ``//todo`` comments editing outside ST.
+       * Reloading file without save, because changes to comments are flushed to database regardless of saving source file itself.
+       * Copy-Pasting doplet, so you have more than one entry with same ID. This is not prohibited, so later editing any one of them will make others outdated.
 
 7.2.
-       Creating ``//todo XXXX:`` by defining XXXX explicitly will overwrite or create that specified XXXX task in database. As being used normally, doplet is protected from editing its ID (see issue 6.4)
+       Creating ``//todo XXXX:`` by defining XXXX explicitly will overwrite or create that specified XXXX task in database. As being used normally, doplet is protected from editing its ID (see issue 6.5)
 
    

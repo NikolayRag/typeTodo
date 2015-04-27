@@ -7,7 +7,13 @@ new:
 - 'Toggle Colorize' command added which stores it state.
 
 fix:
-- Fixed unstable focusing at 'Find todo' command
+- Fixed unstable focusing at 'Find todo' command.
+- Canceling doplets with reason failed. Fixed.
+- (alt-d) shortcut more strictly restricted to doplet
+- Entering blank reason when calceling leave doplet comment unchanged
+
+change:
+- No more deleting line itself when calceling doplet, only content is removed.
 
 
 v1.6.5

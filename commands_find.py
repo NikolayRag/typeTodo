@@ -56,11 +56,14 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         firstLine= 0
         lastFilename= ''
         for cMatch in _matches:
-            if re.match('.*\.sublime-workspace', cMatch[5]):
+            fName= ''
+            if cMatch[5]:
+                fName= cMatch[5]
+            if re.match('.*\.sublime-workspace', fName):
                 continue
-            if lastFilename != cMatch[5]:
-                lastFilename= cMatch[5]
-                textAppend+= '\n' +cMatch[5] +'\n'
+            if lastFilename != fName:
+                lastFilename= fName
+                textAppend+= '\n' +fName +'\n'
 
             if firstLine==0:
                 firstLine= resultsView.rowcol(resultsView.size())

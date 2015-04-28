@@ -105,6 +105,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         try:
             with codecs.open(_fn, 'r', 'UTF-8') as f:
                 for ln in f:
+                    ln= ln.strip()
                     lNum+= 1
                     foundEntry= _test.match(ln)
                     if foundEntry:

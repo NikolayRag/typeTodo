@@ -6,6 +6,7 @@ new:
 
 fix:
 - in-progress highlight color changed to remove cursor slowdown
+- fix unstable consistency check
 
 
 v1.7.0

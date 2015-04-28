@@ -155,6 +155,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         for cMatch in matchesFiles:
             matchDup= False
             for testMatch in matchesView:
+                if testMatch[5] == cMatch[5]:
                     matchDup= True
                     break
             

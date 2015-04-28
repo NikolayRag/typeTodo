@@ -6,7 +6,6 @@
 
 #todo 232 (feature) +0: introduce sub-todo's that are part of other
 
-#=todo 5 (consistency) -10: check as db edited (saved)
 
 import sublime, sublime_plugin
 import sys, re
@@ -53,7 +52,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
-
     #maybe lil overheat here, but it works
     def on_selection_modified(self, _view):
         if self.mutexUnlocked:
@@ -70,7 +68,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
             self.matchTodo(True)
             self.mutexUnlocked= 1
 
-
+#=todo 563 (interaction) +0: allow to change doplet state by pressing corresponding key (-/+/=/!) everywhere in protected doplet; same for up/down for priority
 #todo 449 (fix) -1: too much code duplicated from matchTodo()
     def on_query_context(self, _view, _key, _op, _val, _match):
         if _key=='typetodoUp' or _key=='typetodoDown' or _key=='typetodoSet':

@@ -27,7 +27,7 @@ defaultCfg= {
 
 #todo 241 (cfg, file) +5: enable to define separate file for TODOs, to split DB credentials from file db itself
 def readCfg(_cfgPath):
-#todo 334 (cfg) +1: catch cfg errors
+#=todo 334 (cfg) +1: catch cfg errors
     reMysqlStr= "(?P<enginesql>mysql)\s+(?P<addrs>[^\s]+)\s+(?P<logins>[^\s]+)\s+(?P<passws>[^\s]+)\s+(?P<bases>[^\s]+)"
     reHttpStr= "(?P<enginehttp>http)\s+(?P<addrh>[^\s]+)\s+(?P<baseh>[^\s]+)\s*(?P<loginh>[^\s]*)\s*(?P<passwh>[^\s]*)"
     reCfg= re.compile("^\s*(?:" +reMysqlStr +"|" +reHttpStr +")\s*$")

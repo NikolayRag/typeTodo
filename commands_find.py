@@ -66,8 +66,6 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             fName= ''
             if cMatch[5]:
                 fName= cMatch[5]
-            if re.match('.*\.sublime-workspace', fName):
-                continue
             if lastFilename != fName:
                 lastFilename= fName
                 textAppend+= '\n' +fName +'\n'
@@ -154,6 +152,8 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         for cFolder in sublime.active_window().folders():
             for cWalk in os.walk(cFolder):
                 for cFile in cWalk[2]:
+                    if re.match('.*\.sublime-workspace', cFile):
+                        continue
                     fn= os.path.join(cWalk[0], cFile)
                     matches.extend(self.findTodoInFile(fn, RE_TODO_EXISTING, _id, _isTag))
 

@@ -1,3 +1,13 @@
+v1.7.1
+
+new:
+- 'Find Todo' command now accept comma-separated text for searching by tags, regexp accepted.
+- 'Find Todo' command searches for all matches.
+
+fix:
+- fix unstable consistency check
+
+
 v1.7.0
 
 new:

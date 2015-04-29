@@ -251,9 +251,11 @@ class TodoDb():
             if maybeNew>0:
                 print ('TypeTodo: \'' +self.dbA[dbN].name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
 
-        if self.lastActiveView:
-            sublime.set_timeout(lambda: self.lastActiveView.run_command('typetodo_maintain', {}), 0)
+        sublime.set_timeout(self.maintain, 0)
 
         return success
 
 
+    def maintain(self):
+        if self.lastActiveView:
+            self.lastActiveView.run_command('typetodo_maintain', {})

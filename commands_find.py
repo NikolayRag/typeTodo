@@ -12,7 +12,6 @@ else:
     from .cache import *
     from .c import *
 
-resultsView= None
 
 
 class TypetodoJumpPointCommand(sublime_plugin.TextCommand):
@@ -27,29 +26,37 @@ class TypetodoJumpPointCommand(sublime_plugin.TextCommand):
 
 
 class TypetodoJumpCommand(sublime_plugin.TextCommand):
-    def focusTodoView(self, _view, _line, _col):
+    def focusView(self, _view, _line, _col):
         sublime.active_window().focus_view(_view)
         sublime.set_timeout(lambda: _view.run_command('typetodo_jump_point', {'_line': _line, '_col': _col}), 100)
 
-#todo 566 (command) +0: make jump-to-result in todo search results window
-#=todo 578 (command) +0: prohibit editing doplets within search results; fix inconsistence
-    def listTodoViews(self, _for, _matches):
+
+    def getResultsView(self, _create= True):
         global resultsView
 
-        createNew= True
-        if resultsView:
-            resultsView.set_read_only(False)
+        wId= sublime.active_window().id()
+        if wId in resultsView:
+            return resultsView[wId]
             
-            #check for closed view
-            testSize= resultsView.size()
-            resultsView.run_command('typetodo_reg_replace', {'_regStart': resultsView.size(), '_regEnd': resultsView.size(), '_replaceWith': '\n'})
-            if testSize!= resultsView.size():
-                createNew= False
+        #check for duplicate
+        for cView in sublime.active_window().views():
+            if cView.name() == 'Doplets found':
+                resultsView[wId]= cView
+                return resultsView[wId]
 
-        if createNew:
-            resultsView= sublime.active_window().new_file()
-            resultsView.set_name('Doplets found')
-            resultsView.set_scratch(True)
+        if not _create:
+            return
+
+        resultsView[wId]= sublime.active_window().new_file()
+        resultsView[wId].set_name('Doplets found')
+        resultsView[wId].set_scratch(True)
+        return resultsView[wId]
+
+
+
+#todo 566 (command) +0: make jump-to-result in todo search results window
+    def listTodos(self, _for, _matches):
+        resView= self.getResultsView()
 
         textAppend= 'Search doplets for "' +_for +'":\n\n'
 
@@ -66,22 +73,30 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 textAppend+= '\n' +fName +'\n'
 
             if firstLine==0:
-                firstLine= resultsView.rowcol(resultsView.size())
+                firstLine= resView.rowcol(resView.size())
             lNum= str(cMatch[1]+1)
             textAppend+= ' '*(6-len(lNum)) +lNum +': ' +cMatch[3][len(cMatch[4].group('prefix')):] +'\n'
 
-        resultsView.run_command('typetodo_reg_replace', {'_regStart': resultsView.size(), '_regEnd': resultsView.size(), '_replaceWith': textAppend +'\n'})
-        resultsView.set_read_only(True)
+        resView.set_read_only(False)
+        resView.run_command('typetodo_reg_replace', {'_regStart': resView.size(), '_regEnd': resView.size(), '_replaceWith': textAppend +'\n\n'})
+        resView.set_read_only(True)
 
-        self.focusTodoView(resultsView, firstLine[0], 0)
+        self.focusView(resView, firstLine[0]+4, 0)
 
 
 
     def findTodoInViews(self, _id, _isTag= False):
+        resView= self.getResultsView(False)
+
         matches= []
         for cView in sublime.active_window().views():
-            if cView.name()=='Doplets found':
+            if resView and cView.buffer_id()==resView.buffer_id():
                 continue
+
+            cName= cView.file_name()
+            if not cName:
+                cName= '"' +cView.name() +'"'
+
             lNum= 0
             for cLine in cView.lines(sublime.Region(0,cView.size())):
                 lNum+= 1
@@ -89,12 +104,15 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 if foundIncode:
                     if not _isTag:
                         if foundIncode.group('id')==_id:
-                            matches.append((cView, lNum-1, foundIncode.end('prefix'), cView.substr(cLine), foundIncode, cView.file_name()))
+                            matches.append((cView, lNum-1, foundIncode.end('prefix'), cView.substr(cLine), foundIncode, cName))
                     else:
                         for cTag in foundIncode.group('tags').split(','):
                             for cId in _id.split(','):
-                                if re.search(cId.strip(), cTag.strip()):
-                                    matches.append((cView, lNum-1, foundIncode.end('prefix'), cView.substr(cLine), foundIncode, cView.file_name()))
+                                try:
+                                    if re.search(cId.strip(), cTag.strip()):
+                                        matches.append((cView, lNum-1, foundIncode.end('prefix'), cView.substr(cLine), foundIncode, cName))
+                                except:
+                                    None
 
         return matches
 
@@ -118,8 +136,11 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                         else:
                             for cTag in foundEntry.group('tags').split(','):
                                 for cId in _id.split(','):
-                                    if re.search(cId.strip(), cTag.strip()):
-                                        matches.append((None, lNum-1, foundEntry.end('prefix'), ln, foundEntry, _fn))
+                                    try:
+                                        if re.search(cId.strip(), cTag.strip()):
+                                            matches.append((None, lNum-1, foundEntry.end('prefix'), ln, foundEntry, _fn))
+                                    except:
+                                        None
  
         except Exception as e:
             None
@@ -140,8 +161,9 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
+#todo 577 (command) +0: entering blank string for search gives list of view's doplets
     def findNamed(self, _text= ''):
-        if _text=='':
+        if _text=='' or _text=='*':
             return
 
         isTag= not re.match('^\d+$', _text)
@@ -174,15 +196,14 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             cView= matches[0][0]
             if not cView:
                 cView= sublime.active_window().open_file(matches[0][5], sublime.TRANSIENT)
-            self.focusTodoView(cView, matches[0][1], matches[0][2])
+            self.focusView(cView, matches[0][1], matches[0][2])
 
         if len(matches)>1:
-            self.listTodoViews(_text, matches)
+            self.listTodos(_text, matches)
 
 
 
 
-#todo 577 (command) +0: entering blank string for search gives list of view's doplets
     def run(self, _edit):
         todoRegion = self.view.line(self.view.sel()[0])
 
@@ -198,7 +219,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             matches= self.findTodoInFile(fn, RE_TODO_STORED, todoIncode.group('id'))
             if matches:
                 cView= sublime.active_window().open_file(matches[0][5], sublime.TRANSIENT)
-                self.focusTodoView(cView, matches[0][1], matches[0][2]) #dont want do deal with multi-matches here, use first
+                self.focusView(cView, matches[0][1], matches[0][2]) #dont want do deal with multi-matches here, use first
 
             else:
                 sublime.message_dialog('TypeTodo error:\n\tDoplet #' +todoIncode.group('id') +' not found in project\'s .do')

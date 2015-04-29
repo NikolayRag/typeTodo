@@ -39,11 +39,13 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
         sublime.set_timeout(exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
 
+
     def on_activated(self,_view):
         db=getDB(_view)
         if db:
             db.lastActiveView= _view
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
+
 
     def on_load(self,_view):
         db=getDB(_view)
@@ -52,8 +54,21 @@ class TypetodoEvent(sublime_plugin.EventListener):
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
+    def on_close(self,_view):
+        global resultsView
+        wId= sublime.active_window().id()
+        if wId in resultsView and _view.buffer_id()==resultsView[wId].buffer_id():
+            del resultsView[wId]
+
+
     #maybe lil overheat here, but it works
     def on_selection_modified(self, _view):
+        if sublime.active_window():
+            global resultsView
+            wId= sublime.active_window().id()
+            if wId in resultsView and _view.buffer_id()==resultsView[wId].buffer_id():
+                return
+
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
             self.view= _view
@@ -62,11 +77,18 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     def on_modified(self, _view):
+        if sublime.active_window():
+            global resultsView
+            wId= sublime.active_window().id()
+            if wId in resultsView and _view.buffer_id()==resultsView[wId].buffer_id():
+                return
+
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
             self.view= _view
             self.matchTodo(True)
             self.mutexUnlocked= 1
+
 
 #=todo 563 (interaction) +0: allow to change doplet state by pressing corresponding key (-/+/=/!) everywhere in protected doplet; same for up/down for priority
 #todo 449 (fix) -1: too much code duplicated from matchTodo()
@@ -112,6 +134,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
     prevTriggerNew= None
     prevStateMod= None
+
 
     def matchTodo(self, _modified= False):
         if len(self.view.sel())!=1: #more than one cursors skipped for number of reasons
@@ -212,7 +235,10 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     def cfgStore(self, _db, _id, _state, _tags, _lvl, _fileName, _comment):
-        return _db.store(_id, _state, (_tags or '').split(','), _lvl, _fileName, _comment)
+        if _db:
+            return _db.store(_id, _state, (_tags or '').split(','), _lvl, _fileName, _comment)
+
+        sublime.message_dialog('TypeTodo error:\n\tDoplet was not saved. \n\tThis is known issue and\n\twill be fixed')
 
 #=todo 21 (general) +0: handle filename change, basically for new unsaved files
 

@@ -66,8 +66,8 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         self.view.add_regions('dopletOpenPre', regionsOpenPre, 'comment', 'dot')
         self.view.add_regions('dopletOpen', regionsOpen, 'comment', 'dot', self.codeColor)
 
-        self.view.add_regions('dopletProgressPre', regionsProgressPre, 'string', 'dot')
-        self.view.add_regions('dopletProgress', regionsProgress, 'string', 'dot', self.codeColor)
+        self.view.add_regions('dopletProgressPre', regionsProgressPre, 'constant', 'dot')
+        self.view.add_regions('dopletProgress', regionsProgress, 'constant', 'dot', self.codeColor)
 
         self.view.add_regions('dopletInconsistentPre', regionsInconsistentPre, 'invalid', 'dot')
         self.view.add_regions('dopletInconsistent', regionsInconsistent, 'invalid', 'dot', self.codeColor)

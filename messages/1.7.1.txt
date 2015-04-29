@@ -5,6 +5,5 @@ new:
 - 'Find Todo' command searches for all matches.
 
 fix:
-- in-progress highlight color changed to remove cursor slowdown
 - fix unstable consistency check
 

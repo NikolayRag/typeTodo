@@ -62,7 +62,7 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
 
 class TypetodoWwwCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        cDb= getDB(self.view)
+        cDb= WCache().getDB()
         cCfg= cDb.cfgA
         if cCfg['engine']!='http' or cCfg['addr']=='' or cCfg['base']=='':
             sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
@@ -73,7 +73,7 @@ class TypetodoWwwCommand(sublime_plugin.TextCommand):
 
 class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        cDb= getDB(self.view)
+        cDb= WCache().getDB()
         fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\tNo projects .do file,\n\tplease restart Sublime')
@@ -84,7 +84,7 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
 
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        cDb= getDB(False,'')
+        cDb= WCache().getDB(True)
         fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\tNo global .do file,\n\tplease restart Sublime')
@@ -95,7 +95,7 @@ class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
 
 class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        cDb= getDB(False,'')
+        cDb= WCache().getDB(True)
         if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings.\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tGlobal database content\n\twill be copied to new location.\n\n\tProcceed?'):
             return
 

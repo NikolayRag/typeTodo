@@ -20,12 +20,6 @@ else:
     from .c import *
 
 
-def exitHandler(): # one for all, at very exit
-    if len(sublime.windows())==0:
-        for dbI in projectDbCache:
-           projectDbCache[dbI].flush(True)
-
-
 
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
@@ -33,22 +27,22 @@ class TypetodoEvent(sublime_plugin.EventListener):
     view= None
 
     def on_deactivated(self,_view):
-        db=getDB(_view)
+        db=WCache().getDB()
         if db:
             db.pushReset()
 
-        sublime.set_timeout(exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
+        sublime.set_timeout(WCache().exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
 
 
     def on_activated(self,_view):
-        db=getDB(_view)
+        db=WCache().getDB()
         if db:
             db.lastActiveView= _view
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
     def on_load(self,_view):
-        db=getDB(_view)
+        db=WCache().getDB()
         if db:
             db.lastActiveView= _view
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
@@ -192,7 +186,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
     #create new todo in db and return string to replace original 'todo:'
     def substNew(self, _prefx, _postfx, _region):
-        todoId= self.cfgStore(getDB(self.view), 0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
+        todoId= self.cfgStore(WCache().getDB(), 0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 
         todoComment= _prefx + 'todo ' +str(todoId) +' (${1:' +self.lastCat[0] +'}) ${2:' +self.lastLvl +'}: ${0:}' +_postfx +''
         self.view.run_command('typetodo_reg_replace', {'_regStart': _region.a, '_regEnd': _region.b})
@@ -204,6 +198,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
         return todoId
 
     #store to db and, if changed state, remove comment
+#todo 690 (check) +0: since updVals passed delayed, there can be inconsistence
     updVals= None
     def substDoUpdate(self, _txt=False):
         cView= self.updVals['_view']
@@ -212,7 +207,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
         if _txt==False or _txt=='':
             _txt= self.updVals['_comment']
-        self.updVals['_id']= self.cfgStore(getDB(cView), self.updVals['_id'], self.updVals['_state'], self.updVals['_tags'], self.updVals['_lvl'] or 0, self.view.file_name(), _txt)
+        self.updVals['_id']= self.cfgStore(WCache().getDB(), self.updVals['_id'], self.updVals['_state'], self.updVals['_tags'], self.updVals['_lvl'] or 0, self.view.file_name(), _txt)
 
         if self.updVals['_wipe']:
             todoRegion= cView.full_line(self.updVals['_region'])

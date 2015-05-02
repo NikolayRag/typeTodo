@@ -75,7 +75,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 #todo 570 (tool) +0: make tool for viewing inconsistent difference
     def todoValidate(self, _id, _state, _tags, _priority, _comment):
-        db= getDB(self.view)
+        db= WCache().getDB()
         if db and (int(_id) in db.todoA):
             storedTask= db.todoA[int(_id)]
             if storedTask.state!=_state or ', '.join(storedTask.tagsA)!=_tags or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:

@@ -10,33 +10,45 @@ else:
 
 
 
-#todo 65 (code) -1: make class for db cache
+class WCache(object):
+    __instance = None
+    def __new__(cls, *args, **kwargs):
+        if not cls.__instance:
+            cls.__instance = super(WCache, cls).__new__(cls, *args, **kwargs)
+        return cls.__instance
+
+
+
+#=todo 701 (db) +0: change cache key to window.id()
 #{projectFolder: TodoDb} cache
-projectDbCache= {}
+    dbCache= {}
+
+    def getDB(self, _global= False):
+        cWin= sublime.active_window()
+        if not cWin:
+            return False
+
+        curRoot= ''
+        curName= ''
+
+        if not _global:
+            projFolders= cWin.folders()
+            if len(projFolders):
+                curRoot= projFolders[0]
+                curName= os.path.split(projFolders[0])[1]
+
+        #cache time
+        wId= cWin.id()
+        if wId not in self.dbCache:
+            self.dbCache[wId]= TodoDb(curRoot, curName)
+        else:
+            self.dbCache[wId].update(curRoot, curName)
+
+        return self.dbCache[wId]
 
 
-def getDB(_view=False, _folder=False):
-#todo 74 (db) -1: make better caching of projectDbCache
-#    if _view.TTDB: return _view.TTDB
-    curRoot= ''
-    curName= ''
 
-    if _folder!=False:
-        firstFolderA=(_folder,)
-    elif _view!=False and _view.window():
-        firstFolderA= _view.window().folders()
-    else:
-        return False
-
-    if len(firstFolderA) and (firstFolderA[0] != ''):
-        curRoot= firstFolderA[0]
-        curName= os.path.split(firstFolderA[0])[1]
-
-    #cache time
-    if curRoot not in projectDbCache:
-        projectDbCache[curRoot]= TodoDb(curRoot, curName)
-    else:
-        projectDbCache[curRoot].update(curRoot, curName)
-
-#    _view.TTDB= projectDbCache[curRoot]
-    return projectDbCache[curRoot]
+    def exitHandler(self): # one for all, at very exit
+        if len(sublime.windows())==0:
+            for dbI in self.dbCache:
+               self.dbCache[dbI].flush(True)

@@ -210,7 +210,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         #jump to .do file
         todoIncode= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
         if todoIncode:
-            cDb= getDB(self.view)
+            cDb= WCache().getDB()
             fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
             if not os.path.isfile(fn):
                 sublime.message_dialog('TypeTodo error:\n\tCannot find projects .do file')

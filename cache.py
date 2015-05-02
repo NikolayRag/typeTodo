@@ -19,7 +19,6 @@ class WCache(object):
 
 
 
-#=todo 701 (db) +0: change cache key to window.id()
 #{projectFolder: TodoDb} cache
     dbCache= {}
 

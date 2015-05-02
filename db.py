@@ -146,7 +146,7 @@ class TodoDb():
 
         _id= int(_id)
 
-#=todo 305 (general) +10: make .newId take in respect all db's at once
+#todo 305 (db) +10: make .newId take in respect all db's at once
         newId= _id or 0
         if not _id:
             for db in self.dbA:

@@ -22,7 +22,8 @@ class WCache(object):
     dbCache= {} #{window.id(): TodoDb} cache
 
 
-    def getDB(self, _global= False, _callbackFetch= None):
+    #only returns db after inited first time
+    def getDB(self, _global= False, _callbackFetch= None, _init= False):
         cWin= sublime.active_window()
         if not cWin:
             return False
@@ -36,9 +37,11 @@ class WCache(object):
                 curRoot= projFolders[0]
                 curName= os.path.split(projFolders[0])[1]
 
-        #cache time
+
         wId= cWin.id()
         if wId not in self.dbCache:
+            if not _init:
+                return False
             self.dbCache[wId]= TodoDb(curRoot, curName, _callbackFetch)
         else:
             self.dbCache[wId].update(curRoot, curName)
@@ -94,5 +97,4 @@ class WCache(object):
             return True
 
 
-
-
+wCache= WCache() #hold against GC

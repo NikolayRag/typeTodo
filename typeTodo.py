@@ -39,7 +39,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
     view= None
 
     def on_deactivated(self,_view):
-        db=WCache().getDB(False, dbMaintainance)
+        db= WCache().getDB()
         if db:
             db.pushReset()
 
@@ -47,6 +47,8 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     def on_activated(self,_view):
+        WCache().getDB(False, dbMaintainance, True) #really applies only once
+
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 

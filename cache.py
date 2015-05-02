@@ -41,7 +41,7 @@ class WCache(object):
         #cache time
         wId= cWin.id()
         if wId not in self.dbCache:
-            self.dbCache[wId]= TodoDb(curRoot, curName)
+            self.dbCache[wId]= TodoDb(curRoot, curName, self.dbMaintainance)
         else:
             self.dbCache[wId].update(curRoot, curName)
 
@@ -94,3 +94,18 @@ class WCache(object):
             if _wipe:
                 del self.resultsViewCache[wId]
             return True
+
+
+
+
+
+#todo 820 (consistency) +0: db maintainance callback should be moved somewhere out
+    def dbMaintainance(self):
+        cWnd= sublime.active_window()
+        if not cWnd: return
+
+        cView= cWnd.active_view()
+        if not cView: return
+
+        cView.run_command('typetodo_maintain', {})
+

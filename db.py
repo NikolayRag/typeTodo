@@ -50,13 +50,15 @@ class TodoDb():
     dbA= {}
     todoA= None
 
+    callbackFetch= None
 
-    def __init__(self, _root, _name):
+    def __init__(self, _root, _name, _callback= False):
         self.dbA= {}
 
         self.timerFlush = Timer(0, None) #dummy
         self.timerReset = Timer(0, None) #dummy
 
+        self.callbackFetch= _callback
         self.todoA= {}
         self.update(_root, _name)
         self.pushReset()
@@ -249,17 +251,7 @@ class TodoDb():
             if maybeNew>0:
                 print ('TypeTodo: \'' +self.dbA[dbN].name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
 
-        sublime.set_timeout(self.maintain, 0)
+        if self.callbackFetch:
+            sublime.set_timeout(self.callbackFetch, 0)
 
         return success
-
-
-    def maintain(self):
-        cWnd= sublime.active_window()
-        if not cWnd: return
-
-        cView= cWnd.active_view()
-        if not cView: return
-
-        cView.run_command('typetodo_maintain', {})
-

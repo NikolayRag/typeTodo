@@ -19,11 +19,10 @@ class WCache(object):
 
 
 
-#{projectFolder: TodoDb} cache
-    dbCache= {}
+    dbCache= {} #{window.id(): TodoDb} cache
 
 
-    def getDB(self, _global= False):
+    def getDB(self, _global= False, _callbackFetch= None):
         cWin= sublime.active_window()
         if not cWin:
             return False
@@ -40,7 +39,7 @@ class WCache(object):
         #cache time
         wId= cWin.id()
         if wId not in self.dbCache:
-            self.dbCache[wId]= TodoDb(curRoot, curName, self.dbMaintainance)
+            self.dbCache[wId]= TodoDb(curRoot, curName, _callbackFetch)
         else:
             self.dbCache[wId].update(curRoot, curName)
 
@@ -56,7 +55,7 @@ class WCache(object):
 
 #find command viewport
     
-    resultsViewCache= {}
+    resultsViewCache= {} #{window.id(): view} cache
 
 
     def getResultsView(self, _create= True):
@@ -96,15 +95,4 @@ class WCache(object):
 
 
 
-
-
-#todo 820 (consistency) +0: db maintainance callback should be moved somewhere out
-    def dbMaintainance(self):
-        cWnd= sublime.active_window()
-        if not cWnd: return
-
-        cView= cWnd.active_view()
-        if not cView: return
-
-        cView.run_command('typetodo_maintain', {})
 

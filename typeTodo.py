@@ -21,13 +21,25 @@ else:
 
 
 
+#callback at end of fetching DB
+def dbMaintainance():
+    cWnd= sublime.active_window()
+    if not cWnd: return
+
+    cView= cWnd.active_view()
+    if not cView: return
+
+    cView.run_command('typetodo_maintain', {})
+
+
+
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
 #todo 236 (db, config) +0: reset db after editing .do
     view= None
 
     def on_deactivated(self,_view):
-        db=WCache().getDB()
+        db=WCache().getDB(False, dbMaintainance)
         if db:
             db.pushReset()
 

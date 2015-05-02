@@ -52,13 +52,14 @@ class TodoDb():
 
     callbackFetch= None
 
-    def __init__(self, _root, _name, _callback= False):
+    def __init__(self, _root, _name, _callback= None):
         self.dbA= {}
 
         self.timerFlush = Timer(0, None) #dummy
         self.timerReset = Timer(0, None) #dummy
 
-        self.callbackFetch= _callback
+        if _callback:
+            self.callbackFetch= _callback
         self.todoA= {}
         self.update(_root, _name)
         self.pushReset()

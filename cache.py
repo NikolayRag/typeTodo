@@ -23,6 +23,7 @@ class WCache(object):
 #{projectFolder: TodoDb} cache
     dbCache= {}
 
+
     def getDB(self, _global= False):
         cWin= sublime.active_window()
         if not cWin:
@@ -52,3 +53,44 @@ class WCache(object):
         if len(sublime.windows())==0:
             for dbI in self.dbCache:
                self.dbCache[dbI].flush(True)
+
+
+#find command viewport
+    
+    resultsViewCache= {}
+
+
+    def getResultsView(self, _create= True):
+        cWin= sublime.active_window()
+        if not cWin:
+            return False
+
+        wId= cWin.id()
+        if wId in self.resultsViewCache:
+            return self.resultsViewCache[wId]
+            
+        #check for duplicate
+        for cView in cWin.views():
+            if cView.name() == 'Doplets found':
+                self.resultsViewCache[wId]= cView
+                return self.resultsViewCache[wId]
+
+        if not _create:
+            return
+
+        self.resultsViewCache[wId]= cWin.new_file()
+        self.resultsViewCache[wId].set_name('Doplets found')
+        self.resultsViewCache[wId].set_scratch(True)
+        return self.resultsViewCache[wId]
+
+
+    def checkResultsView(self, _viewId, _wipe=False):
+        cWin= sublime.active_window()
+        if not cWin:
+            return
+
+        wId= sublime.active_window().id()
+        if wId in self.resultsViewCache and _viewId==self.resultsViewCache[wId].buffer_id():
+            if _wipe:
+                del self.resultsViewCache[wId]
+            return True

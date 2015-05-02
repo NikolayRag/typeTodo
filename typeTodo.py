@@ -35,33 +35,21 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     def on_activated(self,_view):
-        db=WCache().getDB()
-        if db:
-            db.lastActiveView= _view
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
     def on_load(self,_view):
-        db=WCache().getDB()
-        if db:
-            db.lastActiveView= _view
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
     def on_close(self,_view):
-        global resultsView
-        wId= sublime.active_window().id()
-        if wId in resultsView and _view.buffer_id()==resultsView[wId].buffer_id():
-            del resultsView[wId]
+            WCache().checkResultsView(_view.buffer_id(), True)
 
 
     #maybe lil overheat here, but it works
     def on_selection_modified(self, _view):
-        if sublime.active_window():
-            global resultsView
-            wId= sublime.active_window().id()
-            if wId in resultsView and _view.buffer_id()==resultsView[wId].buffer_id():
-                return
+        if WCache().checkResultsView(_view.buffer_id()):
+            return
 
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
@@ -71,12 +59,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     def on_modified(self, _view):
-        if sublime.active_window():
-            global resultsView
-            wId= sublime.active_window().id()
-            if wId in resultsView and _view.buffer_id()==resultsView[wId].buffer_id():
-                return
-
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
             self.view= _view

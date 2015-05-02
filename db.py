@@ -50,8 +50,6 @@ class TodoDb():
     dbA= {}
     todoA= None
 
-    lastActiveView= None #used for maintainance at DB fetch()
-
 
     def __init__(self, _root, _name):
         self.dbA= {}
@@ -257,5 +255,11 @@ class TodoDb():
 
 
     def maintain(self):
-        if self.lastActiveView:
-            self.lastActiveView.run_command('typetodo_maintain', {})
+        cWnd= sublime.active_window()
+        if not cWnd: return
+
+        cView= cWnd.active_view()
+        if not cView: return
+
+        cView.run_command('typetodo_maintain', {})
+

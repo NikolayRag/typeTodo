@@ -31,32 +31,9 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         sublime.set_timeout(lambda: _view.run_command('typetodo_jump_point', {'_line': _line, '_col': _col}), 100)
 
 
-    def getResultsView(self, _create= True):
-        global resultsView
-
-        wId= sublime.active_window().id()
-        if wId in resultsView:
-            return resultsView[wId]
-            
-        #check for duplicate
-        for cView in sublime.active_window().views():
-            if cView.name() == 'Doplets found':
-                resultsView[wId]= cView
-                return resultsView[wId]
-
-        if not _create:
-            return
-
-        resultsView[wId]= sublime.active_window().new_file()
-        resultsView[wId].set_name('Doplets found')
-        resultsView[wId].set_scratch(True)
-        return resultsView[wId]
-
-
-
 #todo 566 (command) +0: make jump-to-result in todo search results window
     def listTodos(self, _for, _matches):
-        resView= self.getResultsView()
+        resView= WCache().getResultsView()
 
         textAppend= 'Search doplets for "' +_for +'":\n\n'
 
@@ -84,7 +61,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
     def findTodoInViews(self, _id, _isTag= False):
-        resView= self.getResultsView(False)
+        resView= WCache().getResultsView(False)
 
         matches= []
         for cView in sublime.active_window().views():

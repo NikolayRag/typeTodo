@@ -63,18 +63,18 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
 class TypetodoWwwCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= WCache().getDB()
-        cCfg= cDb.cfgA
-        if cCfg['engine']!='http' or cCfg['addr']=='' or cCfg['base']=='':
+        cCfg= cDb.config.settings[0]
+        if cCfg.engine!='http' or cCfg.addr=='' or cCfg.base=='':
             sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
             return
-        webbrowser.open_new_tab('http://' +cCfg['addr'] +'/' +cCfg['base'] +'/' +cDb.projectName)
+        webbrowser.open_new_tab('http://' +cCfg.addr +'/' +cCfg.base +'/' +cDb.config.projectName)
 
 
 
 class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= WCache().getDB()
-        fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
+        fn= cDb.config.settings[0].file
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\tNo projects .do file,\n\tplease restart Sublime')
             return
@@ -84,8 +84,8 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
 
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        cDb= WCache().getDB(True)
-        fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
+        cDb= WCache().getDB(True, None, True)
+        fn= cDb.config.settings[0].file
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\tNo global .do file,\n\tplease restart Sublime')
             return

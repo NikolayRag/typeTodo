@@ -122,23 +122,15 @@ class TodoDbSql():
     db_pid= 0
     db_uid= 0
 
-    dbAddr= ''
-    dbUname= ''
-    dbPass= ''
-    dbScheme= ''
+    settings= None
+    parentDB= False
 
     dbConn= None
 
-    parentDB= False
-
     migrate=False
 
-    def __init__(self, _cfg, _parentDB):
-        self.dbAddr= _cfg['addr']
-        self.dbUname= _cfg['login']
-        self.dbPass= _cfg['passw']
-        self.dbScheme= _cfg['base']
-
+    def __init__(self, _parentDB, _settings):
+        self.settings= _settings
         self.parentDB= _parentDB
 
 
@@ -147,7 +139,7 @@ class TodoDbSql():
             return True
 
         try:
-            self.dbConn = pymysql.connect(host=self.dbAddr, port=3306, user=self.dbUname, passwd=self.dbPass, db=self.dbScheme, use_unicode=True, charset="utf8")
+            self.dbConn = pymysql.connect(host=self.settings.addr, port=3306, user=self.settings.login, passwd=self.settings.passw, db=self.settings.base, use_unicode=True, charset="utf8")
             self.dbConn.autocommit(True)
         except Exception as e:
 #todo 35 (sql) +0: deal with connection errors: host, log, scheme
@@ -191,14 +183,14 @@ class TodoDbSql():
 
         cur.execute(
             "INSERT INTO projects (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-            self.parentDB.projectName
+            self.settings.projectName
         )
         self.db_pid= self.dbConn._result.insert_id
 
 
         cur.execute(
             "INSERT INTO users (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-            self.parentDB.projUser
+            self.settings.projectUser
         )
         self.db_uid= self.dbConn._result.insert_id
 

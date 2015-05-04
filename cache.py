@@ -23,28 +23,20 @@ class WCache(object):
 
 
     #only returns db after inited first time
-    def getDB(self, _global= False, _callbackFetch= None, _init= False):
+    def getDB(self, _forceGlobal= False, _callbackFetch= None, _init= False):
         cWin= sublime.active_window()
         if not cWin:
             return False
 
-        curRoot= ''
-        curName= ''
-
-        if not _global:
-            projFolders= cWin.folders()
-            if len(projFolders):
-                curRoot= projFolders[0]
-                curName= os.path.split(projFolders[0])[1]
-
-
         wId= cWin.id()
+        projFolders= cWin.folders()
+        if _forceGlobal or not len(projFolders):
+            wId= 0
+
         if wId not in self.dbCache:
             if not _init:
                 return False
-            self.dbCache[wId]= TodoDb(curRoot, curName, _callbackFetch)
-        else:
-            self.dbCache[wId].update(curRoot, curName)
+            self.dbCache[wId]= TodoDb(_callbackFetch, Config(_forceGlobal))
 
         return self.dbCache[wId]
 
@@ -54,6 +46,7 @@ class WCache(object):
         if len(sublime.windows())==0:
             for dbI in self.dbCache:
                self.dbCache[dbI].flush(True)
+
 
 
 #find command viewport

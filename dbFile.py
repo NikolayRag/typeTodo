@@ -13,21 +13,19 @@ class TodoDbFile():
     name= 'File'
 
     dbOk= True
-    cfgString= ''
 
     #db related
     reTodoParse= re.compile('^([\+\-\!\=])(.*) (\d+): ([+-]\d+) (.+) (\d\d/\d\d/\d\d \d\d:\d\d) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d)$')
     reCommentParse= re.compile('^\t?(.*)$')
 
-    projectFname= ''
+    settings= None
+    setId= 0
     maxId= 0
 
     parentDB= False
 
-    def __init__(self, _cfg, _parentDB):
-        self.projectFname= _cfg['file']
-        self.cfgString= _cfg['header']
-
+    def __init__(self, _parentDB, _settings):
+        self.settings= _settings
         self.parentDB= _parentDB
 
 
@@ -41,8 +39,8 @@ class TodoDbFile():
             return False
 
         try:
-            with codecs.open(self.projectFname, 'w+', 'UTF-8') as f:
-                f.write(self.cfgString)
+            with codecs.open(self.settings.file, 'w+', 'UTF-8') as f:
+                f.write(self.settings.head)
                 f.write("\n")
 
                 for iT in self.parentDB.todoA:
@@ -81,7 +79,7 @@ class TodoDbFile():
     def fetch(self, _id=False):
         try:
             todoA= {}
-            with codecs.open(self.projectFname, 'r', 'UTF-8') as f:
+            with codecs.open(self.settings.file, 'r', 'UTF-8') as f:
                 ctxTodo= None
                 for ln in f:
                     ln= ln.splitlines()[0]
@@ -97,7 +95,7 @@ class TodoDbFile():
                         gmtTime= time.mktime (time.strptime(matchParse.group(9), '%y/%m/%d %H:%M'))
 
                         if __id not in todoA:
-                            todoA[__id]= TodoTask(__id, self.parentDB.projectName, matchParse.group(5), gmtCtime, self.parentDB)
+                            todoA[__id]= TodoTask(__id, self.settings.projectName, matchParse.group(5), gmtCtime, self.parentDB)
                         ctxTodo= matchParse
 
                         self.maxId= max(self.maxId, __id)

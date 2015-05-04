@@ -33,51 +33,36 @@ else:
      thus making them synchronised.
 '''
 class TodoDb():
-    projUser= '*Anon*'
-    projectRoot= ''
-    projectName= ''
-
-#todo 67 (cfg) +0: move cfg to class
 #=todo 333 (cfg) +0: make .do read-save cycle more crisp and time-compact
-    cfgA= None
+    config= None
 
     maxflushRetries= 3
     flushTimeout= 30 #seconds
     timerFlush= None
-    timerReset= None
+    resetPending= False
     dirty= False
 
-    dbA= {}
+    dbA= None
     todoA= None
 
     callbackFetch= None
 
-    def __init__(self, _root, _name, _callback= None):
+    def __init__(self, _callback, _cfg):
         self.dbA= {}
+        self.todoA= {}
 
         self.timerFlush = Timer(0, None) #dummy
-        self.timerReset = Timer(0, None) #dummy
 
-        if _callback:
-            self.callbackFetch= _callback
-        self.todoA= {}
-        self.update(_root, _name)
+        self.callbackFetch= _callback
+
+        self.config= _cfg
+
         self.pushReset()
         
 
-    def update(self, _root, _name):
-        if 'USERNAME' in os.environ: self.projUser= os.environ['USERNAME']
-
-        self.projectName= _name
-        self.projectRoot= _root
-        if _root == '':
-            self.projectRoot= defaultCfg['path']
-
-
-    def pushReset(self, _delay=1): #leave 1 to remove spam
-        self.timerReset.cancel()
-        self.timerReset= Timer(_delay, self.reset)
-        self.timerReset.start()
+    def pushReset(self, _delay=1000): #leave 1 to remove spam
+        self.resetPending= True
+        sublime.set_timeout(self.reset, _delay)
 
 #Macro:
 #    - get new cfg
@@ -85,48 +70,31 @@ class TodoDb():
 #    - fetch using new
 #    - flush using new
 
-    def reset(self, _force=False):
-        cfgPath= os.path.join(self.projectRoot, self.projectName +'.do')
+    def reset(self):
+        if not self.resetPending:
+            return
+        self.resetPending= False
 
 #todo 149 (cfg) +5: make use of more than one (last) cfg string
-        cfgFound= False
-        if not _force: #else skip directly to global init
-            cfgFound= readCfg(cfgPath)
 
-
-        if not cfgFound: 
-            cfgFound= initGlobalDo()
-
-            if not cfgFound:
-                return
-
-            if self.projectName != '': #save new named project .do
-                self.todoA.clear() #old tasks are trash
-                
-                cfgFound['file']= cfgPath
-                with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
-                  f.write(cfgFound['header'])
-
-        self.flush(True)
-
-        if cfgFound == self.cfgA: #no changes
+        if not self.config.update() and len(self.dbA):
+            self.flush(True)
             return
 
         print ('TypeTodo: reset db')
-        self.cfgA= cfgFound
 
 #todo 170 (cfg) +0: build list of cfg's to pass to db.reset()
         dbId= 0
         self.dbA.clear() #new db array
 
         if True:
-            self.dbA[dbId]= TodoDbFile(cfgFound, self)
+            self.dbA[dbId]= TodoDbFile(self, self.config.settings[0])
             dbId+= 1
-        if cfgFound['engine']== 'mysql':
-            self.dbA[dbId]= TodoDbSql(cfgFound, self)
+        if self.config.settings[0].engine== 'mysql':
+            self.dbA[dbId]= TodoDbSql(self, self.config.settings[0])
             dbId+= 1
-        if cfgFound['engine']== 'http':
-            self.dbA[dbId]= TodoDbHttp(cfgFound, self)
+        if self.config.settings[0].engine== 'http':
+            self.dbA[dbId]= TodoDbHttp(self, self.config.settings[0])
             dbId+= 1
 
         for iT in self.todoA: #set all unsaved
@@ -139,9 +107,9 @@ class TodoDb():
     def store(self, _id, _state, _tags, _lvl, _fileName, _comment):
         self.timerFlush.cancel()
 
-        if _fileName and self.projectRoot:
-            if (os.path.splitdrive(_fileName)[0]==os.path.splitdrive(self.projectRoot)[0]):
-                _fileName= os.path.relpath(_fileName, self.projectRoot)
+        if _fileName and self.config.projectRoot:
+            if (os.path.splitdrive(_fileName)[0]==os.path.splitdrive(self.config.projectRoot)[0]):
+                _fileName= os.path.relpath(_fileName, self.config.projectRoot)
                 
         _fileName= _fileName or ''
 
@@ -161,11 +129,11 @@ class TodoDb():
 
 #=todo 71 (db) -1: instantly remove blank new task from cache before saving if set to +
         if newId not in self.todoA: #for new and repairing tasks
-            self.todoA[newId]= TodoTask(newId, self.projectName, self.projUser, strStamp, self)
+            self.todoA[newId]= TodoTask(newId, self.config.projectName, self.config.projectUser, strStamp, self)
 
         if _id:
             self.dirty= True
-            self.todoA[newId].set(_state, _tags, _lvl, _fileName, _comment, self.projUser, strStamp)
+            self.todoA[newId].set(_state, _tags, _lvl, _fileName, _comment, self.config.projectUser, strStamp)
 
         self.flushRetries= self.maxflushRetries
         self.timerFlush= Timer(self.flushTimeout, self.flush)
@@ -176,8 +144,6 @@ class TodoDb():
 
     def flush(self, _runOnce=False):
         self.timerFlush.cancel()
-        if not self.cfgA:
-            return
 
         flushOk= True
         for dbN in self.dbA:

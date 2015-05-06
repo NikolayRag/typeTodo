@@ -47,7 +47,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     def on_activated(self,_view):
-        WCache().getDB(False, dbMaintainance, True) #really applies only once
+        WCache().getDB(True, dbMaintainance) #really applies only once
 
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 

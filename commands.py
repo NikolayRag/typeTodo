@@ -74,7 +74,7 @@ class TypetodoWwwCommand(sublime_plugin.TextCommand):
 class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= WCache().getDB()
-        fn= cDb.config.settings[0].file
+        fn= cDb.config.cfgFile
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\tNo projects .do file,\n\tplease restart Sublime')
             return
@@ -84,8 +84,8 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
 
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        cDb= WCache().getDB(True, None, True)
-        fn= cDb.config.settings[0].file
+        cCfg= Config(True)
+        fn= cCfg.cfgFile
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\tNo global .do file,\n\tplease restart Sublime')
             return

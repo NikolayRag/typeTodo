@@ -29,17 +29,18 @@ class Setting:
 
 
 class Config():
+    sublimeRoot= ''
+    cfgFile= ''
 
+    cWnd= None
     forceGlobal= False
-    defaultHttpApi= 'typetodo.com',
+    defaultHttpApi= 'typetodo.com'
 
     defaultHeader= "# uncomment and configure. LAST matched line matters:\n"\
         +"# mysql 127.0.0.1 username password scheme\n"\
         +"# http 127.0.0.1 repository [username password]\n"
 
 
-    sublimePath= ''
-    projectHeader= None
 
     projectUser= '**Anon'
     projectRoot= ''
@@ -48,50 +49,72 @@ class Config():
 
     settings= None
 
+    projectHeader= None
     isUpdated= True
 
     #if inited global, would always be it
     def __init__(self, _forceGlobal=False):
         self.forceGlobal= _forceGlobal
 
-        self.sublimePath= os.path.join(sublime.packages_path(), 'User')
+        self.cWnd= sublime.active_window()
+        self.sublimeRoot= os.path.join(sublime.packages_path(), 'User')
         self.settings= {}
 
-        self.update()
+        self.updateFName()
 
 
 
     def update(self):
-        if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
-
-        self.projectRoot= self.sublimePath
-        self.projectName= ''
-
-        if not self.forceGlobal:
-            projFolders= sublime.active_window().folders()
-            if len(projFolders):
-                self.projectRoot= projFolders[0]
-                self.projectName= os.path.split(projFolders[0])[1]
-
+        self.updateFName()
 #=todo 860 (cfg) +0: handle error
-        doFile= os.path.join(self.projectRoot, self.projectName +'.do')
-        if not self.readCfg(doFile):
-            if self.initGlobalDo() and not self.forceGlobal and len(projFolders):
+        print('TT: opening ' +self.cfgFile +' for window ' +str(self.cWnd.id()))
+        if not self.readCfg():
+            print('TT: error no cfg')
+            if self.initGlobalDo() and not self.forceGlobal and self.projectName!='':
 #=todo 861 (cfg) +0: save cfg to project
-                None
+                print('TT: error no global')
 
         wasUpdated= self.isUpdated
         self.isUpdated= False
         return wasUpdated
 
 
+    lastProjFolder= ''
+
+    def isWindowExists(self):
+        if sys.version<'3':
+            if self.cWnd.id():
+                return True
+        else:
+            if self.cWnd.project_data():
+                return True
+
+    def updateFName(self):
+        if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
+
+        self.projectRoot= self.sublimeRoot
+        self.projectName= ''
+
+        if not self.forceGlobal:
+            if self.isWindowExists():
+                self.lastProjFolder= self.cWnd.folders() #this is delayed for secondary windows, but works here
+                   
+            projFolders= self.lastProjFolder
+            print ('TTF: ' +str(projFolders))
+
+            if len(projFolders):
+                self.projectRoot= projFolders[0]
+                self.projectName= os.path.split(projFolders[0])[1]
+
+        self.cfgFile= os.path.join(self.projectRoot, self.projectName +'.do')
+
 
 #todo 241 (cfg, file) +5: enable to define separate file for TODOs, to split DB credentials from file db itself
 #=todo 334 (cfg) +1: catch cfg errors
 
-    def readCfg(self, _doFile):
+    def readCfg(self):
         try:
-            f= codecs.open(_doFile, 'r', 'UTF-8')
+            f= codecs.open(self.cfgFile, 'r', 'UTF-8')
         except:
             f= False
         if not f:
@@ -129,7 +152,7 @@ class Config():
                     cSettings.passw=    curCfg['passwh']
                     cSettings.base=     curCfg['baseh']
 
-        cSettings.file= _doFile
+        cSettings.file= self.cfgFile
         cSettings.head= headerCollect
 
         if self.projectHeader != headerCollect:
@@ -139,8 +162,6 @@ class Config():
         self.settings[0]= cSettings
         return True
 
-#   'header'
-#   'file'
 
 #=todo 351 (cfg) +0: allow skip global configure for HTTP at first start
 
@@ -168,7 +189,7 @@ class Config():
             cSettings.addr= self.defaultHttpApi
             cSettings.base= cRep
 
-            headerCollect= defaultHeader +cSettings.engine +" " +cSettings.addr +" " +cSettings.base +"\n"
+            headerCollect= self.defaultHeader +cSettings.engine +" " +cSettings.addr +" " +cSettings.base +"\n"
 
             sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
 
@@ -180,7 +201,7 @@ class Config():
         self.settings[0]= cSettings
 
         try:
-            cfgFile= os.path.join(self.sublimePath, '.do')
+            cfgFile= os.path.join(self.sublimeRoot, '.do')
             with codecs.open(cfgFile, 'w+', 'UTF-8') as f:
                 f.write(self.projectHeader)
         except:

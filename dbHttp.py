@@ -191,6 +191,7 @@ class TodoDbHttp():
         self.reserveEvent.set()
 
 
+#todo 957 (db, http) +0: fetch http by one id
     def fetch(self, _id=False):
         postData= {}
         postData['rep']= self.settings.base

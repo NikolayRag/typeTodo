@@ -295,6 +295,7 @@ class TodoDbSql():
         return _id
 
 
+#todo 956 (db, sql) +0: fetch sql by one id
     def fetch(self, _id=False):
         if not self.reconnect():
             return False

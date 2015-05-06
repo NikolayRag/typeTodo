@@ -80,6 +80,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         db= WCache().getDB()
         if db and (int(_id) in db.todoA):
             storedTask= db.todoA[int(_id)]
+#todo 845 (fix) +0: compare tags more properly
             if storedTask.state!=_state or ', '.join(storedTask.tagsA)!=_tags or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
                 return False
         return True

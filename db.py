@@ -50,11 +50,9 @@ class TodoDb():
     def __init__(self, _callback, _cfg):
         self.dbA= {}
         self.todoA= {}
-
         self.timerFlush = Timer(0, None) #dummy
 
         self.callbackFetch= _callback
-
         self.config= _cfg
 
         self.pushReset()
@@ -174,7 +172,7 @@ class TodoDb():
 #   1. roll over all db's
 #   2. fetch unbinded task lists
 #   3. compare if new or updated or outdated
-#       3.1. join int working list
+#       3.1. join into working list
 #       3.2. reset other db's 'saved' flag
 
     def fetch(self, _id=False):

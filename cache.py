@@ -17,7 +17,6 @@ class WCache(object):
             cls.__instance = super(WCache, cls).__new__(cls, *args, **kwargs)
         return cls.__instance
 
-#todo 990 (xxx) +0: wat
 
     dbCache= {} #{window.id(): TodoDb} cache
 

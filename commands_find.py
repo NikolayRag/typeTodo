@@ -124,13 +124,20 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
+    def isKnownFileExt(self, _fn):
+        fName, fExt= os.path.splitext(_fn)
+        for cExt in SKIP_SEARCH_FILES:
+            if cExt==fExt:
+                return True
+
     def findTodoInProject(self, _id, _isTag= False):
         matches= []
         for cFolder in sublime.active_window().folders():
             for cWalk in os.walk(cFolder):
                 for cFile in cWalk[2]:
-                    if re.match('.*\.sublime-workspace', cFile):
+                    if self.isKnownFileExt(cFile):
                         continue
+                    print(cFile)
                     fn= os.path.join(cWalk[0], cFile)
                     matches.extend(self.findTodoInFile(fn, RE_TODO_EXISTING, _id, _isTag))
 

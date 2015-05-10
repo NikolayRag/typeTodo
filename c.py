@@ -21,3 +21,5 @@ RE_TODO_STORED= re.compile('^(?P<prefix>.)(?P<tags>.*) (?P<id>\d+): (?P<priority
 re_mysql_str= "(?P<enginesql>mysql)\s+(?P<addrs>[^\s]+)\s+(?P<logins>[^\s]+)\s+(?P<passws>[^\s]+)\s+(?P<bases>[^\s]+)"
 re_http_str= "(?P<enginehttp>http)\s+(?P<addrh>[^\s]+)\s+(?P<baseh>[^\s]+)\s*(?P<loginh>[^\s]*)\s*(?P<passwh>[^\s]*)"
 RE_CFG= re.compile("^\s*(?:" +re_mysql_str +"|" +re_http_str +")\s*$")
+
+SKIP_SEARCH_FILES= ['', '.sublime-workspace', '.pyc', '.exe', '.dll', '.zip', '.gz', '.jpg', '.jpeg', '.gif', '.png', '.mov', '.avi', '.qt']

@@ -24,8 +24,8 @@ class TodoDbFile():
 
     parentDB= False
 
-    def __init__(self, _parentDB, _settings):
-        self.settings= _settings
+    def __init__(self, _parentDB, _settingsId):
+        self.settings= _parentDB.config.settings[_settingsId]
         self.parentDB= _parentDB
 
 
@@ -33,10 +33,10 @@ class TodoDbFile():
 
 
     def flush(self, _dbN):
-        if not self.dbOk:
-            print("TypeTodo: 'file' db was not properly inited. Saving disabled.")
+#        if not self.dbOk:
+#            print("TypeTodo: 'file' db was not properly inited. Saving disabled.")
 
-            return False
+#            return False
 
         try:
             with codecs.open(self.settings.file, 'w+', 'UTF-8') as f:
@@ -95,7 +95,7 @@ class TodoDbFile():
                         gmtTime= time.mktime (time.strptime(matchParse.group(9), '%y/%m/%d %H:%M'))
 
                         if __id not in todoA:
-                            todoA[__id]= TodoTask(__id, self.settings.projectName, matchParse.group(5), gmtCtime, self.parentDB)
+                            todoA[__id]= TodoTask(__id, self.parentDB.config.projectName, matchParse.group(5), gmtCtime, self.parentDB)
                         ctxTodo= matchParse
 
                         self.maxId= max(self.maxId, __id)
@@ -111,7 +111,7 @@ class TodoDbFile():
 
         except Exception as e:
             print("TypeTodo: 'file' db experienced error while fetching")
-            print(e)
+#            print(e)
 
             self.dbOk= False
             return False

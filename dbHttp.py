@@ -63,8 +63,8 @@ class TodoDbHttp():
     reserveEvent= None
     timerReserveId= None
 
-    def __init__(self, _parentDB, _settings):
-        self.settings= _settings
+    def __init__(self, _parentDB, _settingsId):
+        self.settings= _parentDB.config.settings[_settingsId]
         self.parentDB= _parentDB
 
         self.reservedId= 0
@@ -104,13 +104,13 @@ class TodoDbHttp():
 
         postTodoA['ids']= ','.join(postList)
         postData['todoa']= json.dumps(postTodoA)
-        postData['logName']= urllib2.quote(self.settings.projectUser.encode('utf-8'))
+        postData['logName']= urllib2.quote(self.parentDB.config.projectUser.encode('utf-8'))
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.passw)
 
         postData['rep']= self.settings.base
-        postData['project']= urllib2.quote(self.settings.projectName.encode('utf-8'))
+        postData['project']= urllib2.quote(self.parentDB.config.projectName.encode('utf-8'))
 
         req = urllib2.Request('http://' +self.settings.addr +'/?=flush', str.encode(urllib.urlencode(postData)))
         try:
@@ -167,13 +167,13 @@ class TodoDbHttp():
 
     def newIdGet(self):
         postData= {}
-        postData['logName']= urllib2.quote(self.settings.projectUser.encode('utf-8'))
+        postData['logName']= urllib2.quote(self.parentDB.config.projectUser.encode('utf-8'))
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.passw)
 
         postData['rep']= self.settings.base
-        postData['project']= urllib2.quote(self.settings.projectName.encode('utf-8'))
+        postData['project']= urllib2.quote(self.parentDB.config.projectName.encode('utf-8'))
 
         req = urllib2.Request('http://' +self.settings.addr +'/?=newid', str.encode(urllib.urlencode(postData)))
         try:
@@ -195,7 +195,7 @@ class TodoDbHttp():
     def fetch(self, _id=False):
         postData= {}
         postData['rep']= self.settings.base
-        postData['project']= urllib2.quote(self.settings.projectName.encode('utf-8'))
+        postData['project']= urllib2.quote(self.parentDB.config.projectName.encode('utf-8'))
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.passw)
@@ -213,7 +213,7 @@ class TodoDbHttp():
 
 #todo 143 (multidb) -1: http; handle cStamp on fetch
             if __id not in todoA:
-                todoA[__id]= TodoTask(__id, self.settings.projectName, task['nameuser'], int(task['ustamp']), self.parentDB)
+                todoA[__id]= TodoTask(__id, self.parentDB.config.projectName, task['nameuser'], int(task['ustamp']), self.parentDB)
 
                 fetchedStateName= task['namestate']
 #todo 257 (http) +0: remove True and False states after migration

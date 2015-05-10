@@ -129,8 +129,8 @@ class TodoDbSql():
 
     migrate=False
 
-    def __init__(self, _parentDB, _settings):
-        self.settings= _settings
+    def __init__(self, _parentDB, _settingsId):
+        self.settings= _parentDB.config.settings[_settingsId]
         self.parentDB= _parentDB
 
 
@@ -183,14 +183,14 @@ class TodoDbSql():
 
         cur.execute(
             "INSERT INTO projects (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-            self.settings.projectName
+            self.parentDB.config.projectName
         )
         self.db_pid= self.dbConn._result.insert_id
 
 
         cur.execute(
             "INSERT INTO users (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-            self.settings.projectUser
+            self.parentDB.config.projectUser
         )
         self.db_uid= self.dbConn._result.insert_id
 

@@ -86,13 +86,13 @@ class TodoDb():
         self.dbA.clear() #new db array
 
         if True:
-            self.dbA[dbId]= TodoDbFile(self, self.config.settings[0])
+            self.dbA[dbId]= TodoDbFile(self, 0)
             dbId+= 1
         if self.config.settings[0].engine== 'mysql':
-            self.dbA[dbId]= TodoDbSql(self, self.config.settings[0])
+            self.dbA[dbId]= TodoDbSql(self, 0)
             dbId+= 1
         if self.config.settings[0].engine== 'http':
-            self.dbA[dbId]= TodoDbHttp(self, self.config.settings[0])
+            self.dbA[dbId]= TodoDbHttp(self, 0)
             dbId+= 1
 
         for iT in self.todoA: #set all unsaved

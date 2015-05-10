@@ -73,8 +73,7 @@ class TypetodoWwwCommand(sublime_plugin.TextCommand):
 
 class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        cDb= WCache().getDB()
-        fn= cDb.config.cfgFile
+        fn= WCache().getDB().config.settings[0].file
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\tNo projects .do file,\n\tplease restart Sublime')
             return
@@ -84,8 +83,7 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
 
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        cCfg= Config(True)
-        fn= cCfg.cfgFile
+        fn= Config(True).settings[0].file
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\tNo global .do file,\n\tplease restart Sublime')
             return
@@ -94,12 +92,15 @@ class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
 
 
 class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
-    def run(self, _edit):
-        cDb= WCache().getDB(True)
-        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings.\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tGlobal database content\n\twill be copied to new location.\n\n\tProcceed?'):
-            return
+    cDb= None
 
-        if not initGlobalDo(True):
+    def resetCB(self):
+        if not self.cDb:
+            return
+        cDb= self.cDb
+        self.cDb= None
+
+        if not cDb.config.initGlobalDo(True):
             sublime.message_dialog('TypeTodo error:\n\tCannot reset global .do file,\n\tall remain intact.')
             return
 
@@ -110,3 +111,8 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
         cDb.pushReset(0)
 
 
+    def run(self, _edit):
+        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings.\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tGlobal database content\n\twill be copied to new location.\n\n\tProcceed?'):
+            return
+
+        self.cDb= TodoDb(self.resetCB, Config(True))

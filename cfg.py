@@ -23,14 +23,15 @@ class Setting:
     base=   ''
     file=   ''
     head=   ''
-    projectUser= ''
-    projectRoot= ''
-    projectName= ''
 
+#check for:
+#   first, subsequent window
+#   open existing, unexistent
+#   local, global, global unexistent
+#   
 
 class Config():
     sublimeRoot= ''
-    cfgFile= ''
 
     cWnd= None
     forceGlobal= False
@@ -49,8 +50,9 @@ class Config():
 
     settings= None
 
-    projectHeader= None
-    isUpdated= True
+    lastProjectFolders= []
+    lastProjectHeader= None
+    lastCfgFile= None
 
     #if inited global, would always be it
     def __init__(self, _forceGlobal=False):
@@ -58,28 +60,56 @@ class Config():
 
         self.cWnd= sublime.active_window()
         self.sublimeRoot= os.path.join(sublime.packages_path(), 'User')
-        self.settings= {}
 
-        self.updateFName()
-
+        self.update()
 
 
+
+    #called twice - as Cfg created and then at db.reset()
     def update(self):
-        self.updateFName()
+        if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
+
+        self.projectRoot= self.sublimeRoot
+        self.projectName= ''
+
+        if not self.forceGlobal:
+            if self.isWindowExists():
+                self.lastProjectFolders= self.cWnd.folders() #this is delayed for secondary windows, but works here
+
+            if len(self.lastProjectFolders):
+                self.projectRoot= self.lastProjectFolders[0]
+                self.projectName= os.path.split(self.lastProjectFolders[0])[1]
+
+        _cfgFile= os.path.join(self.projectRoot, self.projectName +'.do')
+
+
 #=todo 860 (cfg) +0: handle error
-        print('TT: opening ' +self.cfgFile +' for window ' +str(self.cWnd.id()))
-        if not self.readCfg():
-            print('TT: error no cfg')
-            if self.initGlobalDo() and not self.forceGlobal and self.projectName!='':
+        cSettings= self.readCfg(_cfgFile)
+        if not cSettings:
+            print('TypeTodo warning: no project\'s config found, creating from global')
+            cSettings= self.initGlobalDo()
+
 #=todo 861 (cfg) +0: save cfg to project
-                print('TT: error no global')
-
-        wasUpdated= self.isUpdated
-        self.isUpdated= False
-        return wasUpdated
 
 
-    lastProjFolder= ''
+        if cSettings:
+            if self.lastCfgFile!=_cfgFile or self.lastProjectHeader!=cSettings.head:
+                cSettings.file= _cfgFile
+                self.lastCfgFile= cSettings.file
+                self.lastProjectHeader= cSettings.head
+
+                self.settings= {}
+                self.settings[0]= cSettings
+
+                return True
+            return
+
+        print ('TypeTodo error: Config could not be read.')
+        self.lastCfgFile= None
+        self.lastProjectHeader= None
+
+
+
 
     def isWindowExists(self):
         if sys.version<'3':
@@ -89,42 +119,22 @@ class Config():
             if self.cWnd.project_data():
                 return True
 
-    def updateFName(self):
-        if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
-
-        self.projectRoot= self.sublimeRoot
-        self.projectName= ''
-
-        if not self.forceGlobal:
-            if self.isWindowExists():
-                self.lastProjFolder= self.cWnd.folders() #this is delayed for secondary windows, but works here
-                   
-            projFolders= self.lastProjFolder
-            print ('TTF: ' +str(projFolders))
-
-            if len(projFolders):
-                self.projectRoot= projFolders[0]
-                self.projectName= os.path.split(projFolders[0])[1]
-
-        self.cfgFile= os.path.join(self.projectRoot, self.projectName +'.do')
 
 
 #todo 241 (cfg, file) +5: enable to define separate file for TODOs, to split DB credentials from file db itself
 #=todo 334 (cfg) +1: catch cfg errors
 
-    def readCfg(self):
+    #return True for unchaged settings (header)
+    def readCfg(self, _cfgFile):
         try:
-            f= codecs.open(self.cfgFile, 'r', 'UTF-8')
+            f= codecs.open(_cfgFile, 'r', 'UTF-8')
         except:
             f= False
         if not f:
             return False
 
-        cSettings= Setting()
-        cSettings.projectUser= self.projectUser
-        cSettings.projectRoot= self.projectRoot
-        cSettings.projectName= self.projectName
 
+        cSettings= Setting()
         headerCollect= ''
 
         while True:
@@ -152,20 +162,23 @@ class Config():
                     cSettings.passw=    curCfg['passwh']
                     cSettings.base=     curCfg['baseh']
 
-        cSettings.file= self.cfgFile
         cSettings.head= headerCollect
 
-        if self.projectHeader != headerCollect:
-            self.isUpdated= True
-
-        self.projectHeader= headerCollect
-        self.settings[0]= cSettings
-        return True
+        return cSettings
 
 
-#=todo 351 (cfg) +0: allow skip global configure for HTTP at first start
 
-    def initGlobalDo(self):
+#=todo 351 (cfg) +0: allow skip glob al configure for HTTP at first start
+
+    def initGlobalDo(self, _force=False):
+        _cfgFile= os.path.join(self.sublimeRoot, '.do')
+
+        if not _force:
+            gCfg= self.readCfg(_cfgFile)
+            if gCfg:
+                return gCfg
+
+
         httpInitFlag= True
 
         #request new radnom public repository
@@ -180,9 +193,7 @@ class Config():
         cSettings= Setting()
         headerCollect= ''
 
-        if not httpInitFlag:
-            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
-        else:
+        if httpInitFlag:
             print("New TypeTodo repository: " +cRep)
 
             cSettings.engine= 'http'
@@ -194,19 +205,19 @@ class Config():
             sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
 
 
-        if self.projectHeader != headerCollect:
-            self.isUpdated= True
-
-        self.projectHeader= headerCollect
-        self.settings[0]= cSettings
-
         try:
-            cfgFile= os.path.join(self.sublimeRoot, '.do')
-            with codecs.open(cfgFile, 'w+', 'UTF-8') as f:
-                f.write(self.projectHeader)
+            with codecs.open(_cfgFile, 'w+', 'UTF-8') as f:
+                f.write(headerCollect)
         except:
-            return False
+            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tglobal config cannot be created'), 1000)
+            return
 
-        return True
+        if not httpInitFlag:
+            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
+
+
+        cSettings.head= headerCollect
+
+        return cSettings
 
 

@@ -32,9 +32,9 @@ class Setting:
 
 class Config():
     sublimeRoot= ''
+    forceGlobal= False
 
     cWnd= None
-    forceGlobal= False
     defaultHttpApi= 'typetodo.com'
 
     defaultHeader= "# uncomment and configure. LAST matched line matters:\n"\
@@ -84,9 +84,11 @@ class Config():
 
 
 #=todo 860 (cfg) +0: handle error
+        cSettings= None
         cSettings= self.readCfg(_cfgFile)
         if not cSettings:
-            print('TypeTodo warning: no project\'s config found, creating from global')
+            if self.projectName!='':
+                print('TypeTodo warning: no project\'s config found, taking global')
             cSettings= self.initGlobalDo()
 
 #=todo 861 (cfg) +0: save cfg to project

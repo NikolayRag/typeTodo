@@ -1,0 +1,8 @@
+v1.7.2 - technical checkpoint
+
+new:
+- skipped some known file extentions at 'Search todo' command
+
+changed:
+- config moved to class
+

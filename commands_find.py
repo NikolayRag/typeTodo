@@ -137,7 +137,6 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 for cFile in cWalk[2]:
                     if self.isKnownFileExt(cFile):
                         continue
-                    print(cFile)
                     fn= os.path.join(cWalk[0], cFile)
                     matches.extend(self.findTodoInFile(fn, RE_TODO_EXISTING, _id, _isTag))
 

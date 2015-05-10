@@ -181,7 +181,7 @@ class TodoDb():
         for dbN in self.dbA:
             todoA= self.dbA[dbN].fetch(_id)
             if todoA==False:
-                return False
+                continue
 
             maybeNew= 0
             for iT in todoA: #each fetched task have to be compared to existing

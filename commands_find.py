@@ -146,8 +146,11 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 #todo 577 (command) +0: entering blank string for search gives list of view's doplets
     def findNamed(self, _text= ''):
-        if _text=='' or _text=='*':
+        if _text=='':
             return
+
+        if _text=='*':
+            _text='.*'
 
         isTag= not re.match('^\d+$', _text)
 

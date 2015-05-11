@@ -33,17 +33,17 @@ class TodoDbFile():
 
 
     def flush(self, _dbN):
-#        if not self.dbOk:
-#            print("TypeTodo: 'file' db was not properly inited. Saving disabled.")
+        if not self.dbOk:
+            print("TypeTodo: 'file' db was not properly inited. Saving disabled.")
 
-#            return False
+            return False
 
         try:
             with codecs.open(self.settings.file, 'w+', 'UTF-8') as f:
                 f.write(self.settings.head)
                 f.write("\n")
 
-                for iT in self.parentDB.todoA:
+                for iT in sorted(self.parentDB.todoA):
                     curTodo= self.parentDB.todoA[iT]
                     if curTodo.savedA[_dbN]==SAVE_STATES.IDLE: #stands for 'if just inited'
                         continue
@@ -77,6 +77,11 @@ class TodoDbFile():
 
 
     def fetch(self, _id=False):
+        if not os.path.isfile(self.settings.file):
+            print("TypeTodo: 'file' db does not exist, should to be created.")
+            return False
+
+
         try:
             todoA= {}
             with codecs.open(self.settings.file, 'r', 'UTF-8') as f:
@@ -111,7 +116,7 @@ class TodoDbFile():
 
         except Exception as e:
             print("TypeTodo: 'file' db experienced error while fetching")
-#            print(e)
+            print(e)
 
             self.dbOk= False
             return False

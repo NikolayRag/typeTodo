@@ -176,12 +176,14 @@ class TodoDb():
 #       3.2. reset other db's 'saved' flag
 
     def fetch(self, _id=False):
-        success= True
+        success= False
 
         for dbN in self.dbA:
             todoA= self.dbA[dbN].fetch(_id)
             if todoA==False:
                 continue
+
+            success= True
 
             maybeNew= 0
             for iT in todoA: #each fetched task have to be compared to existing

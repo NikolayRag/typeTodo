@@ -87,8 +87,6 @@ class Config():
         cSettings= None
         cSettings= self.readCfg(_cfgFile)
         if not cSettings:
-            if self.projectName!='':
-                print('TypeTodo warning: no project\'s config found, taking global')
             cSettings= self.initGlobalDo()
 
 #=todo 861 (cfg) +0: save cfg to project
@@ -133,7 +131,7 @@ class Config():
         except:
             f= False
         if not f:
-            return False
+            return
 
 
         cSettings= Setting()

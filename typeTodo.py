@@ -81,7 +81,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 #=todo 563 (interaction) +0: allow to change doplet state by pressing corresponding key (-/+/=/!) everywhere in protected doplet; same for up/down for priority
-#todo 449 (fix) -1: too much code duplicated from matchTodo()
+#todo 449 (fix) -1: too much code duplicated from matchTodo(), review
     def on_query_context(self, _view, _key, _op, _val, _match):
         if _key=='typetodoUp' or _key=='typetodoDown' or _key=='typetodoSet':
             if len(_view.sel())!=1: #more than one cursors skipped for number of reasons

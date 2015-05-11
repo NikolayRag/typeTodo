@@ -33,7 +33,6 @@ else:
      thus making them synchronised.
 '''
 class TodoDb():
-#=todo 333 (cfg) +0: make .do read-save cycle more crisp and time-compact
     config= None
 
     maxflushRetries= 3
@@ -163,7 +162,7 @@ class TodoDb():
                 sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry ' +str(self.flushRetries) +' more times in ' +str(self.flushTimeout) +' sec\'s'), 0)
                 self.timerFlush = Timer(self.flushTimeout, self.flush)
                 self.timerFlush.start()
-        
+
         if _runOnce or self.flushRetries==0:
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s'), 0)
 

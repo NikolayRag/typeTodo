@@ -32,14 +32,14 @@ class Setting:
 
 class Config():
     sublimeRoot= ''
-    forceGlobal= False
+    isGlobal= False
 
     cWnd= None
     defaultHttpApi= 'typetodo.com'
 
     defaultHeader= "# uncomment and configure. LAST matched line matters:\n"\
         +"# mysql 127.0.0.1 username password scheme\n"\
-        +"# http 127.0.0.1 repository [username password]\n"
+        +"# http typetodo.com repository [username password]\n"
 
 
 
@@ -54,9 +54,9 @@ class Config():
     lastProjectHeader= None
     lastCfgFile= None
 
-    #if inited global, would always be it
+    
     def __init__(self, _forceGlobal=False):
-        self.forceGlobal= _forceGlobal
+        self.isGlobal= _forceGlobal
 
         self.cWnd= sublime.active_window()
         self.sublimeRoot= os.path.join(sublime.packages_path(), 'User')
@@ -65,16 +65,15 @@ class Config():
 
 
 
-    #called twice - as Cfg created and then at db.reset()
     def update(self):
         if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
 
         self.projectRoot= self.sublimeRoot
         self.projectName= ''
 
-        if not self.forceGlobal:
-            if self.isWindowExists():
-                self.lastProjectFolders= self.cWnd.folders() #this is delayed for secondary windows, but works here
+        if not self.isGlobal:
+            if self.isWindowExists(): #should skip 'coz secondary window will return [] as it closes
+                self.lastProjectFolders= self.cWnd.folders()
 
             if len(self.lastProjectFolders):
                 self.projectRoot= self.lastProjectFolders[0]
@@ -83,13 +82,11 @@ class Config():
         _cfgFile= os.path.join(self.projectRoot, self.projectName +'.do')
 
 
-#=todo 860 (cfg) +0: handle error
         cSettings= None
         cSettings= self.readCfg(_cfgFile)
         if not cSettings:
             cSettings= self.initGlobalDo()
 
-#=todo 861 (cfg) +0: save cfg to project
 
 
         if cSettings:
@@ -121,10 +118,9 @@ class Config():
 
 
 
-#todo 241 (cfg, file) +5: enable to define separate file for TODOs, to split DB credentials from file db itself
-#=todo 334 (cfg) +1: catch cfg errors
+#todo 241 (cfg, file) +5: enable to define separate file for TODOs, to split DB settings from file db itself
+#=todo 334 (cfg) +1: catch cfg read errors
 
-    #return True for unchaged settings (header)
     def readCfg(self, _cfgFile):
         try:
             f= codecs.open(_cfgFile, 'r', 'UTF-8')
@@ -168,20 +164,20 @@ class Config():
 
 
 
-#=todo 351 (cfg) +0: allow skip glob al configure for HTTP at first start
+#=todo 351 (cfg) +0: allow skip global configure for HTTP at first start
 
     def initGlobalDo(self, _force=False):
         _cfgFile= os.path.join(self.sublimeRoot, '.do')
 
         if not _force:
-            gCfg= self.readCfg(_cfgFile)
-            if gCfg:
-                return gCfg
+            cCfg= self.readCfg(_cfgFile)
+            if cCfg:
+                return cCfg
 
 
         httpInitFlag= True
 
-        #request new radnom public repository
+        #request new random public repository
         if httpInitFlag:
             req = urllib2.Request('http://' +self.defaultHttpApi +'/?=newrep')
             try:

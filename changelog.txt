@@ -1,10 +1,18 @@
-v1.7.2 - technical checkpoint
-
-new:
-- skipped some known file extentions at 'Search todo' command
+v1.7.2
 
 changed:
-- config moved to class
+- config moved to class, technical issue, maybe some untested issues dealing with .do
+
+new:
+- skipped some known file extentions at 'Find todo' command
+- 'Find todo' command accepts '*' as synonim for '.*' tagged search
+- (+/-) key shortcuts changed with (shift+plus/minus)
+- (shift+plus/minus) key shortcuts as well as 'Set state' command (alt+d) triggers everywhere in doplet
++ set state by pressing corresponding key (alt+shift+[-+=!]) 
+
+fix:
+- .do is saved being sorted by ID
+- new doplet ID could be not synchronized when more than 1 db was used, fixed.
 
 
 v1.7.1

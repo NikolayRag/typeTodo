@@ -119,8 +119,6 @@ class Config():
 
 
 #todo 241 (cfg, file) +5: enable to define separate file for TODOs, to split DB settings from file db itself
-#=todo 334 (cfg) +1: catch cfg read errors
-
     def readCfg(self, _cfgFile):
         try:
             f= codecs.open(_cfgFile, 'r', 'UTF-8')

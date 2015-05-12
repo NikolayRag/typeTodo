@@ -1,10 +1,10 @@
 # coding= utf-8
 
 #todo 1 (interaction) -1: multiline TODO
-#todo 8 (interaction) +0: tag auto-complete; or use command to choose tag
-#todo 11 (interaction) -2: make more TODO formats available
+#todo 11 (interaction) -10: make more TODO formats available
 
 #todo 232 (feature) +0: introduce sub-todo's that are part of other
+#todo 210 (db) -5: implement editing of project .do file
 
 
 import sublime, sublime_plugin
@@ -35,7 +35,6 @@ def dbMaintainance():
 
 class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
-#todo 236 (db, config) +0: reset db after editing .do
     view= None
 
     def on_deactivated(self,_view):

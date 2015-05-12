@@ -85,7 +85,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
             return True
 
 
-        if self.todoCursorPlace=='todo' or self.todoCursorPlace=='priority' or self.todoCursorPlace=='tags' or self.todoCursorPlace=='postfix':
+        if self.todoCursorPlace=='prefix' or self.todoCursorPlace=='todo' or self.todoCursorPlace=='priority' or self.todoCursorPlace=='tags' or self.todoCursorPlace=='postfix':
             todoRegion = _view.line(_view.sel()[0])
 
             if _key=='typetodoSetClosed':
@@ -161,7 +161,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
                 selEnd= tmp
 
             self.todoCursorPlace= 'todoString'
-            if selStart>todoModMatch.end('prefix') and selEnd<todoModMatch.end('postfix'):
+            if selStart>=todoModMatch.end('prefix') and selEnd<=todoModMatch.end('postfix'):
                 self.todoCursorPlace= 'todo'
                 for rangeName in ('prefix', 'state', 'tags', 'priority', 'postfix'):
                     if selStart>=todoModMatch.start(rangeName) and selEnd<=todoModMatch.end(rangeName):

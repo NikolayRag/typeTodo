@@ -54,25 +54,17 @@ else:
 class TodoDbHttp():
     name= 'Http'
 
+    lastId= None
+
     settings= None
     parentDB= False
 
     migrate= False
 
-    reservedId= 0
-    reserveEvent= None
-    timerReserveId= None
 
     def __init__(self, _parentDB, _settingsId):
         self.settings= _parentDB.config.settings[_settingsId]
         self.parentDB= _parentDB
-
-        self.reservedId= 0
-        self.reserveEvent= threading.Event()
-        self.reserveEvent.set()
-        self.timerReserveId = Timer(0, None) #dummy
-
-        self.newId()
 
 #todo 270 (http) +0: implement http timeout
 
@@ -145,28 +137,18 @@ class TodoDbHttp():
         self.migrate= False
         return allOk
 
-#macro
-#   pre: pick event set
-#   wait for pick event to set
-#   set return cached
-#   go pick next
-    def newId(self):
-        self.reserveEvent.wait()
-
-        okId= self.reservedId
-
-        self.reserveEvent.clear()
-        self.timerReserveId= Timer(0, self.newIdGet).start()
-
-        return okId
-
 
 #todo 258 (http) +5: release prefetched id at exit
     def newIdRelease(self):
         None
 
-    def newIdGet(self):
+
+    def newId(self, _wantedId=0):
+        if _wantedId==self.lastId:
+            return self.lastId
+
         postData= {}
+        postData['wantedId']= _wantedId
         postData['logName']= urllib2.quote(self.parentDB.config.projectUser.encode('utf-8'))
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)
@@ -186,9 +168,9 @@ class TodoDbHttp():
             print('TypeTodo: HTTP server fails creating todo')
             response= False
 
-        self.reservedId= int(response)
-        print('TypeTodo: HTTP id reserved: ' +str(self.reservedId))
-        self.reserveEvent.set()
+        self.lastId= int(response)
+        return self.lastId
+
 
 
 #todo 957 (db, http) +0: fetch http by one id

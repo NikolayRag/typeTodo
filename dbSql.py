@@ -122,6 +122,8 @@ class TodoDbSql():
     db_pid= 0
     db_uid= 0
 
+    lastId= None
+
     settings= None
     parentDB= False
 
@@ -271,18 +273,23 @@ class TodoDbSql():
         return True
 
 
-    def newId(self):
+    def newId(self, _wantedId=0):
+        if _wantedId==self.lastId:
+            return self.lastId
+
         if not self.reconnect():
             return False
         cur = self.dbConn.cursor()
 
         cur.execute(
-            "SELECT max(id) max_id FROM tasks WHERE id_project IN (%s)",
+            "SELECT max(id) max_id FROM tasks WHERE id_project=%s",
             self.db_pid
         )
         _id= cur.fetchone()
         if _id and _id[0]:
             _id= int(_id[0]) +1
+            if _wantedId>_id:
+                _id= _wantedId
         else:
             _id= 1
 
@@ -292,7 +299,9 @@ class TodoDbSql():
         )
 
         cur.close()
-        return _id
+
+        self.lastId= _id
+        return self.lastId
 
 
 #todo 956 (db, sql) +0: fetch sql by one id

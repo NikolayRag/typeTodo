@@ -18,10 +18,10 @@ class TodoDbFile():
     reTodoParse= re.compile('^([\+\-\!\=])(.*) (\d+): ([+-]\d+) (.+) (\d\d/\d\d/\d\d \d\d:\d\d) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d)$')
     reCommentParse= re.compile('^\t?(.*)$')
 
-    settings= None
-    setId= 0
+    lastId= None
     maxId= 0
 
+    settings= None
     parentDB= False
 
     def __init__(self, _parentDB, _settingsId):
@@ -71,9 +71,16 @@ class TodoDbFile():
             return False
 
 
-    def newId(self):
+    def newId(self, _wantedId=0):
+        if _wantedId==self.lastId:
+            return self.lastId
+
         self.maxId+= 1
-        return self.maxId
+        if _wantedId>self.maxId:
+            self.maxId= _wantedId
+        
+        self.lastId= self.maxId
+        return self.lastId
 
 
     def fetch(self, _id=False):

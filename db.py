@@ -41,6 +41,9 @@ class TodoDb():
     resetPending= False
     dirty= False
 
+    reservedId= 0
+    reserveEvent= None
+
     dbA= None
     todoA= None
 
@@ -53,6 +56,10 @@ class TodoDb():
 
         self.callbackFetch= _callback
         self.config= _cfg
+
+        self.reservedId= 0
+        self.reserveEvent= threading.Event()
+        self.reserveEvent.set()
 
         self.pushReset()
         
@@ -94,11 +101,57 @@ class TodoDb():
             self.dbA[dbId]= TodoDbHttp(self, 0)
             dbId+= 1
 
+        self.newId() #run prefetch
+
         for iT in self.todoA: #set all unsaved
             self.todoA[iT].setSaved(SAVE_STATES.READY)
 
         self.fetch() #sync all db at first
         self.flush(True)
+
+
+
+
+#macro
+#   pre: pick event set
+#   wait for pick event to set
+#   set return cached
+#   go pick next
+    def newId(self):
+        self.reserveEvent.wait()
+
+        okId= self.reservedId #first call is initial, result should not be used
+
+        self.reserveEvent.clear() #second call to newId() will suspend till newIdGet() done
+        sublime.set_timeout(self.newIdGet, 0)
+
+        return okId
+
+
+    def newIdGet(self):
+        cId= 0
+
+        tries= 10
+        while True:
+            ids= []
+            for db in self.dbA:
+                ids.append(self.dbA[db].newId(cId) or 0)
+
+            cId= max(ids)
+            if cId==min(ids):
+                break
+
+            if tries<=0:
+                print('TypeTodo warning: Cannot synchronize new Id within db\'s.')
+                break
+        
+            tries-= 1
+
+        self.reservedId= cId
+        print('TypeTodo: Id reserved: ' +str(self.reservedId))
+        self.reserveEvent.set()
+
+
 
 
     def store(self, _id, _state, _tags, _lvl, _fileName, _comment):
@@ -112,31 +165,29 @@ class TodoDb():
 
         _id= int(_id)
 
-#todo 305 (db) +10: make .newId take in respect all db's at once
-        newId= _id or 0
+        cId= _id or 0
         if not _id:
-            for db in self.dbA:
-                newId= max(newId, self.dbA[db].newId() or 0)
+            cId= self.newId()
 
-        if not newId:
+        if not cId:
             sublime.status_message('Todo creation failed, see console for info')
             return False
 
         strStamp= int(time.time())
 
 #=todo 71 (db) -1: instantly remove blank new task from cache before saving if set to +
-        if newId not in self.todoA: #for new and repairing tasks
-            self.todoA[newId]= TodoTask(newId, self.config.projectName, self.config.projectUser, strStamp, self)
+        if cId not in self.todoA: #for new and repairing tasks
+            self.todoA[cId]= TodoTask(cId, self.config.projectName, self.config.projectUser, strStamp, self)
 
         if _id:
             self.dirty= True
-            self.todoA[newId].set(_state, _tags, _lvl, _fileName, _comment, self.config.projectUser, strStamp)
+            self.todoA[cId].set(_state, _tags, _lvl, _fileName, _comment, self.config.projectUser, strStamp)
 
         self.flushRetries= self.maxflushRetries
         self.timerFlush= Timer(self.flushTimeout, self.flush)
         self.timerFlush.start()
 
-        return newId
+        return cId
 
 
     def flush(self, _runOnce=False):

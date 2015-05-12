@@ -13,21 +13,19 @@ class TodoDbFile():
     name= 'File'
 
     dbOk= True
-    cfgString= ''
 
     #db related
     reTodoParse= re.compile('^([\+\-\!\=])(.*) (\d+): ([+-]\d+) (.+) (\d\d/\d\d/\d\d \d\d:\d\d) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d)$')
     reCommentParse= re.compile('^\t?(.*)$')
 
-    projectFname= ''
+    lastId= None
     maxId= 0
 
+    settings= None
     parentDB= False
 
-    def __init__(self, _cfg, _parentDB):
-        self.projectFname= _cfg['file']
-        self.cfgString= _cfg['header']
-
+    def __init__(self, _parentDB, _settingsId):
+        self.settings= _parentDB.config.settings[_settingsId]
         self.parentDB= _parentDB
 
 
@@ -41,11 +39,11 @@ class TodoDbFile():
             return False
 
         try:
-            with codecs.open(self.projectFname, 'w+', 'UTF-8') as f:
-                f.write(self.cfgString)
+            with codecs.open(self.settings.file, 'w+', 'UTF-8') as f:
+                f.write(self.settings.head)
                 f.write("\n")
 
-                for iT in self.parentDB.todoA:
+                for iT in sorted(self.parentDB.todoA):
                     curTodo= self.parentDB.todoA[iT]
                     if curTodo.savedA[_dbN]==SAVE_STATES.IDLE: #stands for 'if just inited'
                         continue
@@ -73,15 +71,27 @@ class TodoDbFile():
             return False
 
 
-    def newId(self):
+    def newId(self, _wantedId=0):
+        if _wantedId==self.lastId:
+            return self.lastId
+
         self.maxId+= 1
-        return self.maxId
+        if _wantedId>self.maxId:
+            self.maxId= _wantedId
+        
+        self.lastId= self.maxId
+        return self.lastId
 
 
     def fetch(self, _id=False):
+        if not os.path.isfile(self.settings.file):
+            print("TypeTodo: 'file' db does not exist, should to be created.")
+            return False
+
+
         try:
             todoA= {}
-            with codecs.open(self.projectFname, 'r', 'UTF-8') as f:
+            with codecs.open(self.settings.file, 'r', 'UTF-8') as f:
                 ctxTodo= None
                 for ln in f:
                     ln= ln.splitlines()[0]
@@ -97,7 +107,7 @@ class TodoDbFile():
                         gmtTime= time.mktime (time.strptime(matchParse.group(9), '%y/%m/%d %H:%M'))
 
                         if __id not in todoA:
-                            todoA[__id]= TodoTask(__id, self.parentDB.projectName, matchParse.group(5), gmtCtime, self.parentDB)
+                            todoA[__id]= TodoTask(__id, self.parentDB.config.projectName, matchParse.group(5), gmtCtime, self.parentDB)
                         ctxTodo= matchParse
 
                         self.maxId= max(self.maxId, __id)

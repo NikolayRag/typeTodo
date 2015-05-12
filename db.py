@@ -33,50 +33,40 @@ else:
      thus making them synchronised.
 '''
 class TodoDb():
-    projUser= '*Anon*'
-    projectRoot= ''
-    projectName= ''
-
-#todo 67 (cfg) +0: move cfg to class
-#=todo 333 (cfg) +0: make .do read-save cycle more crisp and time-compact
-    cfgA= None
+    config= None
 
     maxflushRetries= 3
     flushTimeout= 30 #seconds
     timerFlush= None
-    timerReset= None
+    resetPending= False
     dirty= False
 
-    dbA= {}
+    reservedId= 0
+    reserveEvent= None
+
+    dbA= None
     todoA= None
 
-    lastActiveView= None #used for maintainance at DB fetch()
+    callbackFetch= None
 
-
-    def __init__(self, _root, _name):
+    def __init__(self, _callback, _cfg):
         self.dbA= {}
-
-        self.timerFlush = Timer(0, None) #dummy
-        self.timerReset = Timer(0, None) #dummy
-
         self.todoA= {}
-        self.update(_root, _name)
+        self.timerFlush = Timer(0, None) #dummy
+
+        self.callbackFetch= _callback
+        self.config= _cfg
+
+        self.reservedId= 0
+        self.reserveEvent= threading.Event()
+        self.reserveEvent.set()
+
         self.pushReset()
         
 
-    def update(self, _root, _name):
-        if 'USERNAME' in os.environ: self.projUser= os.environ['USERNAME']
-
-        self.projectName= _name
-        self.projectRoot= _root
-        if _root == '':
-            self.projectRoot= defaultCfg['path']
-
-
-    def pushReset(self, _delay=1): #leave 1 to remove spam
-        self.timerReset.cancel()
-        self.timerReset= Timer(_delay, self.reset)
-        self.timerReset.start()
+    def pushReset(self, _delay=1000): #leave 1 to remove spam
+        self.resetPending= True
+        sublime.set_timeout(self.reset, _delay)
 
 #Macro:
 #    - get new cfg
@@ -84,49 +74,34 @@ class TodoDb():
 #    - fetch using new
 #    - flush using new
 
-    def reset(self, _force=False):
-        cfgPath= os.path.join(self.projectRoot, self.projectName +'.do')
+    def reset(self):
+        if not self.resetPending:
+            return
+        self.resetPending= False
 
 #todo 149 (cfg) +5: make use of more than one (last) cfg string
-        cfgFound= False
-        if not _force: #else skip directly to global init
-            cfgFound= readCfg(cfgPath)
 
-
-        if not cfgFound: 
-            cfgFound= initGlobalDo()
-
-            if not cfgFound:
-                return
-
-            if self.projectName != '': #save new named project .do
-                self.todoA.clear() #old tasks are trash
-                
-                cfgFound['file']= cfgPath
-                with codecs.open(cfgPath, 'w+', 'UTF-8') as f:
-                  f.write(cfgFound['header'])
-
-        self.flush(True)
-
-        if cfgFound == self.cfgA: #no changes
+        if not self.config.update() and len(self.dbA):
+            self.flush(True)
             return
 
         print ('TypeTodo: reset db')
-        self.cfgA= cfgFound
 
 #todo 170 (cfg) +0: build list of cfg's to pass to db.reset()
         dbId= 0
         self.dbA.clear() #new db array
 
         if True:
-            self.dbA[dbId]= TodoDbFile(cfgFound, self)
+            self.dbA[dbId]= TodoDbFile(self, 0)
             dbId+= 1
-        if cfgFound['engine']== 'mysql':
-            self.dbA[dbId]= TodoDbSql(cfgFound, self)
+        if self.config.settings[0].engine== 'mysql':
+            self.dbA[dbId]= TodoDbSql(self, 0)
             dbId+= 1
-        if cfgFound['engine']== 'http':
-            self.dbA[dbId]= TodoDbHttp(cfgFound, self)
+        if self.config.settings[0].engine== 'http':
+            self.dbA[dbId]= TodoDbHttp(self, 0)
             dbId+= 1
+
+        self.newId() #run prefetch
 
         for iT in self.todoA: #set all unsaved
             self.todoA[iT].setSaved(SAVE_STATES.READY)
@@ -135,48 +110,88 @@ class TodoDb():
         self.flush(True)
 
 
+
+
+#macro
+#   pre: pick event set
+#   wait for pick event to set
+#   set return cached
+#   go pick next
+    def newId(self):
+        self.reserveEvent.wait()
+
+        okId= self.reservedId #first call is initial, result should not be used
+
+        self.reserveEvent.clear() #second call to newId() will suspend till newIdGet() done
+        sublime.set_timeout(self.newIdGet, 0)
+
+        return okId
+
+
+    def newIdGet(self):
+        cId= 0
+
+        tries= 10
+        while True:
+            ids= []
+            for db in self.dbA:
+                ids.append(self.dbA[db].newId(cId) or 0)
+
+            cId= max(ids)
+            if cId==min(ids):
+                break
+
+            if tries<=0:
+                print('TypeTodo warning: Cannot synchronize new Id within db\'s.')
+                break
+        
+            tries-= 1
+
+        self.reservedId= cId
+        print('TypeTodo: Id reserved: ' +str(self.reservedId))
+        self.reserveEvent.set()
+
+
+
+
     def store(self, _id, _state, _tags, _lvl, _fileName, _comment):
         self.timerFlush.cancel()
 
-        if _fileName and self.projectRoot:
-            if (os.path.splitdrive(_fileName)[0]==os.path.splitdrive(self.projectRoot)[0]):
-                _fileName= os.path.relpath(_fileName, self.projectRoot)
+        if _fileName and self.config.projectRoot:
+            if (os.path.splitdrive(_fileName)[0]==os.path.splitdrive(self.config.projectRoot)[0]):
+                _fileName= os.path.relpath(_fileName, self.config.projectRoot)
                 
         _fileName= _fileName or ''
 
         _id= int(_id)
 
-#=todo 305 (general) +10: make .newId take in respect all db's at once
-        newId= _id or 0
+        cId= _id or 0
         if not _id:
-            for db in self.dbA:
-                newId= max(newId, self.dbA[db].newId() or 0)
+            cId= self.newId()
 
-        if not newId:
+        if not cId:
             sublime.status_message('Todo creation failed, see console for info')
             return False
 
         strStamp= int(time.time())
 
 #=todo 71 (db) -1: instantly remove blank new task from cache before saving if set to +
-        if newId not in self.todoA: #for new and repairing tasks
-            self.todoA[newId]= TodoTask(newId, self.projectName, self.projUser, strStamp, self)
+        if cId not in self.todoA: #for new and repairing tasks
+            self.todoA[cId]= TodoTask(cId, self.config.projectName, self.config.projectUser, strStamp, self)
 
         if _id:
             self.dirty= True
-            self.todoA[newId].set(_state, _tags, _lvl, _fileName, _comment, self.projUser, strStamp)
+            self.todoA[cId].set(_state, _tags, _lvl, _fileName, _comment, self.config.projectUser, strStamp)
 
         self.flushRetries= self.maxflushRetries
         self.timerFlush= Timer(self.flushTimeout, self.flush)
         self.timerFlush.start()
 
-        return newId
+        return cId
 
 
     def flush(self, _runOnce=False):
         self.timerFlush.cancel()
-        if not self.cfgA:
-            return
 
         flushOk= True
         for dbN in self.dbA:
@@ -198,7 +213,7 @@ class TodoDb():
                 sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry ' +str(self.flushRetries) +' more times in ' +str(self.flushTimeout) +' sec\'s'), 0)
                 self.timerFlush = Timer(self.flushTimeout, self.flush)
                 self.timerFlush.start()
-        
+
         if _runOnce or self.flushRetries==0:
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s'), 0)
 
@@ -207,16 +222,18 @@ class TodoDb():
 #   1. roll over all db's
 #   2. fetch unbinded task lists
 #   3. compare if new or updated or outdated
-#       3.1. join int working list
+#       3.1. join into working list
 #       3.2. reset other db's 'saved' flag
 
     def fetch(self, _id=False):
-        success= True
+        success= False
 
         for dbN in self.dbA:
             todoA= self.dbA[dbN].fetch(_id)
             if todoA==False:
-                return False
+                continue
+
+            success= True
 
             maybeNew= 0
             for iT in todoA: #each fetched task have to be compared to existing
@@ -251,11 +268,7 @@ class TodoDb():
             if maybeNew>0:
                 print ('TypeTodo: \'' +self.dbA[dbN].name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
 
-        sublime.set_timeout(self.maintain, 0)
+        if self.callbackFetch:
+            sublime.set_timeout(self.callbackFetch, 0)
 
         return success
-
-
-    def maintain(self):
-        if self.lastActiveView:
-            self.lastActiveView.run_command('typetodo_maintain', {})

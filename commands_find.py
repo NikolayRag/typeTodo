@@ -31,32 +31,9 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         sublime.set_timeout(lambda: _view.run_command('typetodo_jump_point', {'_line': _line, '_col': _col}), 100)
 
 
-    def getResultsView(self, _create= True):
-        global resultsView
-
-        wId= sublime.active_window().id()
-        if wId in resultsView:
-            return resultsView[wId]
-            
-        #check for duplicate
-        for cView in sublime.active_window().views():
-            if cView.name() == 'Doplets found':
-                resultsView[wId]= cView
-                return resultsView[wId]
-
-        if not _create:
-            return
-
-        resultsView[wId]= sublime.active_window().new_file()
-        resultsView[wId].set_name('Doplets found')
-        resultsView[wId].set_scratch(True)
-        return resultsView[wId]
-
-
-
 #todo 566 (command) +0: make jump-to-result in todo search results window
     def listTodos(self, _for, _matches):
-        resView= self.getResultsView()
+        resView= WCache().getResultsView()
 
         textAppend= 'Search doplets for "' +_for +'":\n\n'
 
@@ -84,7 +61,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
     def findTodoInViews(self, _id, _isTag= False):
-        resView= self.getResultsView(False)
+        resView= WCache().getResultsView(False)
 
         matches= []
         for cView in sublime.active_window().views():
@@ -147,12 +124,18 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
+    def isKnownFileExt(self, _fn):
+        fName, fExt= os.path.splitext(_fn)
+        for cExt in SKIP_SEARCH_FILES:
+            if cExt==fExt:
+                return True
+
     def findTodoInProject(self, _id, _isTag= False):
         matches= []
         for cFolder in sublime.active_window().folders():
             for cWalk in os.walk(cFolder):
                 for cFile in cWalk[2]:
-                    if re.match('.*\.sublime-workspace', cFile):
+                    if self.isKnownFileExt(cFile):
                         continue
                     fn= os.path.join(cWalk[0], cFile)
                     matches.extend(self.findTodoInFile(fn, RE_TODO_EXISTING, _id, _isTag))
@@ -163,8 +146,11 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 #todo 577 (command) +0: entering blank string for search gives list of view's doplets
     def findNamed(self, _text= ''):
-        if _text=='' or _text=='*':
+        if _text=='':
             return
+
+        if _text=='*':
+            _text='.*'
 
         isTag= not re.match('^\d+$', _text)
 
@@ -210,8 +196,8 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         #jump to .do file
         todoIncode= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
         if todoIncode:
-            cDb= getDB(self.view)
-            fn= os.path.join(cDb.projectRoot, cDb.projectName +'.do')
+            cDb= WCache().getDB()
+            fn= cDb.config.settings[0].file
             if not os.path.isfile(fn):
                 sublime.message_dialog('TypeTodo error:\n\tCannot find projects .do file')
                 return

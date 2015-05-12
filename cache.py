@@ -10,33 +10,79 @@ else:
 
 
 
-#todo 65 (code) -1: make class for db cache
-#{projectFolder: TodoDb} cache
-projectDbCache= {}
+class WCache(object):
+    __instance = None
+    def __new__(cls, *args, **kwargs):
+        if not cls.__instance:
+            cls.__instance = super(WCache, cls).__new__(cls, *args, **kwargs)
+        return cls.__instance
 
 
-def getDB(_view=False, _folder=False):
-#todo 74 (db) -1: make better caching of projectDbCache
-#    if _view.TTDB: return _view.TTDB
-    curRoot= ''
-    curName= ''
+    dbCache= {} #{window.id(): TodoDb} cache
 
-    if _folder!=False:
-        firstFolderA=(_folder,)
-    elif _view!=False and _view.window():
-        firstFolderA= _view.window().folders()
-    else:
-        return False
 
-    if len(firstFolderA) and (firstFolderA[0] != ''):
-        curRoot= firstFolderA[0]
-        curName= os.path.split(firstFolderA[0])[1]
+    #only returns db after inited first time
+    def getDB(self, _init= False, _callbackFetch= None):
+        cWin= sublime.active_window()
+        if not cWin:
+            return False
 
-    #cache time
-    if curRoot not in projectDbCache:
-        projectDbCache[curRoot]= TodoDb(curRoot, curName)
-    else:
-        projectDbCache[curRoot].update(curRoot, curName)
+        wId= cWin.id()
+        if wId not in self.dbCache:
+            if not wId or not _init:
+                return False
+            self.dbCache[wId]= TodoDb(_callbackFetch, Config())
 
-#    _view.TTDB= projectDbCache[curRoot]
-    return projectDbCache[curRoot]
+        return self.dbCache[wId]
+
+
+
+    def exitHandler(self): # one for all, at very exit
+        if len(sublime.windows())==0:
+            for dbI in self.dbCache:
+               self.dbCache[dbI].flush(True)
+
+
+
+#find command viewport
+    
+    resultsViewCache= {} #{window.id(): view} cache
+
+
+    def getResultsView(self, _create= True):
+        cWin= sublime.active_window()
+        if not cWin:
+            return False
+
+        wId= cWin.id()
+        if wId in self.resultsViewCache:
+            return self.resultsViewCache[wId]
+            
+        #check for duplicate
+        for cView in cWin.views():
+            if cView.name() == 'Doplets found':
+                self.resultsViewCache[wId]= cView
+                return self.resultsViewCache[wId]
+
+        if not _create:
+            return
+
+        self.resultsViewCache[wId]= cWin.new_file()
+        self.resultsViewCache[wId].set_name('Doplets found')
+        self.resultsViewCache[wId].set_scratch(True)
+        return self.resultsViewCache[wId]
+
+
+    def checkResultsView(self, _viewId, _wipe=False):
+        cWin= sublime.active_window()
+        if not cWin:
+            return
+
+        wId= sublime.active_window().id()
+        if wId in self.resultsViewCache and _viewId==self.resultsViewCache[wId].buffer_id():
+            if _wipe:
+                del self.resultsViewCache[wId]
+            return True
+
+
+wCache= WCache() #hold against GC

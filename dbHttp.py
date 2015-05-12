@@ -54,32 +54,17 @@ else:
 class TodoDbHttp():
     name= 'Http'
 
-    httpAddr= ''
-    httpRepository= ''
-    httpUname= ''
-    httpPass= ''
+    lastId= None
 
+    settings= None
     parentDB= False
+
     migrate= False
 
-    reservedId= 0
-    reserveEvent= None
-    timerReserveId= None
 
-    def __init__(self, _cfg, _parentDB):
-        self.httpAddr= _cfg['addr']
-        self.httpRepository= _cfg['base']
-        self.httpUname= _cfg['login']
-        self.httpPass= _cfg['passw']
-
+    def __init__(self, _parentDB, _settingsId):
+        self.settings= _parentDB.config.settings[_settingsId]
         self.parentDB= _parentDB
-
-        self.reservedId= 0
-        self.reserveEvent= threading.Event()
-        self.reserveEvent.set()
-        self.timerReserveId = Timer(0, None) #dummy
-
-        self.newId()
 
 #todo 270 (http) +0: implement http timeout
 
@@ -111,23 +96,23 @@ class TodoDbHttp():
 
         postTodoA['ids']= ','.join(postList)
         postData['todoa']= json.dumps(postTodoA)
-        postData['logName']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
-        if self.httpUname!='' and self.httpPass!='':
-            postData['logName']= urllib2.quote(self.httpUname)
-            postData['logPass']= urllib2.quote(self.httpPass)
+        postData['logName']= urllib2.quote(self.parentDB.config.projectUser.encode('utf-8'))
+        if self.settings.login!='' and self.settings.passw!='':
+            postData['logName']= urllib2.quote(self.settings.login)
+            postData['logPass']= urllib2.quote(self.settings.passw)
 
-        postData['rep']= self.httpRepository
-        postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
+        postData['rep']= self.settings.base
+        postData['project']= urllib2.quote(self.parentDB.config.projectName.encode('utf-8'))
 
-        req = urllib2.Request('http://' +self.httpAddr +'/?=flush', str.encode(urllib.urlencode(postData)))
+        req = urllib2.Request('http://' +self.settings.addr +'/?=flush', str.encode(urllib.urlencode(postData)))
         try:
             response = bytes.decode( urllib2.urlopen(req).read() )
         except Exception as e:
-            print('TypeTodo: HTTP server error while flushing. Repository: ' +self.httpRepository)
+            print('TypeTodo: HTTP server error while flushing. Repository: ' +self.settings.base)
             print(e)
             return False
         if response=='':
-            print('TypeTodo: HTTP server flushing returns unexpected result. Repository: ' +self.httpRepository)
+            print('TypeTodo: HTTP server flushing returns unexpected result. Repository: ' +self.settings.base)
             return False
 
         allOk= True
@@ -152,37 +137,27 @@ class TodoDbHttp():
         self.migrate= False
         return allOk
 
-#macro
-#   pre: pick event set
-#   wait for pick event to set
-#   set return cached
-#   go pick next
-    def newId(self):
-        self.reserveEvent.wait()
-
-        okId= self.reservedId
-
-        self.reserveEvent.clear()
-        self.timerReserveId= Timer(0, self.newIdGet).start()
-
-        return okId
-
 
 #todo 258 (http) +5: release prefetched id at exit
     def newIdRelease(self):
         None
 
-    def newIdGet(self):
+
+    def newId(self, _wantedId=0):
+        if _wantedId==self.lastId:
+            return self.lastId
+
         postData= {}
-        postData['logName']= urllib2.quote(self.parentDB.projUser.encode('utf-8'))
-        if self.httpUname!='' and self.httpPass!='':
-            postData['logName']= urllib2.quote(self.httpUname)
-            postData['logPass']= urllib2.quote(self.httpPass)
+        postData['wantedId']= _wantedId
+        postData['logName']= urllib2.quote(self.parentDB.config.projectUser.encode('utf-8'))
+        if self.settings.login!='' and self.settings.passw!='':
+            postData['logName']= urllib2.quote(self.settings.login)
+            postData['logPass']= urllib2.quote(self.settings.passw)
 
-        postData['rep']= self.httpRepository
-        postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
+        postData['rep']= self.settings.base
+        postData['project']= urllib2.quote(self.parentDB.config.projectName.encode('utf-8'))
 
-        req = urllib2.Request('http://' +self.httpAddr +'/?=newid', str.encode(urllib.urlencode(postData)))
+        req = urllib2.Request('http://' +self.settings.addr +'/?=newid', str.encode(urllib.urlencode(postData)))
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
         except Exception as e:
@@ -193,19 +168,20 @@ class TodoDbHttp():
             print('TypeTodo: HTTP server fails creating todo')
             response= False
 
-        self.reservedId= int(response)
-        print('TypeTodo: HTTP id reserved: ' +str(self.reservedId))
-        self.reserveEvent.set()
+        self.lastId= int(response)
+        return self.lastId
 
 
+
+#todo 957 (db, http) +0: fetch http by one id
     def fetch(self, _id=False):
         postData= {}
-        postData['rep']= self.httpRepository
-        postData['project']= urllib2.quote(self.parentDB.projectName.encode('utf-8'))
-        if self.httpUname!='' and self.httpPass!='':
-            postData['logName']= urllib2.quote(self.httpUname)
-            postData['logPass']= urllib2.quote(self.httpPass)
-        req = urllib2.Request('http://' +self.httpAddr +'/?=fetchtasks', str.encode(urllib.urlencode(postData)))
+        postData['rep']= self.settings.base
+        postData['project']= urllib2.quote(self.parentDB.config.projectName.encode('utf-8'))
+        if self.settings.login!='' and self.settings.passw!='':
+            postData['logName']= urllib2.quote(self.settings.login)
+            postData['logPass']= urllib2.quote(self.settings.passw)
+        req = urllib2.Request('http://' +self.settings.addr +'/?=fetchtasks', str.encode(urllib.urlencode(postData)))
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
         except Exception as e:
@@ -219,7 +195,7 @@ class TodoDbHttp():
 
 #todo 143 (multidb) -1: http; handle cStamp on fetch
             if __id not in todoA:
-                todoA[__id]= TodoTask(__id, self.parentDB.projectName, task['nameuser'], int(task['ustamp']), self.parentDB)
+                todoA[__id]= TodoTask(__id, self.parentDB.config.projectName, task['nameuser'], int(task['ustamp']), self.parentDB)
 
                 fetchedStateName= task['namestate']
 #todo 257 (http) +0: remove True and False states after migration

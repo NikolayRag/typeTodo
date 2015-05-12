@@ -19,6 +19,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
     else:
         codeColor= sublime.DRAW_NO_OUTLINE |sublime.DRAW_NO_FILL |sublime.DRAW_SOLID_UNDERLINE
 
+
     def run(self, _edit, _regionStart= False, _regionEnd= False):
         if sublime.load_settings('typetodo.sublime-settings').get('typetodo_nocolorize'):
             self.view.erase_regions('dopletOpenPre')
@@ -32,7 +33,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
             return
 
-#todo 492 (command, fix) -5: should use specified region to speedup
+#todo 492 (command, fix) -5: should use specified region to speedup at editing
 #        if _regionStart and _regionEnd:
 #            _region= sublime.Region(_regionStart, _regionEnd)
 #        else:
@@ -46,6 +47,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         regionsProgress= []
         regionsInconsistentPre= []
         regionsInconsistent= []
+
         for cTodo in RE_TODO_EXISTING.finditer(content):
             regionMark= sublime.Region(cTodo.end('prefix'), cTodo.start('state'))
             regionTodo= sublime.Region(cTodo.start('state'), cTodo.end('comment'))
@@ -75,9 +77,10 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 #todo 570 (tool) +0: make tool for viewing inconsistent difference
     def todoValidate(self, _id, _state, _tags, _priority, _comment):
-        db= getDB(self.view)
+        db= WCache().getDB()
         if db and (int(_id) in db.todoA):
             storedTask= db.todoA[int(_id)]
+#todo 845 (fix) +0: compare tags more properly
             if storedTask.state!=_state or ', '.join(storedTask.tagsA)!=_tags or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
                 return False
         return True

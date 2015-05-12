@@ -80,42 +80,58 @@ class TypetodoEvent(sublime_plugin.EventListener):
             self.mutexUnlocked= 1
 
 
-#=todo 563 (interaction) +0: allow to change doplet state by pressing corresponding key (-/+/=/!) everywhere in protected doplet; same for up/down for priority
-#todo 449 (fix) -1: too much code duplicated from matchTodo(), review
     def on_query_context(self, _view, _key, _op, _val, _match):
-        if _key=='typetodoUp' or _key=='typetodoDown' or _key=='typetodoSet':
-            if len(_view.sel())!=1: #more than one cursors skipped for number of reasons
-                return;
 
+        if _key=='typetodoSet' and self.todoCursorPlace!=False:
+            return True
+
+
+        if self.todoCursorPlace=='todo' or self.todoCursorPlace=='priority' or self.todoCursorPlace=='tags' or self.todoCursorPlace=='postfix':
             todoRegion = _view.line(_view.sel()[0])
-            todoText = _view.substr(todoRegion)
 
-            _mod= RE_TODO_EXISTING.match(todoText) #mod goes first to allow midline todo
-            if _mod:
-                if _key=='typetodoSet':
-                    return True
+            if _key=='typetodoSetClosed':
+                _view.run_command('typetodo_set_state', {'_replaceWith': '+'})
+                return
 
-                selStart= _view.rowcol(_view.sel()[0].a)[1]
-                selEnd= selStart +_view.sel()[0].b -_view.sel()[0].a
-                if selStart>selEnd:
-                    tmp= selStart
-                    selStart= selEnd
-                    selEnd= tmp
+            if _key=='typetodoSetOpen':
+                _view.run_command('typetodo_set_state', {'_replaceWith': ''})
+                return
 
-                if selStart>=_mod.start('priority') and selEnd<=_mod.end('priority'):
-                    addValue= 1
-                    if _key=='typetodoDown':
-                        addValue= -1
-                    newPriority= int(_mod.group('priority')) +addValue
-                    newPriPfx= ''
-                    if newPriority>=0:
-                        newPriPfx= '+'
-                    newPriority= newPriPfx +str(newPriority)
-                    
-                    _view.run_command('typetodo_reg_replace', {'_regStart': todoRegion.a+_mod.start('priority'), '_regEnd': todoRegion.a+_mod.end('priority'), '_replaceWith': newPriority})
-                    return True
+            if _key=='typetodoSetCancel':
+                _view.run_command('typetodo_set_state', {'_replaceWith': '!'})
+                return
 
-#todo 210 (db) -1: implement editing of project .do file
+            if _key=='typetodoSetProgress':
+                _view.run_command('typetodo_set_state', {'_replaceWith': '='})
+                return
+
+
+
+
+            if _key=='typetodoUp':
+                addValue= 1
+
+            elif _key=='typetodoDown':
+                addValue= -1
+
+            else:
+                return
+
+            newPriority= int(self.todoMatch.group('priority')) +addValue
+            newPriPfx= ''
+            if newPriority>=0:
+                newPriPfx= '+'
+            newPriority= newPriPfx +str(newPriority)
+            
+            _view.set_read_only(False)
+            _view.run_command('typetodo_reg_replace', {
+                '_regStart': todoRegion.a+self.todoMatch.start('priority'),
+                '_regEnd': todoRegion.a+self.todoMatch.end('priority'),
+                '_replaceWith': newPriority
+            })
+            return True
+
+
 
 
 #todo 229 (ux) +0: make cached stuff per-project (or not?)
@@ -124,17 +140,19 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
     prevTriggerNew= None
     prevStateMod= None
-
+    todoCursorPlace= False
+    todoMatch= None
 
     def matchTodo(self, _modified= False):
+        self.todoCursorPlace= False
         if len(self.view.sel())!=1: #more than one cursors skipped for number of reasons
             return;
         
         todoRegion = self.view.line(self.view.sel()[0])
         todoText = self.view.substr(todoRegion)
 
-        _mod= RE_TODO_EXISTING.match(todoText) #mod goes first to allow midline todo
-        if _mod:
+        self.todoMatch= todoModMatch= RE_TODO_EXISTING.match(todoText) #mod goes first to allow midline todo
+        if todoModMatch:
             #set readonly
             selStart= self.view.rowcol(self.view.sel()[0].a)[1]
             selEnd= selStart +self.view.sel()[0].b -self.view.sel()[0].a
@@ -143,24 +161,24 @@ class TypetodoEvent(sublime_plugin.EventListener):
                 selStart= selEnd
                 selEnd= tmp
 
-            allowFlag= False
-            if selStart<=_mod.end('prefix') and selEnd>=_mod.start('postfix'):
-                allowFlag= True
-            else:
+            self.todoCursorPlace= 'todoString'
+            if selStart>todoModMatch.end('prefix') and selEnd<todoModMatch.end('postfix'):
+                self.todoCursorPlace= 'todo'
                 for rangeName in ('prefix', 'state', 'tags', 'priority', 'postfix'):
-                    if selStart>=_mod.start(rangeName) and selEnd<=_mod.end(rangeName):
-                        allowFlag= True
+                    if selStart>=todoModMatch.start(rangeName) and selEnd<=todoModMatch.end(rangeName):
+                        self.todoCursorPlace= rangeName
                         break
-            self.view.set_read_only(not allowFlag)
+
+            self.view.set_read_only(self.todoCursorPlace=='todo')
 
 
             #should trigger at '+' or '!' entered
-            doWipe= _mod.group('state')=='+' and self.prevStateMod!='+'
-            if not doWipe: doWipe= _mod.group('state')=='!' and self.prevStateMod!='!'
-            self.prevStateMod= _mod.group('state')
+            doWipe= todoModMatch.group('state')=='+' and self.prevStateMod!='+'
+            if not doWipe: doWipe= todoModMatch.group('state')=='!' and self.prevStateMod!='!'
+            self.prevStateMod= todoModMatch.group('state')
 
             if _modified:
-                self.substUpdate(_mod.group('state'), _mod.group('id'), _mod.group('tags'), _mod.group('priority'), _mod.group('comment'), _mod.group('prefix'), todoRegion, doWipe)
+                self.substUpdate(todoModMatch.group('state'), todoModMatch.group('id'), todoModMatch.group('tags'), todoModMatch.group('priority'), todoModMatch.group('comment'), todoModMatch.group('prefix'), todoRegion, doWipe)
                 sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {'_regionStart': int(todoRegion.a), '_regionEnd': int(todoRegion.b)}), 0)
 
             return
@@ -168,14 +186,14 @@ class TypetodoEvent(sublime_plugin.EventListener):
         self.view.set_read_only(False)
 
 
-        _new = RE_TODO_NEW.match(todoText)
-        if _new:
+        todoNewMatch = RE_TODO_NEW.match(todoText)
+        if todoNewMatch:
             #should trigger at ':' entered
-            doTrigger= _new.group('trigger')==':' and self.prevTriggerNew!=':'
-            self.prevTriggerNew= _new.group('trigger')
+            doTrigger= todoNewMatch.group('trigger')==':' and self.prevTriggerNew!=':'
+            self.prevTriggerNew= todoNewMatch.group('trigger')
 
             if _modified and doTrigger:
-                self.substNew(_new.group('prefix'), _new.group('comment'), todoRegion)
+                self.substNew(todoNewMatch.group('prefix'), todoNewMatch.group('comment'), todoRegion)
                 sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {'_regionStart': int(todoRegion.a), '_regionEnd': int(todoRegion.b)}), 0)
 
             return

@@ -17,6 +17,7 @@ else:
 #command is used to keep python flow unruined
 class TypetodoRegReplaceCommand(sublime_plugin.TextCommand):
     def run(self, _edit, _regStart= False, _regEnd= False, _replaceWith=''):
+        self.view.set_read_only(False) #will reset instantly
         self.view.replace(_edit, sublime.Region(int(_regStart), int(_regEnd)), _replaceWith)
 
 class TypetodoSetStateCommand(sublime_plugin.TextCommand):
@@ -27,11 +28,19 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
         if _idx>=0:
             self.view.run_command('typetodo_reg_replace', {'_regStart': self.setStateRegion[0], '_regEnd': self.setStateRegion[1], '_replaceWith': self.setStateChars[_idx]})
 
-    def run(self, _edit):
+    def run(self, _edit, _replaceWith=False):
         todoRegion = self.view.line(self.view.sel()[0])
         _mod= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
         if not _mod:
             sublime.status_message('Nothing Todo here')
+            return
+
+        self.setStateRegion= (_mod.span('state')[0] +todoRegion.a, _mod.span('state')[1] +todoRegion.a)
+
+
+        if _replaceWith!=False:
+            self.setStateChars= [_replaceWith]
+            self.setChar(0)
             return
 
 
@@ -54,7 +63,6 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
             self.setStateChars.append(state)
             menuItems.append('\'' +state +'\': ' +str(STATE_LIST[state]))
 
-        self.setStateRegion= (_mod.span('state')[0] +todoRegion.a, _mod.span('state')[1] +todoRegion.a)
 
         self.view.window().show_quick_panel(menuItems, self.setChar, sublime.MONOSPACE_FONT)
 

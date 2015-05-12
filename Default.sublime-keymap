@@ -1,6 +1,12 @@
 [
-{ "keys": ["+"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoUp"}] },
-{ "keys": ["-"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoDown"}] },
+{ "keys": ["shift+keypad_plus"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoUp"}] },
+{ "keys": ["shift+keypad_minus"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoDown"}] },
 { "keys": ["alt+d"], "command": "typetodo_set_state", "args": {}, "context": [{"key": "typetodoSet"}] },
-{ "keys": ["alt+shift+d"], "command": "typetodo_jump", "args": {} }
+{ "keys": ["alt+shift+d"], "command": "typetodo_jump", "args": {} },
+
+{ "keys": ["alt+shift+keypad_plus"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoSetClosed"}] },
+{ "keys": ["alt+shift+keypad_minus"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoSetOpen"}] },
+{ "keys": ["alt+shift+1"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoSetCancel"}] },
+{ "keys": ["alt+shift+="], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoSetProgress"}] }
+
 ]

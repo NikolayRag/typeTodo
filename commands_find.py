@@ -82,12 +82,19 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                             matches.append((cView, lNum-1, foundIncode.end('prefix'), cView.substr(cLine), foundIncode, cName))
                     else:
                         for cTag in foundIncode.group('tags').split(','):
+                            tagFound= False
                             for cId in _id.split(','):
                                 try:
                                     if re.search(cId.strip(), cTag.strip()):
                                         matches.append((cView, lNum-1, foundIncode.end('prefix'), cView.substr(cLine), foundIncode, cName))
+                                        tagFound= True
+                                        break
                                 except:
                                     None
+
+                            if tagFound:
+                                break
+
 
         return matches
 
@@ -110,12 +117,19 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                                 matches.append((None, lNum-1, foundEntry.end('prefix'), ln, foundEntry, _fn))
                         else:
                             for cTag in foundEntry.group('tags').split(','):
+                                tagFound= False
                                 for cId in _id.split(','):
                                     try:
                                         if re.search(cId.strip(), cTag.strip()):
                                             matches.append((None, lNum-1, foundEntry.end('prefix'), ln, foundEntry, _fn))
+                                            tagFound= True
+                                            break
                                     except:
                                         None
+                                
+                                if tagFound:
+                                    break
+
  
         except Exception as e:
             None
@@ -154,10 +168,6 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
         isTag= not re.match('^\d+$', _text)
 
-        markName= '#' +_text
-        if isTag: 
-            markName= 'tagged "' +_text +'"'
-
 
         matchesView= self.findTodoInViews(_text, isTag)
         matchesFiles= self.findTodoInProject(_text, isTag)
@@ -176,14 +186,21 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
         if not len(matches):
+            markName= '#' +_text
+            if isTag: 
+                markName= 'tagged "' +_text +'"'
+            
             sublime.message_dialog('TypeTodo error:\n\tDoplet ' +markName +' was not found in source')
 
+
+        #one found
         if len(matches) == 1:
             cView= matches[0][0]
             if not cView:
                 cView= sublime.active_window().open_file(matches[0][5], sublime.TRANSIENT)
             self.focusView(cView, matches[0][1], matches[0][2])
 
+        #many found
         if len(matches)>1:
             self.listTodos(_text, matches)
 

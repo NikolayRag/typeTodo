@@ -59,7 +59,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
             WCache().checkResultsView(_view.buffer_id(), True)
 
 
-    #maybe lil overheat here, but it works
+
     def on_selection_modified(self, _view):
         if WCache().checkResultsView(_view.buffer_id()):
             return
@@ -178,7 +178,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
             self.view.set_read_only(self.todoCursorPlace=='todo')
 
-
+#todo 1239 (interaction, fix) +0: get rid of snippets for tags autocomplete
             #toggle autocomplete
             self.autoList= False
             self.view.settings().erase('auto_complete_selector')

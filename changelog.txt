@@ -1,3 +1,12 @@
+v1.7.3
+
+new:
+- tags autocomplete added. Issue: autocomplete also will show snippets
+
+fix:
+- 'Search todo' command returned duplicates for multi-tag match, fixed
+
+
 v1.7.2
 
 changed:

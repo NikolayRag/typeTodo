@@ -59,7 +59,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
             WCache().checkResultsView(_view.buffer_id(), True)
 
 
-    #maybe lil overheat here, but it works
+
     def on_selection_modified(self, _view):
         if WCache().checkResultsView(_view.buffer_id()):
             return
@@ -79,32 +79,17 @@ class TypetodoEvent(sublime_plugin.EventListener):
             self.mutexUnlocked= 1
 
 
+
+
+    def on_query_completions(self, view, prefix, locations):
+        return self.autoList
+
+
+
     def on_query_context(self, _view, _key, _op, _val, _match):
 
-        if _key=='typetodoSet' and self.todoCursorPlace!=False:
-            return True
-
-
-        if self.todoCursorPlace=='prefix' or self.todoCursorPlace=='todo' or self.todoCursorPlace=='priority' or self.todoCursorPlace=='tags' or self.todoCursorPlace=='postfix':
+        if self.todoCursorPlace!=False:
             todoRegion = _view.line(_view.sel()[0])
-
-            if _key=='typetodoSetClosed':
-                _view.run_command('typetodo_set_state', {'_replaceWith': '+'})
-                return
-
-            if _key=='typetodoSetOpen':
-                _view.run_command('typetodo_set_state', {'_replaceWith': ''})
-                return
-
-            if _key=='typetodoSetCancel':
-                _view.run_command('typetodo_set_state', {'_replaceWith': '!'})
-                return
-
-            if _key=='typetodoSetProgress':
-                _view.run_command('typetodo_set_state', {'_replaceWith': '='})
-                return
-
-
 
 
             if _key=='typetodoUp':
@@ -133,7 +118,12 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 
-#todo 229 (ux) +0: make cached stuff per-project (or not?)
+
+
+
+
+
+
     lastCat= ['general']
     lastLvl= '+0'
 
@@ -141,6 +131,24 @@ class TypetodoEvent(sublime_plugin.EventListener):
     prevStateMod= None
     todoCursorPlace= False
     todoMatch= None
+
+    autoList= False
+
+    def tagsAutoCollect(self):
+        tagsA= []
+        todosA= WCache().getDB().todoA
+        for cTask in todosA:
+            for cTag in todosA[cTask].tagsA:
+                if cTag not in tagsA:
+                    tagsA.append(cTag)
+
+        tagsListA= [(' ','')]
+        for cTag in tagsA:
+            tagsListA.append((cTag, cTag))
+
+        return tagsListA
+
+
 
     def matchTodo(self, _modified= False):
         self.todoCursorPlace= False
@@ -152,7 +160,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
         self.todoMatch= todoModMatch= RE_TODO_EXISTING.match(todoText) #mod goes first to allow midline todo
         if todoModMatch:
-            #set readonly
+            #resolve cursor place
             selStart= self.view.rowcol(self.view.sel()[0].a)[1]
             selEnd= selStart +self.view.sel()[0].b -self.view.sel()[0].a
             if selStart>selEnd:
@@ -169,6 +177,14 @@ class TypetodoEvent(sublime_plugin.EventListener):
                         break
 
             self.view.set_read_only(self.todoCursorPlace=='todo')
+
+#todo 1239 (interaction, fix) +0: get rid of snippets for tags autocomplete
+            #toggle autocomplete
+            self.autoList= False
+            self.view.settings().erase('auto_complete_selector')
+            if self.todoCursorPlace=='tags':
+                self.autoList= self.tagsAutoCollect()
+                self.view.settings().set('auto_complete_selector', 'source')
 
 
             #should trigger at '+' or '!' entered

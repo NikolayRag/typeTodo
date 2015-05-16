@@ -35,7 +35,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
     def listTodos(self, _for, _matches):
         resView= WCache().getResultsView()
 
-        textAppend= 'Search doplets for "' +_for +'":\n\n'
+        textAppend= 'Search doplets for "' +_for +'"\n' +str(len(_matches)) +' matches found:\n\n'
 
         firstLine= 0
         lastFilename= ''

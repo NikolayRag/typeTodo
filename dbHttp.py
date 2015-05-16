@@ -34,8 +34,7 @@ either:
 '''
 #todo 96 (store) +0: add more 'context' using HTTP
 
-import sys, json, threading, encodings.idna
-from threading import Timer
+import sys, json, encodings.idna
 
 if sys.version < '3':
     import urllib2, urllib

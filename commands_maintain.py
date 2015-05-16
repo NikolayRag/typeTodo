@@ -75,13 +75,13 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         self.view.add_regions('dopletInconsistent', regionsInconsistent, 'invalid', 'dot', self.codeColor)
 
 
-#todo 570 (tool) +0: make tool for viewing inconsistent difference
+#todo 570 (feature) +0: make tool for viewing inconsistent difference
     def todoValidate(self, _id, _state, _tags, _priority, _comment):
         db= WCache().getDB()
         if db and (int(_id) in db.todoA):
             storedTask= db.todoA[int(_id)]
 #todo 845 (fix) +0: compare tags more properly
-            if storedTask.state!=_state or ', '.join(storedTask.tagsA)!=_tags or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
+            if storedTask.state!=_state or sorted(storedTask.tagsA)!=_tags or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
                 return False
         return True
 

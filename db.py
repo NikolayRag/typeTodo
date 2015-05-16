@@ -1,6 +1,6 @@
 # coding= utf-8
 
-import sys, re, os, time, codecs
+import sys, re, os, time, codecs, threading
 from threading import Timer
 
 if sys.version < '3':
@@ -70,7 +70,7 @@ class TodoDb():
 
 #Macro:
 #    - get new cfg
-#    - flush using old if any
+#       - flush if unchanged
 #    - fetch using new
 #    - flush using new
 
@@ -175,7 +175,7 @@ class TodoDb():
 
         strStamp= int(time.time())
 
-#=todo 71 (db) -1: instantly remove blank new task from cache before saving if set to +
+#=todo 71 (db) -1: instantly remove blank new task from cache before saving if set to + or !
         if cId not in self.todoA: #for new and repairing tasks
             self.todoA[cId]= TodoTask(cId, self.config.projectName, self.config.projectUser, strStamp, self)
 
@@ -218,6 +218,7 @@ class TodoDb():
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s'), 0)
 
 
+#=todo 1250 (db, consistency) +0: fetch db periodically
 #macro
 #   1. roll over all db's
 #   2. fetch unbinded task lists

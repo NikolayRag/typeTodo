@@ -194,7 +194,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
             if _modified:
                 self.substUpdate(todoModMatch.group('state'), todoModMatch.group('id'), todoModMatch.group('tags'), todoModMatch.group('priority'), todoModMatch.group('comment'), todoModMatch.group('prefix'), todoRegion, doWipe)
-                sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {'_regionStart': int(todoRegion.a), '_regionEnd': int(todoRegion.b)}), 0)
+                sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {'_delayed':0, '_regionStart': int(todoRegion.a), '_regionEnd': int(todoRegion.b)}), 0)
 
             return
 
@@ -209,7 +209,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
             if _modified and doTrigger:
                 self.substNew(todoNewMatch.group('prefix'), todoNewMatch.group('comment'), todoRegion)
-                sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {'_regionStart': int(todoRegion.a), '_regionEnd': int(todoRegion.b)}), 0)
+                sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {'_delayed':0, '_regionStart': int(todoRegion.a), '_regionEnd': int(todoRegion.b)}), 0)
 
             return
 

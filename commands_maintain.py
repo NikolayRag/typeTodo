@@ -20,7 +20,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         codeColor= sublime.DRAW_NO_OUTLINE |sublime.DRAW_NO_FILL |sublime.DRAW_SOLID_UNDERLINE
 
 
-    def run(self, _edit, _regionStart= False, _regionEnd= False):
+    def run(self, _edit, _delayed=True, _regionStart= False, _regionEnd= False):
         if sublime.load_settings('typetodo.sublime-settings').get('typetodo_nocolorize'):
             self.view.erase_regions('dopletOpenPre')
             self.view.erase_regions('dopletOpen')
@@ -65,14 +65,17 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
                 regionsOpen.append(regionTodo)
 
 
+        _delayed= int(_delayed)
+        
         self.view.add_regions('dopletOpenPre', regionsOpenPre, 'comment', 'dot')
         self.view.add_regions('dopletOpen', regionsOpen, 'comment', 'dot', self.codeColor)
 
-        self.view.add_regions('dopletProgressPre', regionsProgressPre, 'constant.language', 'dot')
-        self.view.add_regions('dopletProgress', regionsProgress, 'constant.language', 'dot', self.codeColor)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletProgressPre', regionsProgressPre, 'constant.language', 'dot'), 100*_delayed)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletProgress', regionsProgress, 'constant.language', 'dot', self.codeColor), 100*_delayed)
 
-        self.view.add_regions('dopletInconsistentPre', regionsInconsistentPre, 'invalid', 'dot')
-        self.view.add_regions('dopletInconsistent', regionsInconsistent, 'invalid', 'dot', self.codeColor)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletInconsistentPre', regionsInconsistentPre, 'invalid', 'dot'), 200*_delayed)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletInconsistent', regionsInconsistent, 'invalid', 'dot', self.codeColor), 200*_delayed)
+
 
 
 #todo 570 (command, feature) +0: make tool for viewing inconsistent difference

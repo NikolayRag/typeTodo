@@ -214,6 +214,11 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         #jump to .do file
         todoIncode= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
         if todoIncode:
+            foundView= WCache().getResultsView(False)
+            if foundView and foundView.buffer_id()==self.view.buffer_id():
+                self.findNamed(todoIncode.group('id'))
+                return
+
             cDb= WCache().getDB()
             fn= cDb.config.settings[0].file
             if not os.path.isfile(fn):

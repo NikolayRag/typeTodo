@@ -20,7 +20,7 @@ class TypetodoRegReplaceCommand(sublime_plugin.TextCommand):
         self.view.set_read_only(False) #will reset instantly
         self.view.replace(_edit, sublime.Region(int(_regStart), int(_regEnd)), _replaceWith)
  
-#=todo 1253 (command, fix) +0: prevent Search results from 'Set State' command
+
 class TypetodoSetStateCommand(sublime_plugin.TextCommand):
     setStateChars= []
     setStateRegion= []
@@ -30,6 +30,11 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
             self.view.run_command('typetodo_reg_replace', {'_regStart': self.setStateRegion[0], '_regEnd': self.setStateRegion[1], '_replaceWith': self.setStateChars[_idx]})
 
     def run(self, _edit, _replaceWith=False):
+        #prevented while in 'Search todo' results
+        foundView= WCache().getResultsView(False)
+        if foundView and foundView.buffer_id()==self.view.buffer_id():
+            return
+
         todoRegion = self.view.line(self.view.sel()[0])
         _mod= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
         if not _mod:

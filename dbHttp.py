@@ -32,7 +32,7 @@ either:
 - task editor name specified by rather an plain text (anon) or by logged user id
 
 '''
-#todo 96 (store) +0: add more 'context' using HTTP
+#todo 96 (store, feature) +0: add more 'context' using HTTP
 
 import sys, json, encodings.idna
 
@@ -65,9 +65,9 @@ class TodoDbHttp():
         self.settings= _parentDB.config.settings[_settingsId]
         self.parentDB= _parentDB
 
-#todo 270 (http) +0: implement http timeout
+#todo 270 (http, cleanup) +0: implement http timeout
 
-#=todo 307 (http) +0: change URL addressing scheme to rep/proj; join registered/anon name
+#todo 307 (http, cleanup, unsure) +0: change URL addressing scheme to rep/proj; join registered/anon name
     def flush(self, _dbN):
         postData= {}
         postList= list()
@@ -115,7 +115,7 @@ class TodoDbHttp():
             return False
 
         allOk= True
-#todo 281 (db, flush) +0: compare with postList
+#todo 281 (db, flush, cleanup) +0: compare with postList
         response= json.loads(response)
         for respId in response:
             curTodo= self.parentDB.todoA[int(respId)]
@@ -137,7 +137,7 @@ class TodoDbHttp():
         return allOk
 
 
-#todo 258 (http) +5: release prefetched id at exit
+#todo 258 (http, cleanup) +5: release prefetched id at exit
     def newIdRelease(self):
         None
 
@@ -172,7 +172,7 @@ class TodoDbHttp():
 
 
 
-#todo 957 (db, http) +0: fetch http by one id
+#todo 957 (db, http, refactor) +0: fetch http by one id
     def fetch(self, _id=False):
         postData= {}
         postData['rep']= self.settings.base
@@ -192,12 +192,12 @@ class TodoDbHttp():
         for task in json.loads(response):
             __id= int(task['id'])
 
-#todo 143 (multidb) -1: http; handle cStamp on fetch
+#todo 143 (multidb, unsure) -1: http; handle cStamp on fetch
             if __id not in todoA:
                 todoA[__id]= TodoTask(__id, self.parentDB.config.projectName, task['nameuser'], int(task['ustamp']), self.parentDB)
 
                 fetchedStateName= task['namestate']
-#todo 257 (http) +0: remove True and False states after migration
+#todo 257 (http, cleanup) +0: remove True and False states after migration
 #subject to remove after state names migration+
                 if fetchedStateName=='False':
                     self.migrate= True

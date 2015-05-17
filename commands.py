@@ -19,8 +19,8 @@ class TypetodoRegReplaceCommand(sublime_plugin.TextCommand):
     def run(self, _edit, _regStart= False, _regEnd= False, _replaceWith=''):
         self.view.set_read_only(False) #will reset instantly
         self.view.replace(_edit, sublime.Region(int(_regStart), int(_regEnd)), _replaceWith)
-
-#todo 1253 (command, fix) +0: prevent Search results form 'Set State' command
+ 
+#=todo 1253 (command, fix) +0: prevent Search results from 'Set State' command
 class TypetodoSetStateCommand(sublime_plugin.TextCommand):
     setStateChars= []
     setStateRegion= []

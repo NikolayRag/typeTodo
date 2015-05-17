@@ -31,7 +31,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         sublime.set_timeout(lambda: _view.run_command('typetodo_jump_point', {'_line': _line, '_col': _col}), 100)
 
 
-#todo 566 (command) +0: make jump-to-result in todo search results window
+#todo 566 (command, feature) +0: make jump-to-result in todo search results window
     def listTodos(self, _for, _matches):
         resView= WCache().getResultsView()
 
@@ -60,7 +60,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-#todo 1252 (command, fix) +0: skip search in non-related windows, as Sublime find results
+#=todo 1252 (command, fix) +0: skip search in non-related windows, as Sublime find results
     def findTodoInViews(self, _id, _isTag= False):
         resView= WCache().getResultsView(False)
 
@@ -159,7 +159,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-#todo 577 (command) +0: entering blank string for search gives list of view's doplets
+#todo 577 (command, feature) +0: entering blank string for search gives list of view's doplets
     def findNamed(self, _text= ''):
         if _text=='':
             return

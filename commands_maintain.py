@@ -33,7 +33,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
             return
 
-#todo 492 (command, fix) -5: should use specified region to speedup at editing
+#todo 492 (command, cleanup) -5: should use specified region to speedup at editing
 #        if _regionStart and _regionEnd:
 #            _region= sublime.Region(_regionStart, _regionEnd)
 #        else:
@@ -75,7 +75,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         self.view.add_regions('dopletInconsistent', regionsInconsistent, 'invalid', 'dot', self.codeColor)
 
 
-#todo 570 (feature) +0: make tool for viewing inconsistent difference
+#todo 570 (command, feature) +0: make tool for viewing inconsistent difference
     def todoValidate(self, _id, _state, _tags, _priority, _comment):
         db= WCache().getDB()
         if db and (int(_id) in db.todoA):

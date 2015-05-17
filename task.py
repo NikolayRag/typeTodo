@@ -15,6 +15,7 @@ class TodoTask():
     project= ''
     creator= ''
 
+#todo 1254 (unsure) +0: remove cStamp from .do and form dealing with
     cStamp= False #used only for dbFile; unix time
 
     #updatable
@@ -58,7 +59,7 @@ class TodoTask():
 
     def setSaved(self, _state, _engine=-1):
         #'file' (0) indicates it is initial; dont set True at flush to save bulk every time after first .set()
-        if _state==SAVE_STATES.IDLE and _engine==0: #skip explicit 'file'->IDLE; #todo 209 (db) -10: make .savedA[] for file treated as for other engines
+        if _state==SAVE_STATES.IDLE and _engine==0: #skip explicit 'file'->IDLE; #todo 209 (db, cleanup) -10: make .savedA[] for file treated as for other engines
             return True
 
         if _engine<0: #set all

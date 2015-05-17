@@ -60,13 +60,15 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-#=todo 1252 (command, fix) +0: skip search in non-related windows, as Sublime find results
+
     def findTodoInViews(self, _id, _isTag= False):
         resView= WCache().getResultsView(False)
 
         matches= []
         for cView in sublime.active_window().views():
             if resView and cView.buffer_id()==resView.buffer_id():
+                continue
+            if cView.name() == 'Find Results':
                 continue
 
             cName= cView.file_name()

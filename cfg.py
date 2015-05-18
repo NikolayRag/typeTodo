@@ -65,6 +65,10 @@ class Config():
 
 
 
+
+
+
+
     def update(self):
         if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
 
@@ -118,7 +122,13 @@ class Config():
 
 
 
-#todo 241 (cfg, file, feature) +5: enable to define separate file for TODOs, to split DB settings from file db itself
+
+
+
+#=todo 149 (cfg, feature) +5: make use of more than one (last) cfg string
+#=todo 170 (cfg, refactor) +0: build list of cfg's to pass to db.reset()
+
+#=todo 241 (cfg, file, feature) +5: enable to define separate file for TODOs, to split DB settings from file db itself
     def readCfg(self, _cfgFile):
         try:
             f= codecs.open(_cfgFile, 'r', 'UTF-8')
@@ -159,6 +169,10 @@ class Config():
         cSettings.head= headerCollect
 
         return cSettings
+
+
+
+
 
 
 

@@ -64,6 +64,12 @@ class TodoDb():
         self.pushReset()
         
 
+
+
+
+
+
+#todo 1250 (db, consistency, feature) +0: fetch db periodically
     def pushReset(self, _delay=1000): #leave 1 to remove spam
         self.resetPending= True
         sublime.set_timeout(self.reset, _delay)
@@ -79,15 +85,14 @@ class TodoDb():
             return
         self.resetPending= False
 
-#todo 149 (cfg, feature) +5: make use of more than one (last) cfg string
 
         if not self.config.update() and len(self.dbA):
             self.flush(True)
             return
 
+
         print ('TypeTodo: reset db')
 
-#todo 170 (cfg, refactor) +0: build list of cfg's to pass to db.reset()
         dbId= 0
         self.dbA.clear() #new db array
 
@@ -108,6 +113,10 @@ class TodoDb():
 
         self.fetch() #sync all db at first
         self.flush(True)
+
+
+
+
 
 
 
@@ -154,6 +163,12 @@ class TodoDb():
 
 
 
+
+
+
+
+
+
     def store(self, _id, _state, _tags, _lvl, _fileName, _comment):
         self.timerFlush.cancel()
 
@@ -190,6 +205,13 @@ class TodoDb():
         return cId
 
 
+
+
+
+
+
+
+
     def flush(self, _runOnce=False):
         self.timerFlush.cancel()
 
@@ -218,7 +240,12 @@ class TodoDb():
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s'), 0)
 
 
-#todo 1250 (db, consistency, feature) +0: fetch db periodically
+
+
+
+
+
+
 #macro
 #   1. roll over all db's
 #   2. fetch unbinded task lists

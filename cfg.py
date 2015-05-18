@@ -65,6 +65,10 @@ class Config():
 
 
 
+
+
+
+
     def update(self):
         if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
 
@@ -118,7 +122,13 @@ class Config():
 
 
 
-#todo 241 (cfg, file) +5: enable to define separate file for TODOs, to split DB settings from file db itself
+
+
+
+#=todo 149 (cfg, feature) +5: make use of more than one (last) cfg string
+#=todo 170 (cfg, refactor) +0: build list of cfg's to pass to db.reset()
+
+#=todo 241 (cfg, file, feature) +5: enable to define separate file for TODOs, to split DB settings from file db itself
     def readCfg(self, _cfgFile):
         try:
             f= codecs.open(_cfgFile, 'r', 'UTF-8')
@@ -162,7 +172,10 @@ class Config():
 
 
 
-#=todo 351 (cfg) +0: allow skip global configure for HTTP at first start
+
+
+
+
 
     def initGlobalDo(self, _force=False):
         _cfgFile= os.path.join(self.sublimeRoot, '.do')
@@ -173,30 +186,30 @@ class Config():
                 return cCfg
 
 
-        httpInitFlag= True
+        cSettings= Setting()
+        headerCollect= self.defaultHeader
+
+        httpInitFlag= sublime.ok_cancel_dialog('TypeTodo init:\n\n\tStart with public HTTP base?')
 
         #request new random public repository
         if httpInitFlag:
             req = urllib2.Request('http://' +self.defaultHttpApi +'/?=newrep')
             try:
                 cRep= bytes.decode( urllib2.urlopen(req).read() )
+
+                print("New TypeTodo repository: " +cRep)
+                sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
+
+                cSettings.engine= 'http'
+                cSettings.addr= self.defaultHttpApi
+                cSettings.base= cRep
+
+                headerCollect+= cSettings.engine +" " +cSettings.addr +" " +cSettings.base +"\n"
+
+
             except:
-                httpInitFlag= False
+                sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
 
-
-        cSettings= Setting()
-        headerCollect= ''
-
-        if httpInitFlag:
-            print("New TypeTodo repository: " +cRep)
-
-            cSettings.engine= 'http'
-            cSettings.addr= self.defaultHttpApi
-            cSettings.base= cRep
-
-            headerCollect= self.defaultHeader +cSettings.engine +" " +cSettings.addr +" " +cSettings.base +"\n"
-
-            sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
 
 
         try:
@@ -206,8 +219,6 @@ class Config():
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tglobal config cannot be created'), 1000)
             return
 
-        if not httpInitFlag:
-            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
 
 
         cSettings.head= headerCollect

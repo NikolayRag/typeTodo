@@ -23,7 +23,7 @@ else:
     from .task import *
     from .c import *
 
-#todo 95 (store) +0: add more 'context' using SQL
+#todo 95 (store, feature) +0: add more 'context' using SQL
 
 class TodoDbSql():
     name= 'Sql'
@@ -144,7 +144,7 @@ class TodoDbSql():
             self.dbConn = pymysql.connect(host=self.settings.addr, port=3306, user=self.settings.login, passwd=self.settings.passw, db=self.settings.base, use_unicode=True, charset="utf8")
             self.dbConn.autocommit(True)
         except Exception as e:
-#todo 35 (sql) +0: deal with connection errors: host, log, scheme
+#todo 35 (sql, cleanup) +0: deal with connection errors: host, log, scheme
             self.dbConn= None
             print('TypeTodo: MySQL error, Sql connection cannot be established, check MySQL settings:')
             print(e)
@@ -262,7 +262,7 @@ class TodoDbSql():
                 )
                 tagOrder+= 1
 
-            #todo 285 (sql) +0: detect sql saving error
+            #todo 285 (sql, cleanup) +0: detect sql saving error
             #newState= SAVE_STATES.READY
             if curTodo.savedA[_dbN]==SAVE_STATES.HOLD: #edited-while-save todo will not become idle here
                 curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
@@ -304,7 +304,7 @@ class TodoDbSql():
         return self.lastId
 
 
-#todo 956 (db, sql) +0: fetch sql by one id
+#todo 956 (db, sql, refactor) +0: fetch sql by one id
     def fetch(self, _id=False):
         if not self.reconnect():
             return False
@@ -331,7 +331,7 @@ class TodoDbSql():
         for task in cur.fetchall():
             __id= int(task[sqn['id']])
             ver_tags[__id]= task[sqn['version_tag']]
-#todo 144 (multidb) -1: sql; handle cStamp on fetch
+#todo 144 (multidb, unsure) -1: sql; handle cStamp on fetch
             if __id not in todoA:
                 todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], int(task[sqn['ustamp']]), self.parentDB)
 

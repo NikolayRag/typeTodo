@@ -31,11 +31,11 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         sublime.set_timeout(lambda: _view.run_command('typetodo_jump_point', {'_line': _line, '_col': _col}), 100)
 
 
-#todo 566 (command) +0: make jump-to-result in todo search results window
+
     def listTodos(self, _for, _matches):
         resView= WCache().getResultsView()
 
-        textAppend= 'Search doplets for "' +_for +'":\n\n'
+        textAppend= 'Search doplets for "' +_for +'"\n' +str(len(_matches)) +' matches found:\n\n'
 
         firstLine= 0
         lastFilename= ''
@@ -60,12 +60,15 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
+
     def findTodoInViews(self, _id, _isTag= False):
         resView= WCache().getResultsView(False)
 
         matches= []
         for cView in sublime.active_window().views():
             if resView and cView.buffer_id()==resView.buffer_id():
+                continue
+            if cView.name() == 'Find Results':
                 continue
 
             cName= cView.file_name()
@@ -138,6 +141,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
+#todo 1310 (command, feature) -1: 'Search todo' should accept .git-ignore file to skip files
     def isKnownFileExt(self, _fn):
         fName, fExt= os.path.splitext(_fn)
         for cExt in SKIP_SEARCH_FILES:
@@ -158,11 +162,14 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-#todo 577 (command) +0: entering blank string for search gives list of view's doplets
-    def findNamed(self, _text= ''):
-        if _text=='':
-            return
+    jumpList= []
 
+    def jumpFromList (self, _idx):
+        self.focusView(self.view, self.jumpList[_idx][1], self.jumpList[_idx][2])
+
+
+#todo 1309 (command, feature) +0: allow 'except' search by prefixing with '-'
+    def findNamed(self, _text= ''):
         if _text=='*':
             _text='.*'
 
@@ -170,6 +177,36 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
         matchesView= self.findTodoInViews(_text, isTag)
+        
+        #current view list
+        if _text=='':
+            cViewMatches= []
+            for cMatch in matchesView:
+                if cMatch[0].buffer_id()==self.view.buffer_id():
+                    cViewMatches.append(cMatch)
+
+            #one found
+            if len(cViewMatches) == 1:
+                self.focusView(self.view, cViewMatches[0][1], cViewMatches[0][2])
+
+            #many found, list
+            if len(cViewMatches)>1:
+
+                self.jumpList= []
+                viewTodoList= []
+
+                for cMatch in cViewMatches:
+                    self.jumpList.append(cMatch)
+                    
+                    cId= ' '*(7-len(cMatch[4].group('id'))) +cMatch[4].group('id')
+                    cEnding= ''
+                    if cMatch[4].group('postfix')>65:
+                        cEnding= '...'
+                    viewTodoList.append(cId +':' +cMatch[4].group('postfix')[0:65] +cEnding)
+                self.view.window().show_quick_panel(viewTodoList, self.jumpFromList, sublime.MONOSPACE_FONT)
+
+            return
+
         matchesFiles= self.findTodoInProject(_text, isTag)
 
         #exclude duplicated filenames from file matches
@@ -207,12 +244,20 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
+
     def run(self, _edit):
         todoRegion = self.view.line(self.view.sel()[0])
 
-        #jump to .do file
+        #jump by doplet's id - to .d or from Search results
         todoIncode= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
         if todoIncode:
+
+            # jump from Search results
+            foundView= WCache().getResultsView(False)
+            if foundView and foundView.buffer_id()==self.view.buffer_id():
+                self.findNamed(todoIncode.group('id'))
+                return
+
             cDb= WCache().getDB()
             fn= cDb.config.settings[0].file
             if not os.path.isfile(fn):
@@ -230,7 +275,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             return
 
 
-        #jump to code
+        #jump from .do to code
         todoIndo= RE_TODO_STORED.match(self.view.substr(todoRegion))
         if todoIndo:
             self.findNamed(todoIndo.group('id'))

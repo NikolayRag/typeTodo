@@ -1,0 +1,12 @@
+v1.7.4
+
+new:
+- 'Search todo' with blank input will list current view's doplets
+- allow to skip HTTP when global config created
+
+fix:
+- 'Set State' command restricted in 'Search todo' results view
+- 'Search todo' now skip ordinary 'Find' results view
+- cursor was currupted with different-colorized doplets on one screen
+- If searching doplets within 'Search todo' results, source doplet is focused instead of .do
+

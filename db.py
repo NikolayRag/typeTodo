@@ -1,6 +1,6 @@
 # coding= utf-8
 
-import sys, re, os, time, codecs
+import sys, re, os, time, codecs, threading
 from threading import Timer
 
 if sys.version < '3':
@@ -16,9 +16,9 @@ else:
     from .dbHttp import *
     from .task import *
 
-#=todo 44 (config, doc) +0: handle saving project - existing and blank; transfer db for involved files
+#todo 44 (config, db) +0: handle saving project - existing and blank; transfer db for involved files
 
-#todo 89 (db) +0: save context (+-2 strings of code) with task. NOT for 'file' mode
+#todo 89 (db, feature) +0: save context (+-2 strings of code) with task. NOT for 'file' mode
 
 
 '''
@@ -64,13 +64,19 @@ class TodoDb():
         self.pushReset()
         
 
+
+
+
+
+
+#todo 1250 (db, consistency, feature) +0: fetch db periodically
     def pushReset(self, _delay=1000): #leave 1 to remove spam
         self.resetPending= True
         sublime.set_timeout(self.reset, _delay)
 
 #Macro:
 #    - get new cfg
-#    - flush using old if any
+#       - flush if unchanged
 #    - fetch using new
 #    - flush using new
 
@@ -79,15 +85,14 @@ class TodoDb():
             return
         self.resetPending= False
 
-#todo 149 (cfg) +5: make use of more than one (last) cfg string
 
         if not self.config.update() and len(self.dbA):
             self.flush(True)
             return
 
+
         print ('TypeTodo: reset db')
 
-#todo 170 (cfg) +0: build list of cfg's to pass to db.reset()
         dbId= 0
         self.dbA.clear() #new db array
 
@@ -108,6 +113,10 @@ class TodoDb():
 
         self.fetch() #sync all db at first
         self.flush(True)
+
+
+
+
 
 
 
@@ -154,6 +163,12 @@ class TodoDb():
 
 
 
+
+
+
+
+
+
     def store(self, _id, _state, _tags, _lvl, _fileName, _comment):
         self.timerFlush.cancel()
 
@@ -175,7 +190,7 @@ class TodoDb():
 
         strStamp= int(time.time())
 
-#=todo 71 (db) -1: instantly remove blank new task from cache before saving if set to +
+#todo 71 (db, cleanup) -1: instantly remove blank new task from cache before saving if set to + or !
         if cId not in self.todoA: #for new and repairing tasks
             self.todoA[cId]= TodoTask(cId, self.config.projectName, self.config.projectUser, strStamp, self)
 
@@ -190,6 +205,13 @@ class TodoDb():
         return cId
 
 
+
+
+
+
+
+
+
     def flush(self, _runOnce=False):
         self.timerFlush.cancel()
 
@@ -197,8 +219,8 @@ class TodoDb():
         for dbN in self.dbA:
             flushOk= flushOk and self.dbA[dbN].flush(dbN)
         
-#todo 280 (db, flush) +0: .dirty used only to display message; should be removed at all
-        if not self.dirty: #todo 240 (db, flush) +0: hadn't to save, needed for file mode;  should be reviewed
+#todo 280 (db, flush, cleanup) +0: .dirty used only to display message; should be removed at all
+        if not self.dirty: #todo 240 (db, flush, cleanup) +0: hadn't to save, needed for file mode;  should be reviewed
             return
             
         if flushOk:
@@ -216,6 +238,12 @@ class TodoDb():
 
         if _runOnce or self.flushRetries==0:
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s'), 0)
+
+
+
+
+
+
 
 
 #macro
@@ -240,7 +268,6 @@ class TodoDb():
                 task= todoA[iT]
                 __id= task.id
 
-#todo 112 (multidb) +0: Use and check tasks .version
                 isNew= __id not in self.todoA
                 diffStamp= 0
                 if not isNew:

@@ -1,10 +1,10 @@
 # coding= utf-8
 
-#todo 1 (interaction) -1: multiline TODO
-#todo 11 (interaction) -10: make more TODO formats available
+#todo 1 (interaction, feature) -1: multiline TODO
+#todo 11 (interaction, unsure) -10: make more TODO formats available
 
 #todo 232 (feature) +0: introduce sub-todo's that are part of other
-#todo 210 (db) -5: implement editing of project .do file
+#todo 210 (db, feature, unsure) -5: implement editing of project .do file
 
 
 import sublime, sublime_plugin
@@ -178,7 +178,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
             self.view.set_read_only(self.todoCursorPlace=='todo')
 
-#todo 1239 (interaction, fix) +0: get rid of snippets for tags autocomplete
+#todo 1239 (interaction, unsolved) +0: get rid of snippets for tags autocomplete
             #toggle autocomplete
             self.autoList= False
             self.view.settings().erase('auto_complete_selector')
@@ -194,7 +194,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
             if _modified:
                 self.substUpdate(todoModMatch.group('state'), todoModMatch.group('id'), todoModMatch.group('tags'), todoModMatch.group('priority'), todoModMatch.group('comment'), todoModMatch.group('prefix'), todoRegion, doWipe)
-                sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {'_regionStart': int(todoRegion.a), '_regionEnd': int(todoRegion.b)}), 0)
+                sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {'_delayed':0, '_regionStart': int(todoRegion.a), '_regionEnd': int(todoRegion.b)}), 0)
 
             return
 
@@ -209,7 +209,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
             if _modified and doTrigger:
                 self.substNew(todoNewMatch.group('prefix'), todoNewMatch.group('comment'), todoRegion)
-                sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {'_regionStart': int(todoRegion.a), '_regionEnd': int(todoRegion.b)}), 0)
+                sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {'_delayed':0, '_regionStart': int(todoRegion.a), '_regionEnd': int(todoRegion.b)}), 0)
 
             return
 
@@ -264,7 +264,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
         sublime.message_dialog('TypeTodo error:\n\tDoplet was not saved. \n\tThis is known issue and\n\twill be fixed')
 
-#=todo 21 (general) +0: handle filename change, basically for new unsaved files
+#todo 21 (interaction, feature) +0: handle filename change, basically for new unsaved files
 
 
 try:

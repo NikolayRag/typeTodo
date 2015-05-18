@@ -20,7 +20,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         codeColor= sublime.DRAW_NO_OUTLINE |sublime.DRAW_NO_FILL |sublime.DRAW_SOLID_UNDERLINE
 
 
-    def run(self, _edit, _regionStart= False, _regionEnd= False):
+    def run(self, _edit, _delayed=True, _regionStart= False, _regionEnd= False):
         if sublime.load_settings('typetodo.sublime-settings').get('typetodo_nocolorize'):
             self.view.erase_regions('dopletOpenPre')
             self.view.erase_regions('dopletOpen')
@@ -33,7 +33,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
             return
 
-#todo 492 (command, fix) -5: should use specified region to speedup at editing
+#todo 492 (command, cleanup) -5: should use specified region to speedup at editing
 #        if _regionStart and _regionEnd:
 #            _region= sublime.Region(_regionStart, _regionEnd)
 #        else:
@@ -65,24 +65,31 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
                 regionsOpen.append(regionTodo)
 
 
+        _delayed= int(_delayed)
+        
         self.view.add_regions('dopletOpenPre', regionsOpenPre, 'comment', 'dot')
         self.view.add_regions('dopletOpen', regionsOpen, 'comment', 'dot', self.codeColor)
 
-        self.view.add_regions('dopletProgressPre', regionsProgressPre, 'constant.language', 'dot')
-        self.view.add_regions('dopletProgress', regionsProgress, 'constant.language', 'dot', self.codeColor)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletProgressPre', regionsProgressPre, 'constant.language', 'dot'), 100*_delayed)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletProgress', regionsProgress, 'constant.language', 'dot', self.codeColor), 100*_delayed)
 
-        self.view.add_regions('dopletInconsistentPre', regionsInconsistentPre, 'invalid', 'dot')
-        self.view.add_regions('dopletInconsistent', regionsInconsistent, 'invalid', 'dot', self.codeColor)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletInconsistentPre', regionsInconsistentPre, 'invalid', 'dot'), 200*_delayed)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletInconsistent', regionsInconsistent, 'invalid', 'dot', self.codeColor), 200*_delayed)
 
 
-#todo 570 (tool) +0: make tool for viewing inconsistent difference
+
+#todo 570 (command, feature) +0: make tool for viewing inconsistent difference
     def todoValidate(self, _id, _state, _tags, _priority, _comment):
         db= WCache().getDB()
         if db and (int(_id) in db.todoA):
             storedTask= db.todoA[int(_id)]
-#todo 845 (fix) +0: compare tags more properly
-            if storedTask.state!=_state or ', '.join(storedTask.tagsA)!=_tags or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
+            tagsA= []
+            for cTag in _tags.split(','):
+                tagsA.append(cTag.strip())
+
+            if storedTask.state!=_state or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
                 return False
+
         return True
 
 

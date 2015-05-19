@@ -89,7 +89,7 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         fn= WCache().getDB().config.settings[0].file
         if not os.path.isfile(fn):
-            sublime.message_dialog('TypeTodo:\n\tNo projects .do file,\n\tplease restart Sublime')
+            sublime.message_dialog('TypeTodo:\n\n\tNo projects .do file,\n\tplease restart Sublime')
             return
         sublime.active_window().open_file(fn, sublime.TRANSIENT)
 
@@ -99,7 +99,7 @@ class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         fn= Config(True).settings[0].file
         if not os.path.isfile(fn):
-            sublime.message_dialog('TypeTodo:\n\tNo global .do file,\n\tplease restart Sublime')
+            sublime.message_dialog('TypeTodo:\n\n\tNo global .do file,\n\tplease restart Sublime')
             return
         sublime.active_window().open_file(fn, sublime.TRANSIENT)
 
@@ -114,8 +114,8 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
         cDb= self.cDb
         self.cDb= None
 
-        if not cDb.config.initGlobalDo(True):
-            sublime.message_dialog('TypeTodo error:\n\tCannot reset global .do file,\n\tall remain intact.')
+        if not cDb.config.globalInited and not cDb.config.initGlobalDo(True):
+            sublime.message_dialog('TypeTodo error:\n\n\tCannot reset global .do file,\n\tall remain intact.')
             return
 
         for iT in cDb.todoA:

@@ -96,15 +96,19 @@ class TodoDb():
         dbId= 0
         self.dbA.clear() #new db array
 
-        if True:
-            self.dbA[dbId]= TodoDbFile(self, 0)
+        for cSetting in self.config.settings:
+            if cSetting.engine=='file':
+                cEngClass= TodoDbFile
+            elif cSetting.engine=='mysql':
+                cEngClass= TodoDbSql
+            elif cSetting.engine=='http':
+                cEngClass= TodoDbHttp
+            else:
+                continue
+
+            self.dbA[dbId]= cEngClass(self, cSetting)
             dbId+= 1
-        if self.config.settings[0].engine== 'mysql':
-            self.dbA[dbId]= TodoDbSql(self, 0)
-            dbId+= 1
-        if self.config.settings[0].engine== 'http':
-            self.dbA[dbId]= TodoDbHttp(self, 0)
-            dbId+= 1
+
 
         self.newId() #run prefetch
 
@@ -237,7 +241,7 @@ class TodoDb():
                 self.timerFlush.start()
 
         if _runOnce or self.flushRetries==0:
-            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s'), 0)
+            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tcannot flush todo\'s'), 0)
 
 
 

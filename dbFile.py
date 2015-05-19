@@ -24,8 +24,8 @@ class TodoDbFile():
     settings= None
     parentDB= False
 
-    def __init__(self, _parentDB, _settingsId):
-        self.settings= _parentDB.config.settings[_settingsId]
+    def __init__(self, _parentDB, _settings):
+        self.settings= _settings
         self.parentDB= _parentDB
 
 

@@ -262,7 +262,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
         if _db:
             return _db.store(_id, _state, (_tags or '').split(','), _lvl, _fileName, _comment)
 
-        sublime.message_dialog('TypeTodo error:\n\tDoplet was not saved. \n\tThis is known issue and\n\twill be fixed')
+        sublime.message_dialog('TypeTodo error:\n\n\tDoplet was not saved. \n\tThis is known issue and\n\twill be fixed')
 
 #todo 21 (interaction, feature) +0: handle filename change, basically for new unsaved files
 

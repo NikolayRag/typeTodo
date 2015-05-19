@@ -31,6 +31,8 @@ class WCache(object):
         if wId not in self.dbCache:
             if not wId or not _init:
                 return False
+
+            self.dbCache[wId]= False #hold place
             self.dbCache[wId]= TodoDb(_callbackFetch, Config())
 
         return self.dbCache[wId]

@@ -96,15 +96,22 @@ class TodoDb():
         dbId= 0
         self.dbA.clear() #new db array
 
-        if True:
-            self.dbA[dbId]= TodoDbFile(self, 0)
+        cSettingId= -1
+        for cSetting in self.config.settings:
+            cSettingId+= 1
+
+            if cSetting.engine=='file':
+                cEngClass= TodoDbFile(self, cSettingId)
+            elif cSetting.engine=='mysql':
+                cEngClass= TodoDbSql(self, cSettingId)
+            elif cSetting.engine=='http':
+                cEngClass= TodoDbHttp(self, cSettingId)
+            else:
+                continue
+
+            self.dbA[dbId]= cEngClass
             dbId+= 1
-        if self.config.settings[0].engine== 'mysql':
-            self.dbA[dbId]= TodoDbSql(self, 0)
-            dbId+= 1
-        if self.config.settings[0].engine== 'http':
-            self.dbA[dbId]= TodoDbHttp(self, 0)
-            dbId+= 1
+
 
         self.newId() #run prefetch
 

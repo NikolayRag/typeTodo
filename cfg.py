@@ -17,12 +17,8 @@ else:
 
 class Setting:
     engine= ''
-    addr=   ''
-    login=  ''
-    passw=  ''
-    base=   ''
-    file=   ''
-    head=   ''
+
+
 
 #check for:
 #   first, subsequent window
@@ -37,7 +33,8 @@ class Config():
     cWnd= None
     defaultHttpApi= 'typetodo.com'
 
-    defaultHeader= "# uncomment and configure. LAST matched line matters:\n"\
+    defaultHeader= "# uncomment and configure. ALL matched lines matters:\n"\
+        +"# file filename.ext\n"\
         +"# mysql 127.0.0.1 username password scheme\n"\
         +"# http typetodo.com repository [username password]\n"
 
@@ -86,21 +83,25 @@ class Config():
         _cfgFile= os.path.join(self.projectRoot, self.projectName +'.do')
 
 
-        cSettings= None
-        cSettings= self.readCfg(_cfgFile)
-        if not cSettings:
-            cSettings= self.initGlobalDo()
-
-
+        cSettings= self.readCfg(_cfgFile) or self.initGlobalDo()
 
         if cSettings:
-            if self.lastCfgFile!=_cfgFile or self.lastProjectHeader!=cSettings.head:
-                cSettings.file= _cfgFile
-                self.lastCfgFile= cSettings.file
-                self.lastProjectHeader= cSettings.head
+            if self.lastCfgFile!=_cfgFile or self.lastProjectHeader!=cSettings[0].head:
+                cSettings[0].file= _cfgFile #filename need TO save
+                self.lastCfgFile= cSettings[0].file
+                self.lastProjectHeader= cSettings[0].head
 
-                self.settings= {}
-                self.settings[0]= cSettings
+                self.settings= cSettings
+
+
+                if not os.path.isfile(_cfgFile):
+                    print ('TypeTodo init: Writing project\'s config.')
+                    try:
+                        with codecs.open(_cfgFile, 'w+', 'UTF-8') as f:
+                            f.write(self.lastProjectHeader)
+                            f.write("\n")
+                    except:
+                        None
 
                 return True
             return
@@ -125,10 +126,8 @@ class Config():
 
 
 
-#=todo 149 (cfg, feature) +5: make use of more than one (last) cfg string
-#=todo 170 (cfg, refactor) +0: build list of cfg's to pass to db.reset()
 
-#=todo 241 (cfg, file, feature) +5: enable to define separate file for TODOs, to split DB settings from file db itself
+
     def readCfg(self, _cfgFile):
         try:
             f= codecs.open(_cfgFile, 'r', 'UTF-8')
@@ -138,9 +137,13 @@ class Config():
             return
 
 
-        cSettings= Setting()
+        cSettings= []
+        doSetting= Setting()
+        cSettings.append(doSetting) #[0] will refer to .do itself; engine should be blank if overriden
+
         headerCollect= ''
 
+        fileSetFound= False
         while True:
             l= f.readline().splitlines()
             if l==[] or l[0]=='' or not l[0]:
@@ -152,21 +155,49 @@ class Config():
             #catch last matched config
             cfgFoundTry= RE_CFG.match(cfgString)
             if cfgFoundTry:
-                curCfg= cfgFoundTry.groupdict()
-                if curCfg['enginesql']:
-                    cSettings.engine=   curCfg['enginesql']
-                    cSettings.addr=     curCfg['addrs']
-                    cSettings.login=    curCfg['logins']
-                    cSettings.passw=    curCfg['passws']
-                    cSettings.base=     curCfg['bases']
-                elif curCfg['enginehttp']:
-                    cSettings.engine=   curCfg['enginehttp']
-                    cSettings.addr=     curCfg['addrh']
-                    cSettings.login=    curCfg['loginh']
-                    cSettings.passw=    curCfg['passwh']
-                    cSettings.base=     curCfg['baseh']
+                cSetting= Setting()
 
-        cSettings.head= headerCollect
+                curCfg= cfgFoundTry.groupdict()
+                if curCfg['enginefile']:
+                    fileSetFound= True
+                    cSetting.engine=    'file'
+                    if os.path.dirname(curCfg['fname'])=='':
+                        cSetting.file=  os.path.join(self.projectRoot, curCfg['fname'])
+                    else:
+                        cSetting.file=  curCfg['fname']
+                    cSetting.head=      ''
+
+                    if os.path.normcase(cSetting.file)==os.path.normcase(_cfgFile):
+                        cSetting= False #prevent explicit .do as 'file'
+                        fileSetFound= False
+
+
+                if curCfg['enginesql']:
+                    cSetting.engine=    'mysql'
+                    cSetting.addr=      curCfg['addrs']
+                    cSetting.login=     curCfg['logins']
+                    cSetting.passw=     curCfg['passws']
+                    cSetting.base=      curCfg['bases']
+
+
+                if curCfg['enginehttp']:
+                    cSetting.engine=    'http'
+                    cSetting.addr=      curCfg['addrh']
+                    cSetting.login=     curCfg['loginh']
+                    cSetting.passw=     curCfg['passwh']
+                    cSetting.base=      curCfg['baseh']
+
+
+                if cSetting:
+                    cSettings.append(cSetting)
+
+
+
+        if not fileSetFound:
+            doSetting.engine= 'file'
+
+        doSetting.head= headerCollect
+                   
 
         return cSettings
 
@@ -186,9 +217,14 @@ class Config():
                 return cCfg
 
 
-        cSettings= Setting()
+        cSettings= []
+        doSetting= Setting()
+        cSettings.append(doSetting) #[0] will refer to .do itself; engine should be blank if overriden
+        doSetting.engine= 'file'
+
         headerCollect= self.defaultHeader
 
+#=todo 1365 (cfg, fix, st3) +0: st3 repeats new http creation several times
         httpInitFlag= sublime.ok_cancel_dialog('TypeTodo init:\n\n\tStart with public HTTP base?')
 
         #request new random public repository
@@ -200,11 +236,14 @@ class Config():
                 print("New TypeTodo repository: " +cRep)
                 sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
 
-                cSettings.engine= 'http'
-                cSettings.addr= self.defaultHttpApi
-                cSettings.base= cRep
+                cSetting= Setting()
+                cSettings.append(cSetting)
 
-                headerCollect+= cSettings.engine +" " +cSettings.addr +" " +cSettings.base +"\n"
+                cSetting.engine= 'http'
+                cSetting.addr= self.defaultHttpApi
+                cSetting.base= cRep
+
+                headerCollect+= cSetting.engine +" " +cSetting.addr +" " +cSetting.base +"\n"
 
 
             except:
@@ -220,8 +259,7 @@ class Config():
             return
 
 
-
-        cSettings.head= headerCollect
+        doSetting.head= headerCollect
 
         return cSettings
 

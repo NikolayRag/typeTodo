@@ -241,7 +241,7 @@ class TodoDb():
                 self.timerFlush.start()
 
         if _runOnce or self.flushRetries==0:
-            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot flush todo\'s'), 0)
+            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tcannot flush todo\'s'), 0)
 
 
 

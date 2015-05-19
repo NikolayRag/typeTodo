@@ -1,3 +1,10 @@
+v1.8.0
+
+new:
+- 'file' base filename can be explicitly defined with 'file [path/]file.ext' in .do to store doplets instead of .do itself; Used to separate 'http'/'sql' credentials.
+- EVERY base defined in .do will be used even if several SQL's, HTTP's are in place; No big use, mainly added to make available 'sql' or 'http' base together with external 'file'
+
+
 v1.7.4
 
 new:

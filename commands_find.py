@@ -227,7 +227,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             if isTag: 
                 markName= 'tagged "' +_text +'"'
             
-            sublime.message_dialog('TypeTodo error:\n\tDoplet ' +markName +' was not found in source')
+            sublime.message_dialog('TypeTodo error:\n\n\tDoplet ' +markName +' was not found in source')
 
 
         #one found
@@ -261,7 +261,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             cDb= WCache().getDB()
             fn= cDb.config.settings[0].file
             if not os.path.isfile(fn):
-                sublime.message_dialog('TypeTodo error:\n\tCannot find projects .do file')
+                sublime.message_dialog('TypeTodo error:\n\n\tCannot find projects .do file')
                 return
 
             matches= self.findTodoInFile(fn, RE_TODO_STORED, todoIncode.group('id'))
@@ -270,7 +270,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 self.focusView(cView, matches[0][1], matches[0][2]) #dont want do deal with multi-matches here, use first
 
             else:
-                sublime.message_dialog('TypeTodo error:\n\tDoplet #' +todoIncode.group('id') +' not found in project\'s .do')
+                sublime.message_dialog('TypeTodo error:\n\n\tDoplet #' +todoIncode.group('id') +' not found in project\'s .do')
 
             return
 

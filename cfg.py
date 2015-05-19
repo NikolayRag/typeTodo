@@ -252,7 +252,7 @@ class Config():
 
 
             except:
-                sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
+                sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
 
 
 
@@ -260,7 +260,7 @@ class Config():
             with codecs.open(_cfgFile, 'w+', 'UTF-8') as f:
                 f.write(headerCollect)
         except:
-            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\tglobal config cannot be created'), 1000)
+            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tglobal config cannot be created'), 1000)
             return
 
 

@@ -114,7 +114,7 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
         cDb= self.cDb
         self.cDb= None
 
-        if not cDb.config.initGlobalDo(True):
+        if not cDb.config.globalInited and not cDb.config.initGlobalDo(True):
             sublime.message_dialog('TypeTodo error:\n\tCannot reset global .do file,\n\tall remain intact.')
             return
 

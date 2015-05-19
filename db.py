@@ -96,20 +96,17 @@ class TodoDb():
         dbId= 0
         self.dbA.clear() #new db array
 
-        cSettingId= -1
         for cSetting in self.config.settings:
-            cSettingId+= 1
-
             if cSetting.engine=='file':
-                cEngClass= TodoDbFile(self, cSettingId)
+                cEngClass= TodoDbFile
             elif cSetting.engine=='mysql':
-                cEngClass= TodoDbSql(self, cSettingId)
+                cEngClass= TodoDbSql
             elif cSetting.engine=='http':
-                cEngClass= TodoDbHttp(self, cSettingId)
+                cEngClass= TodoDbHttp
             else:
                 continue
 
-            self.dbA[dbId]= cEngClass
+            self.dbA[dbId]= cEngClass(self, cSetting)
             dbId+= 1
 
 

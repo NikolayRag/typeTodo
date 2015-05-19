@@ -33,8 +33,8 @@ class Config():
     cWnd= None
     defaultHttpApi= 'typetodo.com'
 
-    defaultHeader= "# uncomment and configure. ALL matched lines matters:\n"\
-        +"# file filename.ext\n"\
+    defaultHeader= "# Uncomment and configure. ALL matched lines matters:\n"\
+        +"# file [absolute_path/]filename.ext\n"\
         +"# mysql 127.0.0.1 username password scheme\n"\
         +"# http typetodo.com repository [username password]\n"
 
@@ -46,6 +46,8 @@ class Config():
 
 
     settings= None
+
+    globalInited= False
 
     lastProjectFolders= []
     lastProjectHeader= None
@@ -217,15 +219,17 @@ class Config():
                 return cCfg
 
 
+        self.globalInited= True
+
         cSettings= []
         doSetting= Setting()
-        cSettings.append(doSetting) #[0] will refer to .do itself; engine should be blank if overriden
+        cSettings.append(doSetting)
         doSetting.engine= 'file'
 
         headerCollect= self.defaultHeader
 
-#=todo 1365 (cfg, fix, st3) +0: st3 repeats new http creation several times
-        httpInitFlag= sublime.ok_cancel_dialog('TypeTodo init:\n\n\tStart with public HTTP base?')
+
+        httpInitFlag= sublime.ok_cancel_dialog('TypeTodo init:\n\n\tStart with new public HTTP storage?')
 
         #request new random public repository
         if httpInitFlag:
@@ -242,6 +246,7 @@ class Config():
                 cSetting.engine= 'http'
                 cSetting.addr= self.defaultHttpApi
                 cSetting.base= cRep
+                cSetting.login= cSetting.passwh= ''
 
                 headerCollect+= cSetting.engine +" " +cSetting.addr +" " +cSetting.base +"\n"
 

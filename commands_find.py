@@ -84,7 +84,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                         if foundIncode.group('id')==_id:
                             matches.append((cView, lNum-1, foundIncode.end('prefix'), cView.substr(cLine), foundIncode, cName))
                     else:
-                        for cTag in foundIncode.group('tags').split(','):
+                        for cTag in foundIncode.group('tags').lower().split(','):
                             tagFound= False
                             for cId in _id.split(','):
                                 try:
@@ -119,7 +119,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                             if foundEntry.group('id')==_id:
                                 matches.append((None, lNum-1, foundEntry.end('prefix'), ln, foundEntry, _fn))
                         else:
-                            for cTag in foundEntry.group('tags').split(','):
+                            for cTag in foundEntry.group('tags').lower().split(','):
                                 tagFound= False
                                 for cId in _id.split(','):
                                     try:
@@ -168,6 +168,33 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         self.focusView(self.view, self.jumpList[_idx][1], self.jumpList[_idx][2])
 
 
+    def currentViewList (self, _matchesView):
+        cViewMatches= []
+        for cMatch in _matchesView:
+            if cMatch[0].buffer_id()==self.view.buffer_id():
+                cViewMatches.append(cMatch)
+
+        #one found
+        if len(cViewMatches) == 1:
+            self.focusView(self.view, cViewMatches[0][1], cViewMatches[0][2])
+
+        #many found, list
+        if len(cViewMatches)>1:
+
+            self.jumpList= []
+            viewTodoList= []
+
+            for cMatch in cViewMatches:
+                self.jumpList.append(cMatch)
+                
+                cId= ' '*(7-len(cMatch[4].group('id'))) +cMatch[4].group('id')
+                cEnding= ''
+                if cMatch[4].group('postfix')>65:
+                    cEnding= '...'
+                viewTodoList.append(cId +':' +cMatch[4].group('postfix')[0:65] +cEnding)
+            self.view.window().show_quick_panel(viewTodoList, self.jumpFromList, sublime.MONOSPACE_FONT)
+
+
 #todo 1309 (command, feature) +0: allow 'except' search by prefixing with '-'
     def findNamed(self, _text= ''):
         if _text=='*':
@@ -176,38 +203,13 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         isTag= not re.match('^\d+$', _text)
 
 
-        matchesView= self.findTodoInViews(_text, isTag)
+        matchesView= self.findTodoInViews(_text.lower(), isTag)
         
-        #current view list
         if _text=='':
-            cViewMatches= []
-            for cMatch in matchesView:
-                if cMatch[0].buffer_id()==self.view.buffer_id():
-                    cViewMatches.append(cMatch)
-
-            #one found
-            if len(cViewMatches) == 1:
-                self.focusView(self.view, cViewMatches[0][1], cViewMatches[0][2])
-
-            #many found, list
-            if len(cViewMatches)>1:
-
-                self.jumpList= []
-                viewTodoList= []
-
-                for cMatch in cViewMatches:
-                    self.jumpList.append(cMatch)
-                    
-                    cId= ' '*(7-len(cMatch[4].group('id'))) +cMatch[4].group('id')
-                    cEnding= ''
-                    if cMatch[4].group('postfix')>65:
-                        cEnding= '...'
-                    viewTodoList.append(cId +':' +cMatch[4].group('postfix')[0:65] +cEnding)
-                self.view.window().show_quick_panel(viewTodoList, self.jumpFromList, sublime.MONOSPACE_FONT)
-
+            self.currentViewList(matchesView)
             return
 
-        matchesFiles= self.findTodoInProject(_text, isTag)
+        matchesFiles= self.findTodoInProject(_text.lower(), isTag)
 
         #exclude duplicated filenames from file matches
         matches= list(matchesView)

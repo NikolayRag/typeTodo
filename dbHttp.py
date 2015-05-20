@@ -58,8 +58,6 @@ class TodoDbHttp():
     settings= None
     parentDB= False
 
-    migrate= False
-
 
     def __init__(self, _parentDB, _settings):
         self.settings= _settings
@@ -73,13 +71,11 @@ class TodoDbHttp():
         postList= list()
         postTodoA= {}
 
-        if self.migrate:
-            print('TypeTodo Http: migrating')
-
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if not self.migrate: 
-                if curTodo.savedA[_dbN]!=SAVE_STATES.READY: continue
+            if curTodo.savedA[_dbN]!=SAVE_STATES.READY:
+                continue
+
             curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere
 
             postList.append(str(curTodo.id))
@@ -133,7 +129,6 @@ class TodoDbHttp():
                     curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
 
 
-        self.migrate= False
         return allOk
 
 
@@ -196,22 +191,12 @@ class TodoDbHttp():
                 todoA[__id]= TodoTask(__id, self.parentDB.config.projectName, self.parentDB)
 
                 fetchedStateName= task['namestate']
-#todo 257 (http, cleanup) +0: remove True and False states after migration
-#subject to remove after state names migration+
-                if fetchedStateName=='False':
-                    self.migrate= True
-                    fetchedStateName= 'Open'
-                if fetchedStateName=='True':
-                    self.migrate= True
-                    fetchedStateName= 'Close'
-#subject to remove after state names migration-
-                stateFound= False
-                for stateIdx in STATE_LIST:
-                    if STATE_LIST[stateIdx]==fetchedStateName:
-                        stateFound= True
+
+                stateIdx= ''
+                for cState in STATE_LIST:
+                    if STATE_LIST[cState]==fetchedStateName:
+                        stateIdx= cState
                         break
-                if not stateFound: #defaults to 'opened' todo
-                    stateIdx= ''
 
                 tags= task['nametag'].split(',')
                 todoA[__id].set(stateIdx, tags, task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))

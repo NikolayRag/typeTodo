@@ -196,7 +196,7 @@ class TodoDb():
 
 #todo 71 (db, cleanup) -1: instantly remove blank new task from cache before saving if set to + or !
         if cId not in self.todoA: #for new and repairing tasks
-            self.todoA[cId]= TodoTask(cId, self.config.projectName, self.config.projectUser, strStamp, self)
+            self.todoA[cId]= TodoTask(cId, self.config.projectName, self)
 
         if _id:
             self.dirty= True

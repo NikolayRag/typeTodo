@@ -13,10 +13,6 @@ class TodoTask():
     #static, defined at creation
     id= 0
     project= ''
-    creator= ''
-
-#todo 1254 (unsure) +0: remove cStamp from .do and form dealing with
-    cStamp= False #used only for dbFile; unix time
 
     #updatable
     state= ''
@@ -31,11 +27,10 @@ class TodoTask():
     parentDb= False #used to set saved[] state per db engine
     savedA= {} #[DBId]= state; cleared at reseting db's
 
-    def __init__(self, _id, _project, _creator, _stamp, _parentDB):
+
+    def __init__(self, _id, _project, _parentDB):
         self.id= _id
         self.project= _project
-        self.creator= _creator
-        self.cStamp= _stamp
 
         self.savedA= {}
         self.parentDb= _parentDB

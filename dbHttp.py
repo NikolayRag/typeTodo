@@ -192,9 +192,8 @@ class TodoDbHttp():
         for task in json.loads(response):
             __id= int(task['id'])
 
-#todo 143 (multidb, unsure) -1: http; handle cStamp on fetch
             if __id not in todoA:
-                todoA[__id]= TodoTask(__id, self.parentDB.config.projectName, task['nameuser'], int(task['ustamp']), self.parentDB)
+                todoA[__id]= TodoTask(__id, self.parentDB.config.projectName, self.parentDB)
 
                 fetchedStateName= task['namestate']
 #todo 257 (http, cleanup) +0: remove True and False states after migration

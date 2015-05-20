@@ -331,9 +331,9 @@ class TodoDbSql():
         for task in cur.fetchall():
             __id= int(task[sqn['id']])
             ver_tags[__id]= task[sqn['version_tag']]
-#todo 144 (multidb, unsure) -1: sql; handle cStamp on fetch
+
             if __id not in todoA:
-                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], int(task[sqn['ustamp']]), self.parentDB)
+                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], self.parentDB)
 
             fetchedStateName= task[sqn['namestate']]
 #subject to remove after state names migration+

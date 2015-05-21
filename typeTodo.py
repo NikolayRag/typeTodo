@@ -48,15 +48,23 @@ class TypetodoEvent(sublime_plugin.EventListener):
     def on_activated(self,_view):
         WCache().getDB(True, dbMaintainance) #really applies only once
 
+        if WCache().checkResultsView(_view.buffer_id()):
+            sublime.set_timeout(lambda: _view.set_read_only(True), 0)
+            return
+
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
     def on_load(self,_view):
+        if WCache().checkResultsView(_view.buffer_id()):
+            sublime.set_timeout(lambda: _view.set_read_only(True), 0)
+            return
+
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
     def on_close(self,_view):
-            WCache().checkResultsView(_view.buffer_id(), True)
+        WCache().checkResultsView(_view.buffer_id(), True)
 
 
 

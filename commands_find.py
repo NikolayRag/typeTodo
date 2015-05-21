@@ -195,7 +195,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             self.view.window().show_quick_panel(viewTodoList, self.jumpFromList, sublime.MONOSPACE_FONT)
 
 
-#todo 1309 (command, feature) +0: allow 'except' search by prefixing with '-'
+#=todo 1309 (command, feature) +0: allow 'exclude' search by prefixing with '-'
     def findNamed(self, _text= ''):
         if _text=='*':
             _text='.*'

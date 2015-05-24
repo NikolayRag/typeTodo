@@ -271,7 +271,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         todoRegion = self.view.line(self.view.sel()[0])
 
-        #jump by doplet's id - to .d or from Search results
+        #jump by doplet's id - to .do or from Search results
         todoIncode= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
         if todoIncode:
 
@@ -282,7 +282,12 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 return
 
             cDb= WCache().getDB()
-            fn= cDb.config.settings[0].file
+            fn= ''
+            for cSetting in cDb.config.settings:
+                if cSetting.engine=='file':
+                    fn= cSetting.file
+                    break
+
             if not os.path.isfile(fn):
                 sublime.message_dialog('TypeTodo error:\n\n\tCannot find projects .do file')
                 return

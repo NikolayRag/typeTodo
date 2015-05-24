@@ -25,4 +25,7 @@ re_http_str= "(?P<enginehttp>http)\s+(?P<addrh>[^\s]+)\s+(?P<baseh>[^\s]+)\s*(?P
 re_file_str= "(?P<enginefile>file)\s+(?P<fname>[^\s]+)"
 RE_CFG= re.compile("^\s*(?:" +re_mysql_str +"|" +re_http_str +"|" +re_file_str +")\s*$")
 
-SKIP_SEARCH_FILES= ['', '.sublime-workspace', '.pyc', '.exe', '.dll', '.zip', '.gz', '.jpg', '.jpeg', '.gif', '.png', '.mov', '.avi', '.qt']
+SKIP_SEARCH_DIR= []
+SKIP_SEARCH_FILES= ['*.', '*.sublime-workspace', '*.gz', '*.mov', '*.avi', '*.qt']
+SKIP_SEARCH_SIZE= 640000 #should be enough for everyone
+

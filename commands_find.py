@@ -1,7 +1,7 @@
 # coding= utf-8
 
 import sublime, sublime_plugin
-import sys, os
+import sys, os, fnmatch
 
 if sys.version < '3':
     from db import *
@@ -141,21 +141,42 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-#todo 1310 (command, feature) -1: 'Search todo' should accept .git-ignore file to skip files
-    def isKnownFileExt(self, _fn):
-        fName, fExt= os.path.splitext(_fn)
-        for cExt in SKIP_SEARCH_FILES:
-            if cExt==fExt:
+    def isKnownFile(self, _fn, _masksA):
+        fName= os.path.basename(_fn)
+
+        for cMask in _masksA:
+            if fnmatch.fnmatch(fName, cMask):
                 return True
 
+
     def findTodoInProject(self, _id, _isTag= False):
+        skipDirs= SKIP_SEARCH_DIR +self.view.settings().get('folder_exclude_patterns')
+        skipFiles= (SKIP_SEARCH_FILES
+            +self.view.settings().get('file_exclude_patterns')
+            +self.view.settings().get('binary_file_patterns')
+        )
+
         matches= []
         for cFolder in sublime.active_window().folders():
+            skipFolder= ''
             for cWalk in os.walk(cFolder):
+                #skip entire branch
+                if skipFolder!='' and os.path.relpath(cWalk[0], skipFolder).split('\\')[0]!='..':
+                    continue
+
+                if self.isKnownFile(cWalk[0], skipDirs):
+                    skipFolder= cWalk[0]
+                    continue
+
                 for cFile in cWalk[2]:
-                    if self.isKnownFileExt(cFile):
+                    if self.isKnownFile(cFile, skipFiles):
                         continue
+
                     fn= os.path.join(cWalk[0], cFile)
+
+                    if os.path.getsize(fn)>SKIP_SEARCH_SIZE:
+                        continue
+
                     matches.extend(self.findTodoInFile(fn, RE_TODO_EXISTING, _id, _isTag))
 
         return matches

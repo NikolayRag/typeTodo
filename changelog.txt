@@ -1,3 +1,18 @@
+v1.8.1
+
+change:
+- 'file' base now holds only last Editor and Timestamp, without Creator and Creation stamp anymore: it is job for sql/http storage.
+
+new:
+- 'Search todo' will skip files listed in sublime config
+- 'Search todo' will skip files greater than ~500k
+
+fix:
+- 'Search todo' by tags now ignores case
+- 'Search todo' didnt jump to external 'file'
+- set '.do' syntax automatically to all files which are used for 'file' base
+
+
 v1.8.0
 
 new:

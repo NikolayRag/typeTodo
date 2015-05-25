@@ -46,7 +46,14 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     def on_activated(self,_view):
-        WCache().getDB(True, dbMaintainance) #really applies only once
+        cDb= WCache().getDB(True, dbMaintainance) #really applies only once
+
+        #set 'file' syntax where it is not right
+        for cSetting in cDb.config.settings:
+            if cSetting.engine=='file':
+                if cSetting.file==_view.file_name() and _view.settings().get('syntax')!='Packages/TypeTodo/typeTodo.tmLanguage':
+                    _view.set_syntax_file('Packages/TypeTodo/typeTodo.tmLanguage')
+
 
         if WCache().checkResultsView(_view.buffer_id()):
             sublime.set_timeout(lambda: _view.set_read_only(True), 0)

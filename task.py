@@ -52,14 +52,17 @@ class TodoTask():
         self.editor= _editor
         self.stamp= _stamp
 
-    def setSaved(self, _state, _engine=-1):
-        #'file' (0) indicates it is initial; dont set True at flush to save bulk every time after first .set()
-        if _state==SAVE_STATES.IDLE and _engine==0: #skip explicit 'file'->IDLE; #todo 209 (db, cleanup) -10: make .savedA[] for file treated as for other engines
-            return True
+    def setSaved(self, _state, _dbIdx=-1):
 
-        if _engine<0: #set all
+        if _dbIdx<0: #set all
+            self.savedA= {}
             for dbEN in self.parentDb.dbA:
                 self.savedA[dbEN]= _state
-        else:
-            self.savedA[_engine]= _state
-        return True
+
+            return
+
+        #skip setting saved to hold 'file' always as full set
+        if _state==SAVE_STATES.IDLE and self.parentDb.dbA[_dbIdx].settings.engine=='file': #skip explicit 'file'->IDLE; #=todo 209 (db, cleanup) -10: make .savedA[] for file treated as for other engines
+            return
+
+        self.savedA[_dbIdx]= _state

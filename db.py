@@ -93,10 +93,11 @@ class TodoDb():
 
         print ('TypeTodo: reset db')
 
-        dbId= 0
+        dbId= -1
         self.dbA.clear() #new db array
 
         for cSetting in self.config.settings:
+            dbId+= 1
             if cSetting.engine=='file':
                 cEngClass= TodoDbFile
             elif cSetting.engine=='mysql':
@@ -107,7 +108,6 @@ class TodoDb():
                 continue
 
             self.dbA[dbId]= cEngClass(self, cSetting)
-            dbId+= 1
 
 
         self.newId() #run prefetch
@@ -261,13 +261,15 @@ class TodoDb():
         success= False
 
         for dbN in self.dbA:
-            todoA= self.dbA[dbN].fetch(_id)
+            cDb= self.dbA[dbN]
+            todoA= cDb.fetch(_id)
             if todoA==False:
                 continue
 
             success= True
 
             maybeNew= 0
+            maybeOld= 0
             for iT in todoA: #each fetched task have to be compared to existing
                 task= todoA[iT]
                 __id= task.id
@@ -282,7 +284,7 @@ class TodoDb():
 
                 if isNew or diffStamp>0:
                     if diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
-                        print ('TypeTodo: \'' +self.dbA[dbN].name +'\' DB is new at ' +str(__id))
+                        print ('TypeTodo: \'' +cDb.name +'\' DB is new at ' +str(__id))
                     elif diffStamp>0:
                         maybeNew+= 1
                     self.todoA[__id]= task
@@ -290,14 +292,19 @@ class TodoDb():
                     self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
 
                 elif diffStamp<0:
-                    print ('TypeTodo: \'' +self.dbA[dbN].name +'\' DB is old at ' +str(__id))
+                    if diffStamp<-60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
+                        print ('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(__id))
+                    else:
+                        maybeOld+= 1
                     self.todoA[__id].setSaved(SAVE_STATES.READY, dbN)
 
                 self.dirty= True
 
             #'apparently new' mean that stamp difference is less than 60s. It is likely a subject, when comparing with 'file' DB with seconds truncated. In this case 'file' is treated as little older and is replaced. As 'file' is anyway replaced at each flush, it doesn't make any difference to normal behavior and is messaged just in case.
             if maybeNew>0:
-                print ('TypeTodo: \'' +self.dbA[dbN].name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
+                print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
+            if maybeOld>0:
+                print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeOld) +' tasks apparently old')
 
         if self.callbackFetch:
             sublime.set_timeout(self.callbackFetch, 0)

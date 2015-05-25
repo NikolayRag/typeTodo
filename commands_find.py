@@ -249,6 +249,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             markName= '#' +_text
             
             isId= re.match('^\d+$', _text)
+            if not isId: 
                 markName= 'tagged "' +_text +'"'
             
             sublime.message_dialog('TypeTodo error:\n\n\tDoplet ' +markName +' was not found in source')

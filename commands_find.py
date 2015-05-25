@@ -61,7 +61,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-    def findTodoInViews(self, _id, _isTag= False):
+    def findTodoInViews(self, _id):
         resView= WCache().getResultsView(False)
 
         matches= []
@@ -80,7 +80,8 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 lNum+= 1
                 foundIncode= RE_TODO_EXISTING.match(cView.substr(cLine))
                 if foundIncode:
-                    if not _isTag:
+                    isId= re.match('^\d+$', _id)
+                    if isId:
                         if foundIncode.group('id')==_id:
                             matches.append((cView, lNum-1, foundIncode.end('prefix'), cView.substr(cLine), foundIncode, cName))
                     else:
@@ -103,7 +104,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-    def findTodoInFile(self, _fn, _test, _id, _isTag= False):
+    def findTodoInFile(self, _fn, _test, _id):
         matches= []
 
         foundEntry= None
@@ -115,7 +116,8 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                     lNum+= 1
                     foundEntry= _test.match(ln)
                     if foundEntry:
-                        if not _isTag:
+                        isId= re.match('^\d+$', _id)
+                        if isId:
                             if foundEntry.group('id')==_id:
                                 matches.append((None, lNum-1, foundEntry.end('prefix'), ln, foundEntry, _fn))
                         else:
@@ -149,7 +151,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 return True
 
 
-    def findTodoInProject(self, _id, _isTag= False):
+    def findTodoInProject(self, _id):
         skipDirs= SKIP_SEARCH_DIR +self.view.settings().get('folder_exclude_patterns')
         skipFiles= (SKIP_SEARCH_FILES
             +self.view.settings().get('file_exclude_patterns')
@@ -177,7 +179,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                     if os.path.getsize(fn)>SKIP_SEARCH_SIZE:
                         continue
 
-                    matches.extend(self.findTodoInFile(fn, RE_TODO_EXISTING, _id, _isTag))
+                    matches.extend(self.findTodoInFile(fn, RE_TODO_EXISTING, _id))
 
         return matches
 
@@ -221,16 +223,14 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         if _text=='*':
             _text='.*'
 
-        isTag= not re.match('^\d+$', _text)
 
-
-        matchesView= self.findTodoInViews(_text.lower(), isTag)
+        matchesView= self.findTodoInViews(_text.lower())
         
         if _text=='':
             self.currentViewList(matchesView)
             return
 
-        matchesFiles= self.findTodoInProject(_text.lower(), isTag)
+        matchesFiles= self.findTodoInProject(_text.lower())
 
         #exclude duplicated filenames from file matches
         matches= list(matchesView)
@@ -247,7 +247,8 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
         if not len(matches):
             markName= '#' +_text
-            if isTag: 
+            
+            isId= re.match('^\d+$', _text)
                 markName= 'tagged "' +_text +'"'
             
             sublime.message_dialog('TypeTodo error:\n\n\tDoplet ' +markName +' was not found in source')

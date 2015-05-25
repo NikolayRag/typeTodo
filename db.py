@@ -69,7 +69,7 @@ class TodoDb():
 
 
 
-#todo 1250 (db, consistency, feature) +0: fetch db periodically
+#=todo 1250 (db, consistency, feature) +0: fetch db periodically
     def pushReset(self, _delay=1000): #leave 1 to remove spam
         self.resetPending= True
         sublime.set_timeout(self.reset, _delay)

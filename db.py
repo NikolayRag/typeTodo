@@ -48,10 +48,13 @@ class TodoDb():
 
     callbackFetch= None
 
+    reportFlush= False
+
     def __init__(self, _callback, _cfg):
         self.dbA= {}
         self.todoA= {}
         self.timerFlush = Timer(0, None) #dummy
+
 
         self.callbackFetch= _callback
         self.config= _cfg
@@ -198,6 +201,7 @@ class TodoDb():
             self.todoA[cId]= TodoTask(cId, self.config.projectName, self)
 
         if _id:
+            self.reportFlush= True
             self.todoA[cId].set(_state, _tags, _lvl, _fileName, _comment, self.config.projectUser, strStamp)
 
         self.flushRetries= self.maxflushRetries
@@ -217,13 +221,18 @@ class TodoDb():
     def flush(self, _runOnce=False):
         self.timerFlush.cancel()
 
+#todo 1492 (xxx) +0: 
         flushOk= True
         for dbN in self.dbA:
             flushOk= flushOk and self.dbA[dbN].flush(dbN)
         
         if flushOk:
-            sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
+            if self.reportFlush:
+                sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
+
+            self.reportFlush= False
             return
+
 
         if not _runOnce:
             self.flushRetries-= 1
@@ -294,6 +303,7 @@ class TodoDb():
                 print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
             if maybeOld>0:
                 print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeOld) +' tasks apparently old')
+
 
         if self.callbackFetch:
             sublime.set_timeout(self.callbackFetch, 0)

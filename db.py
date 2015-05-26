@@ -39,7 +39,6 @@ class TodoDb():
     flushTimeout= 30 #seconds
     timerFlush= None
     resetPending= False
-    dirty= False
 
     reservedId= 0
     reserveEvent= None
@@ -199,7 +198,6 @@ class TodoDb():
             self.todoA[cId]= TodoTask(cId, self.config.projectName, self)
 
         if _id:
-            self.dirty= True
             self.todoA[cId].set(_state, _tags, _lvl, _fileName, _comment, self.config.projectUser, strStamp)
 
         self.flushRetries= self.maxflushRetries
@@ -223,14 +221,8 @@ class TodoDb():
         for dbN in self.dbA:
             flushOk= flushOk and self.dbA[dbN].flush(dbN)
         
-#todo 280 (db, flush, cleanup) +0: .dirty used only to display message; should be removed at all
-        if not self.dirty: #todo 240 (db, flush, cleanup) +0: hadn't to save, needed for file mode;  should be reviewed
-            return
-            
         if flushOk:
             sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
-
-            self.dirty= False
             return
 
         if not _runOnce:
@@ -279,8 +271,6 @@ class TodoDb():
                 if not isNew:
                     diffStamp= task.stamp -self.todoA[__id].stamp
 #todo 279 (check) +0: see if states dont interfere while task is in-save
-                if not isNew:
-                    self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
 
                 if isNew or diffStamp>0:
                     if diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
@@ -298,7 +288,6 @@ class TodoDb():
                         maybeOld+= 1
                     self.todoA[__id].setSaved(SAVE_STATES.READY, dbN)
 
-                self.dirty= True
 
             #'apparently new' mean that stamp difference is less than 60s. It is likely a subject, when comparing with 'file' DB with seconds truncated. In this case 'file' is treated as little older and is replaced. As 'file' is anyway replaced at each flush, it doesn't make any difference to normal behavior and is messaged just in case.
             if maybeNew>0:

@@ -120,7 +120,6 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
 
         for iT in cDb.todoA:
             cDb.todoA[iT].setSaved(SAVE_STATES.READY)
-        cDb.dirty= True
 
         cDb.pushReset(0)
 

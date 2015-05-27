@@ -187,8 +187,10 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
     jumpList= []
 
+
     def jumpFromList (self, _idx):
-        self.focusView(self.view, self.jumpList[_idx][1], self.jumpList[_idx][2])
+        if _idx!=-1:
+            self.focusView(self.view, self.jumpList[_idx][1], self.jumpList[_idx][2])
 
 
     def currentViewList (self, _matchesView):
@@ -212,7 +214,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 
                 cId= ' '*(7-len(cMatch[4].group('id'))) +cMatch[4].group('id')
                 cEnding= ''
-                if cMatch[4].group('postfix')>65:
+                if len(cMatch[4].group('postfix'))>65:
                     cEnding= '...'
                 viewTodoList.append(cId +':' +cMatch[4].group('postfix')[0:65] +cEnding)
             self.view.window().show_quick_panel(viewTodoList, self.jumpFromList, sublime.MONOSPACE_FONT)

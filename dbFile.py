@@ -30,10 +30,20 @@ class TodoDbFile():
 
 
     def flush(self, _dbN):
+        dirty= False
+        for iT in self.parentDB.todoA:
+            curTodo= self.parentDB.todoA[iT]
+            if curTodo.savedA[_dbN]==SAVE_STATES.READY and curTodo.shadowDiffers():
+                dirty= True
+
+        if not dirty:
+            return True
+
+
         if not self.dbOk:
             print("TypeTodo: 'file' db was not properly inited. Saving disabled.")
-
             return False
+
 
         try:
             with codecs.open(self.settings.file, 'w+', 'UTF-8') as f:
@@ -42,7 +52,7 @@ class TodoDbFile():
 
                 for iT in sorted(self.parentDB.todoA):
                     curTodo= self.parentDB.todoA[iT]
-                    if curTodo.savedA[_dbN]==SAVE_STATES.IDLE: #stands for 'if just inited'
+                    if curTodo.initial:
                         continue
 
                     self.maxId= max(self.maxId, curTodo.id)
@@ -58,13 +68,20 @@ class TodoDbFile():
 
                     f.write(stateSign +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
 
-            return True
 
         except Exception as e:
             print("TypeTodo: 'file' db experienced error while flushing")
             print(e)
 
             return False
+
+
+        for iT in self.parentDB.todoA:
+            self.parentDB.todoA[iT].setSaved(SAVE_STATES.IDLE, _dbN)
+
+
+        return True
+
 
 
     def newId(self, _wantedId=0):
@@ -77,6 +94,8 @@ class TodoDbFile():
         
         self.lastId= self.maxId
         return self.lastId
+
+
 
 
     def fetch(self, _id=False):

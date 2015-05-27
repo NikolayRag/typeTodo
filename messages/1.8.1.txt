@@ -2,8 +2,7 @@ v1.8.1
 
 change:
 - 'file' base now holds only last Editor and Timestamp, without Creator and Creation stamp anymore: it is job for sql/http storage.
-
-new:
+- save only doplets with actual changes; changing doplet and then undoing will not reset stamp in sql/http
 - 'Search todo' will skip files listed in sublime config
 - 'Search todo' will skip files greater than ~500k
 
@@ -11,4 +10,6 @@ fix:
 - 'Search todo' by tags now ignores case
 - 'Search todo' didnt jump to external 'file'
 - set '.do' syntax automatically to all files which are used for 'file' base
+- 'file' saved only if any of doplets are changed; previous 'file' was saved at any db reset, say at ST unfocus.
+- canceling 'Search todo' with blank input (within view) caused jump somewhere; fixed
 

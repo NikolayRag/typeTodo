@@ -33,7 +33,7 @@ class TodoDbFile():
         dirty= False
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if curTodo.savedA[_dbN]==SAVE_STATES.READY:
+            if curTodo.savedA[_dbN]==SAVE_STATES.READY and curTodo.shadowDiffers():
                 dirty= True
 
         if not dirty:

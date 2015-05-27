@@ -73,7 +73,7 @@ class TodoDbHttp():
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if curTodo.savedA[_dbN]!=SAVE_STATES.READY:
+            if curTodo.savedA[_dbN]!=SAVE_STATES.READY or not curTodo.shadowDiffers():
                 continue
 
             curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere

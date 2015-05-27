@@ -188,21 +188,24 @@ class TodoDb():
 
         cId= _id or 0
         if not _id:
+#todo 1499 (check, db) -5: check newId() fail
             cId= self.newId()
 
-        if not cId:
-            sublime.status_message('Todo creation failed, see console for info')
-            return False
+            if not cId:
+                sublime.status_message('Todo creation failed, see console for info')
+                return False
 
-        strStamp= int(time.time())
 
-#todo 71 (db, cleanup) -1: instantly remove blank new task from cache before saving if set to + or !
         if cId not in self.todoA: #for new and repairing tasks
             self.todoA[cId]= TodoTask(cId, self.config.projectName, self)
 
         if _id:
-            self.reportFlush= True
-            self.todoA[cId].set(_state, _tags, _lvl, _fileName, _comment, self.config.projectUser, strStamp)
+            if self.todoA[cId].initial and _comment=='' and (_state=='+' or _state=='!'):
+                del self.todoA[cId]
+            else:
+                self.reportFlush= True
+                strStamp= int(time.time())
+                self.todoA[cId].set(_state, _tags, _lvl, _fileName, _comment, self.config.projectUser, strStamp)
 
         self.flushRetries= self.maxflushRetries
         self.timerFlush= Timer(self.flushTimeout, self.flush)
@@ -221,7 +224,7 @@ class TodoDb():
     def flush(self, _runOnce=False):
         self.timerFlush.cancel()
 
-#todo 1492 (xxx) +0: 
+
         flushOk= True
         for dbN in self.dbA:
             flushOk= flushOk and self.dbA[dbN].flush(dbN)

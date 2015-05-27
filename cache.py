@@ -76,13 +76,13 @@ class WCache(object):
 
 
     def checkResultsView(self, _viewId, _wipe=False):
-        cWin= sublime.active_window()
-        if not cWin:
+        viewFind= self.getResultsView(False)
+        if not viewFind:
             return
 
-        wId= sublime.active_window().id()
-        if wId in self.resultsViewCache and _viewId==self.resultsViewCache[wId].buffer_id():
+        if _viewId==viewFind.buffer_id():
             if _wipe:
+                wId= sublime.active_window().id()
                 del self.resultsViewCache[wId]
             return True
 

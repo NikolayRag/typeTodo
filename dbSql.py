@@ -129,7 +129,6 @@ class TodoDbSql():
 
     dbConn= None
 
-    migrate=False
 
     def __init__(self, _parentDB, _settings):
         self.settings= _settings
@@ -166,11 +165,9 @@ class TodoDbSql():
                 for testField in tableDesc['fields']:
                     testFieldName= testField.split()[0].strip('`')
                     if not testFieldName in fields:
-                        self.migrate= True
                         cur.execute("ALTER TABLE " +tName +" ADD COLUMN " +testField)
                         print ('TypeTodo MySQL: added `' +testFieldName +'` field into `' +tName +'` table')
             except:
-                self.migrate= True
                 flagTableOk= False
 
             if not flagTableOk:
@@ -209,13 +206,12 @@ class TodoDbSql():
             return False
         cur = self.dbConn.cursor()
 
-        if self.migrate:
-            print('TypeTodo Sql: migrating')
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if not self.migrate:
-                if curTodo.savedA[_dbN]!=SAVE_STATES.READY: continue
+            if curTodo.savedA[_dbN]!=SAVE_STATES.READY:
+                continue
+
             curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere
 
             cur.execute(
@@ -269,7 +265,6 @@ class TodoDbSql():
 
         cur.close()
 
-        self.migrate= False
         return True
 
 
@@ -331,26 +326,17 @@ class TodoDbSql():
         for task in cur.fetchall():
             __id= int(task[sqn['id']])
             ver_tags[__id]= task[sqn['version_tag']]
-#todo 144 (multidb, unsure) -1: sql; handle cStamp on fetch
+
             if __id not in todoA:
-                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], task[sqn['nameuser']], int(task[sqn['ustamp']]), self.parentDB)
+                todoA[__id]= TodoTask(__id, task[sqn['nameproject']], self.parentDB)
 
             fetchedStateName= task[sqn['namestate']]
-#subject to remove after state names migration+
-            if fetchedStateName=='False':
-                self.migrate= True
-                fetchedStateName= 'Open'
-            if fetchedStateName=='True':
-                self.migrate= True
-                fetchedStateName= 'Close'
-#subject to remove after state names migration-
-            stateFound= False
-            for stateIdx in STATE_LIST:
-                if STATE_LIST[stateIdx]==fetchedStateName:
-                    stateFound= True
+
+            stateIdx= ''
+            for cState in STATE_LIST:
+                if STATE_LIST[cState]==fetchedStateName:
+                    stateIdx= cState
                     break
-            if not stateFound: #defaults to 'opened' todo
-                stateIdx= ''
 
             todoA[__id].set(stateIdx, [task[sqn['namecat']]], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
 

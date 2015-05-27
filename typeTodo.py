@@ -4,7 +4,7 @@
 #todo 11 (interaction, unsure) -10: make more TODO formats available
 
 #todo 232 (feature) +0: introduce sub-todo's that are part of other
-#todo 210 (db, feature, unsure) -5: implement editing of project .do file
+#=todo 210 (db, feature, unsure) -5: implement editing of project .do file
 
 
 import sublime, sublime_plugin
@@ -46,17 +46,30 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     def on_activated(self,_view):
-        WCache().getDB(True, dbMaintainance) #really applies only once
+        cDb= WCache().getDB(True, dbMaintainance) #really applies only once
 
+        #set 'file' syntax where it is not right
+        for cSetting in cDb.config.settings:
+            if cSetting.engine=='file':
+                if cSetting.file==_view.file_name() and _view.settings().get('syntax')!='Packages/TypeTodo/typeTodo.tmLanguage':
+                    _view.set_syntax_file('Packages/TypeTodo/typeTodo.tmLanguage')
+
+
+        if WCache().checkResultsView(_view.buffer_id()):
+            sublime.set_timeout(lambda: _view.set_read_only(True), 0)
+  
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
     def on_load(self,_view):
+        if WCache().checkResultsView(_view.buffer_id()):
+            sublime.set_timeout(lambda: _view.set_read_only(True), 0)
+ 
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
     def on_close(self,_view):
-            WCache().checkResultsView(_view.buffer_id(), True)
+        WCache().checkResultsView(_view.buffer_id(), True)
 
 
 

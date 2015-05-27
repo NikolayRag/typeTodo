@@ -187,8 +187,10 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
     jumpList= []
 
+
     def jumpFromList (self, _idx):
-        self.focusView(self.view, self.jumpList[_idx][1], self.jumpList[_idx][2])
+        if _idx!=-1:
+            self.focusView(self.view, self.jumpList[_idx][1], self.jumpList[_idx][2])
 
 
     def currentViewList (self, _matchesView):

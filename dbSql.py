@@ -23,7 +23,7 @@ else:
     from .task import *
     from .c import *
 
-#todo 95 (store, feature) +0: add more 'context' using SQL
+
 
 class TodoDbSql():
     name= 'Sql'
@@ -299,8 +299,8 @@ class TodoDbSql():
         return self.lastId
 
 
-#todo 956 (db, sql, refactor) +0: fetch sql by one id
-    def fetch(self, _id=False):
+
+    def fetch(self):
         if not self.reconnect():
             return False
         cur = self.dbConn.cursor()

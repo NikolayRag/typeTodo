@@ -38,9 +38,9 @@ class TypetodoEvent(sublime_plugin.EventListener):
     view= None
 
     def on_deactivated(self,_view):
-        db= WCache().getDB()
-        if db:
-            db.pushReset()
+        cDb= WCache().getDB()
+        if cDb:
+            cDb.pushReset()
 
         sublime.set_timeout(WCache().exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
 
@@ -54,6 +54,8 @@ class TypetodoEvent(sublime_plugin.EventListener):
                 if cSetting.engine=='file':
                     if cSetting.file==_view.file_name() and _view.settings().get('syntax')!='Packages/TypeTodo/typeTodo.tmLanguage':
                         _view.set_syntax_file('Packages/TypeTodo/typeTodo.tmLanguage')
+
+            cDb.pushReset()
 
 
         if WCache().checkResultsView(_view.buffer_id()):

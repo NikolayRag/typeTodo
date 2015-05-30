@@ -4,7 +4,6 @@
 #todo 11 (interaction, unsure) -10: make more TODO formats available
 
 #todo 232 (feature) +0: introduce sub-todo's that are part of other
-#=todo 210 (db, feature, unsure) -5: implement editing of project .do file
 
 
 import sublime, sublime_plugin
@@ -93,7 +92,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
             self.view= _view
             self.matchTodo(True)
             self.mutexUnlocked= 1
-
 
 
 

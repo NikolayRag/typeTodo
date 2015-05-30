@@ -16,7 +16,7 @@ else:
     from .dbHttp import *
     from .task import *
 
-#todo 44 (config, db) +0: handle saving project - existing and blank; transfer db for involved files
+#todo 44 (config, db, feature) +0: handle saving project - existing and blank; transfer db for involved files
 
 #todo 89 (db, feature) +0: save context (+-2 strings of code) with task. NOT for 'file' mode
 

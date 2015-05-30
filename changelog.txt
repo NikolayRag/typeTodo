@@ -1,3 +1,15 @@
+v1.8.2
+
+new:
+- 'Update inconsistence' tool for in-view replacing outdated doplets with actual ones
+- fetch and synchronize db periodically, not only at start and at .do change
+- jump from search results by mouse doubleclick
+- 'Search todo' allow exclusive search by prefixing search string with '-': only doplets that are NOT tagged as any of listed tags will match.
+
+fix:
+- autocompletion was wasted after doplet's tag
+
+
 v1.8.1
 
 change:

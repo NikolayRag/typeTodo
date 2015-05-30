@@ -14,6 +14,23 @@ else:
 
 
 
+class TypetodoJumpMouseCommand(sublime_plugin.TextCommand):
+    if sys.version < '3':
+        def run_(self, args):
+            if WCache().checkResultsView(self.view.buffer_id()):
+                self.view.run_command('typetodo_jump')
+            else:
+                self.view.run_command('drag_select', args)
+    else:
+        def run_(self, view, args):
+            if WCache().checkResultsView(self.view.buffer_id()):
+                self.view.run_command('typetodo_jump')
+            else:
+                self.view.run_command('drag_select', args)
+
+
+
+
 class TypetodoJumpPointCommand(sublime_plugin.TextCommand):
     def run(self, _edit, _line, _col):
         focusBegin= self.view.text_point(_line, _col)

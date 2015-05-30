@@ -32,5 +32,10 @@
     {
         "caption": "TypeTodo: Toggle Colorize",
         "command": "typetodo_toggle_colorize"
+    },
+
+    {
+        "caption": "TypeTodo: Update inconsistence",
+        "command": "typetodo_revivify"
     }
 ]

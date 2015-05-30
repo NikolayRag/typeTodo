@@ -31,8 +31,13 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
             self.view.erase_regions('dopletInconsistentPre')
             self.view.erase_regions('dopletInconsistent')
 
-            return
+        else:
+            self.colorize(_edit, _delayed, _regionStart, _regionEnd)
 
+
+
+
+    def colorize(self, _edit, _delayed=True, _regionStart= False, _regionEnd= False):
 #todo 492 (command, cleanup) -5: should use specified region to speedup at editing
 #        if _regionStart and _regionEnd:
 #            _region= sublime.Region(_regionStart, _regionEnd)
@@ -47,6 +52,10 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         regionsProgress= []
         regionsInconsistentPre= []
         regionsInconsistent= []
+
+        for cTodo in RE_TODO_OLD.finditer(content):
+            regionTodo= sublime.Region(cTodo.end('prefix'), cTodo.end('comment'))
+            regionsInconsistent.append(regionTodo)
 
         for cTodo in RE_TODO_EXISTING.finditer(content):
             regionMark= sublime.Region(cTodo.end('prefix'), cTodo.start('state'))
@@ -78,7 +87,6 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 
 
-#todo 570 (command, feature) +0: make tool for viewing inconsistent difference
     def todoValidate(self, _id, _state, _tags, _priority, _comment):
         db= WCache().getDB()
         if db and (int(_id) in db.todoA):
@@ -93,11 +101,60 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         return True
 
 
-class TypetodoToggleColorizeCommand(sublime_plugin.TextCommand):
 
+
+
+
+
+
+class TypetodoToggleColorizeCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cSettings= sublime.load_settings('typetodo.sublime-settings')
         cSettings.set('typetodo_nocolorize', not cSettings.get('typetodo_nocolorize'))
         sublime.save_settings('typetodo.sublime-settings')
 
         sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {}), 0)
+
+
+
+
+
+
+
+
+#todo 1554 (command, fix) +0: should adjust cursor position
+class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        _region= sublime.Region(0,self.view.size())
+        content= self.view.substr(_region)
+        contentA= []
+        for cTodo in RE_TODO_EXISTING.finditer(content):
+            contentA.append(cTodo)
+
+        for cTodo in reversed(contentA):
+            regionTodo= sublime.Region(cTodo.end('prefix'), cTodo.end('comment'))
+
+            cId= cTodo.group('id')
+            if not self.todoValidate(cId, cTodo.group('state'), cTodo.group('tags'), cTodo.group('priority'), cTodo.group('comment')):
+                storedTask= WCache().getDB().todoA[int(cId)]
+                commentType= self.view.substr(sublime.Region(cTodo.end('prefix'), cTodo.start('state')))
+
+                replaceTodo= commentType +storedTask.state +'todo ' +cId +' (' +', '.join(storedTask.tagsA) +') +' +str(storedTask.lvl) +': ' +storedTask.comment
+
+                self.view.replace(_edit, sublime.Region(cTodo.end('comment')+1, cTodo.end('comment')+1), replaceTodo+'\n')
+                self.view.replace(_edit, sublime.Region(cTodo.end('state'), cTodo.start('id')), '     ')
+
+
+
+    def todoValidate(self, _id, _state, _tags, _priority, _comment):
+        db= WCache().getDB()
+        if db and (int(_id) in db.todoA):
+            storedTask= db.todoA[int(_id)]
+            tagsA= []
+            for cTag in _tags.split(','):
+                tagsA.append(cTag.strip())
+
+            if storedTask.state!=_state or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
+                return False
+
+        return True

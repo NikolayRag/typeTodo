@@ -17,16 +17,17 @@ else:
 class TypetodoJumpMouseCommand(sublime_plugin.TextCommand):
     if sys.version < '3':
         def run_(self, args):
-            if WCache().checkResultsView(self.view.buffer_id()):
-                self.view.run_command('typetodo_jump')
-            else:
-                self.view.run_command('drag_select', args)
+            self.run23(args)
     else:
         def run_(self, view, args):
-            if WCache().checkResultsView(self.view.buffer_id()):
-                self.view.run_command('typetodo_jump')
-            else:
-                self.view.run_command('drag_select', args)
+            self.run23(args)
+
+
+    def run23(self, args):
+        if WCache().checkResultsView(self.view.buffer_id()):
+            self.view.run_command('typetodo_jump')
+        else:
+            self.view.run_command('drag_select', args)
 
 
 

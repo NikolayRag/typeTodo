@@ -15,6 +15,7 @@ STATE_LIST= {
 }
 
 RE_TODO_NEW= re.compile('(?P<prefix>.*(?://|#)\s*)todo(?P<trigger>:)?[ \t]*(?P<comment>.*)')
+RE_TODO_OLD= re.compile('(?P<prefix>.*)(?://|#)\s*(?P<state>[\+\=\!]?)\s+(?P<id>\d+)(?:\s+\((?P<tags>.*)\))?(?:\s+(?P<priority>[\+\-]\d+))?\s*:(?P<postfix>[ \t]*(?P<comment>.*)[ \t]*)')
 RE_TODO_EXISTING= re.compile('(?P<prefix>.*)(?://|#)\s*(?P<state>[\+\=\!]?)todo\s+(?P<id>\d+)(?:\s+\((?P<tags>.*)\))?(?:\s+(?P<priority>[\+\-]\d+))?\s*:(?P<postfix>[ \t]*(?P<comment>.*)[ \t]*)')
 RE_TODO_STORED= re.compile('^(?P<prefix>[\+\-\!\=])(?P<tags>.*) (?P<id>\d+): (?P<priority>[\+\-]\d+) (.+ \d\d/\d\d/\d\d \d\d:\d\d )?\"(?P<context>.*)\" (?P<editor>.+) (?P<edited>\d\d/\d\d/\d\d \d\d:\d\d)(?P<comment>)$')
 RE_TODO_STORED_COMMENT= re.compile('^\t?(?P<comment>.*)$')

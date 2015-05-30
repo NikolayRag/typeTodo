@@ -16,7 +16,7 @@ else:
     from .dbHttp import *
     from .task import *
 
-#todo 44 (config, db) +0: handle saving project - existing and blank; transfer db for involved files
+#todo 44 (config, db, feature) +0: handle saving project - existing and blank; transfer db for involved files
 
 #todo 89 (db, feature) +0: save context (+-2 strings of code) with task. NOT for 'file' mode
 
@@ -38,7 +38,8 @@ class TodoDb():
     maxflushRetries= 3
     flushTimeout= 30 #seconds
     timerFlush= None
-    resetPending= False
+    resetPending= 0
+    resetId= 0
 
     reservedId= 0
     reserveEvent= None
@@ -48,6 +49,7 @@ class TodoDb():
 
     callbackFetch= None
 
+    reportFetchReset= False
     reportFlush= False
 
     def __init__(self, _callback, _cfg):
@@ -71,10 +73,11 @@ class TodoDb():
 
 
 
-#=todo 1250 (db, consistency, feature) +0: fetch db periodically
     def pushReset(self, _delay=1000): #leave 1 to remove spam
-        self.resetPending= True
-        sublime.set_timeout(self.reset, _delay)
+        rId= self.resetId+1
+        self.resetPending= rId
+        sublime.set_timeout(lambda: self.reset(rId), _delay)
+        self.resetId= rId
 
 #Macro:
 #    - get new cfg
@@ -82,13 +85,14 @@ class TodoDb():
 #    - fetch using new
 #    - flush using new
 
-    def reset(self):
-        if not self.resetPending:
+    def reset(self, _checkId):
+        if _checkId!=self.resetPending:
             return
-        self.resetPending= False
+        self.resetPending= 0
 
 
         if not self.config.update() and len(self.dbA):
+            self.fetch()
             self.flush(True)
             return
 
@@ -117,6 +121,7 @@ class TodoDb():
         for iT in self.todoA: #set all unsaved
             self.todoA[iT].setSaved(SAVE_STATES.READY)
 
+        self.reportFetchReset= True
         self.fetch() #sync all db at first
         self.flush(True)
 
@@ -234,6 +239,9 @@ class TodoDb():
                 sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
 
             self.reportFlush= False
+
+            self.pushReset(30000)
+
             return
 
 
@@ -285,7 +293,7 @@ class TodoDb():
 #todo 279 (check) +0: see if states dont interfere while task is in-save
 
                 if isNew or diffStamp>0:
-                    if diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
+                    if not self.reportFetchReset or diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
                         print ('TypeTodo: \'' +cDb.name +'\' DB is new at ' +str(__id))
                     elif diffStamp>0:
                         maybeNew+= 1
@@ -294,19 +302,23 @@ class TodoDb():
                     self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
 
                 elif diffStamp<0:
-                    if diffStamp<-60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
-                        print ('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(__id))
-                    else:
-                        maybeOld+= 1
+                    if self.reportFetchReset:
+                        if diffStamp<-60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
+                            print ('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(__id))
+                        else:
+                            maybeOld+= 1
                     self.todoA[__id].setSaved(SAVE_STATES.READY, dbN)
 
 
             #'apparently new' mean that stamp difference is less than 60s. It is likely a subject, when comparing with 'file' DB with seconds truncated. In this case 'file' is treated as little older and is replaced. As 'file' is anyway replaced at each flush, it doesn't make any difference to normal behavior and is messaged just in case.
-            if maybeNew>0:
-                print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
-            if maybeOld>0:
-                print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeOld) +' tasks apparently old')
+            if self.reportFetchReset:
+                if maybeNew>0:
+                    print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
+                if maybeOld>0:
+                    print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeOld) +' tasks apparently old')
 
+
+        self.reportFetchReset= False
 
         if self.callbackFetch:
             sublime.set_timeout(self.callbackFetch, 0)

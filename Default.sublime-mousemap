@@ -1,0 +1,3 @@
+[
+	{"button": "button1", "count": 2, "press_command": "typetodo_jump_mouse", "press_args": {"by": "words"}}
+]

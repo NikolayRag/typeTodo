@@ -32,7 +32,7 @@ either:
 - task editor name specified by rather an plain text (anon) or by logged user id
 
 '''
-#todo 96 (store, feature) +0: add more 'context' using HTTP
+
 
 import sys, json, encodings.idna
 
@@ -167,8 +167,8 @@ class TodoDbHttp():
 
 
 
-#todo 957 (db, http, refactor) +0: fetch http by one id
-    def fetch(self, _id=False):
+
+    def fetch(self):
         postData= {}
         postData['rep']= self.settings.base
         postData['project']= urllib2.quote(self.parentDB.config.projectName.encode('utf-8'))

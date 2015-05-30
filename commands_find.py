@@ -14,6 +14,24 @@ else:
 
 
 
+class TypetodoJumpMouseCommand(sublime_plugin.TextCommand):
+    if sys.version < '3':
+        def run_(self, args):
+            self.run23(args)
+    else:
+        def run_(self, view, args):
+            self.run23(args)
+
+
+    def run23(self, args):
+        if WCache().checkResultsView(self.view.buffer_id()):
+            self.view.run_command('typetodo_jump')
+        else:
+            self.view.run_command('drag_select', args)
+
+
+
+
 class TypetodoJumpPointCommand(sublime_plugin.TextCommand):
     def run(self, _edit, _line, _col):
         focusBegin= self.view.text_point(_line, _col)
@@ -61,6 +79,37 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
+    def findTodoLine(self, _reg, _id):
+        isId= re.match('^\d+$', _id)
+
+        isExclude= False
+        if _id[0]=='-':
+            isExclude= True
+            _id= _id[1:]
+
+
+        if isId:
+            if _reg.group('id')==_id:
+                return True
+        else:
+            tagFound= False
+            for cTag in _reg.group('tags').lower().split(','):
+                for cId in _id.split(','):
+                    try:
+                        if re.search(cId.strip(), cTag.strip()):
+                            tagFound= True
+                            break
+                    except:
+                        None
+
+                if tagFound:
+                    break
+
+            if tagFound!=isExclude: #invert result by exclusion
+                return True
+
+
+
     def findTodoInViews(self, _id):
         resView= WCache().getResultsView(False)
 
@@ -77,28 +126,11 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
             lNum= 0
             for cLine in cView.lines(sublime.Region(0,cView.size())):
+                ln= cView.substr(cLine)
                 lNum+= 1
-                foundIncode= RE_TODO_EXISTING.match(cView.substr(cLine))
-                if foundIncode:
-                    isId= re.match('^\d+$', _id)
-                    if isId:
-                        if foundIncode.group('id')==_id:
-                            matches.append((cView, lNum-1, foundIncode.end('prefix'), cView.substr(cLine), foundIncode, cName))
-                    else:
-                        for cTag in foundIncode.group('tags').lower().split(','):
-                            tagFound= False
-                            for cId in _id.split(','):
-                                try:
-                                    if re.search(cId.strip(), cTag.strip()):
-                                        matches.append((cView, lNum-1, foundIncode.end('prefix'), cView.substr(cLine), foundIncode, cName))
-                                        tagFound= True
-                                        break
-                                except:
-                                    None
-
-                            if tagFound:
-                                break
-
+                foundRe= RE_TODO_EXISTING.match(ln)
+                if foundRe and self.findTodoLine(foundRe, _id):
+                    matches.append((cView, lNum-1, foundRe.end('prefix'), ln, foundRe, cName))
 
         return matches
 
@@ -107,33 +139,16 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
     def findTodoInFile(self, _fn, _test, _id):
         matches= []
 
-        foundEntry= None
+        foundRe= None
         lNum= 0
         try:
             with codecs.open(_fn, 'r', 'UTF-8') as f:
                 for ln in f:
                     ln= ln.strip()
                     lNum+= 1
-                    foundEntry= _test.match(ln)
-                    if foundEntry:
-                        isId= re.match('^\d+$', _id)
-                        if isId:
-                            if foundEntry.group('id')==_id:
-                                matches.append((None, lNum-1, foundEntry.end('prefix'), ln, foundEntry, _fn))
-                        else:
-                            for cTag in foundEntry.group('tags').lower().split(','):
-                                tagFound= False
-                                for cId in _id.split(','):
-                                    try:
-                                        if re.search(cId.strip(), cTag.strip()):
-                                            matches.append((None, lNum-1, foundEntry.end('prefix'), ln, foundEntry, _fn))
-                                            tagFound= True
-                                            break
-                                    except:
-                                        None
-                                
-                                if tagFound:
-                                    break
+                    foundRe= _test.match(ln)
+                    if foundRe and self.findTodoLine(foundRe, _id):
+                        matches.append((None, lNum-1, foundRe.end('prefix'), ln, foundRe, _fn))
 
  
         except Exception as e:
@@ -220,7 +235,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             self.view.window().show_quick_panel(viewTodoList, self.jumpFromList, sublime.MONOSPACE_FONT)
 
 
-#=todo 1309 (command, feature) +0: allow 'exclude' search by prefixing with '-'
+
     def findNamed(self, _text= ''):
         if _text=='*':
             _text='.*'

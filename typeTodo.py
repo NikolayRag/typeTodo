@@ -4,7 +4,6 @@
 #todo 11 (interaction, unsure) -10: make more TODO formats available
 
 #todo 232 (feature) +0: introduce sub-todo's that are part of other
-#=todo 210 (db, feature, unsure) -5: implement editing of project .do file
 
 
 import sublime, sublime_plugin
@@ -38,9 +37,9 @@ class TypetodoEvent(sublime_plugin.EventListener):
     view= None
 
     def on_deactivated(self,_view):
-        db= WCache().getDB()
-        if db:
-            db.pushReset()
+        cDb= WCache().getDB()
+        if cDb:
+            cDb.pushReset()
 
         sublime.set_timeout(WCache().exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
 
@@ -54,6 +53,8 @@ class TypetodoEvent(sublime_plugin.EventListener):
                 if cSetting.engine=='file':
                     if cSetting.file==_view.file_name() and _view.settings().get('syntax')!='Packages/TypeTodo/typeTodo.tmLanguage':
                         _view.set_syntax_file('Packages/TypeTodo/typeTodo.tmLanguage')
+
+            cDb.pushReset()
 
 
         if WCache().checkResultsView(_view.buffer_id()):
@@ -91,7 +92,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
             self.view= _view
             self.matchTodo(True)
             self.mutexUnlocked= 1
-
 
 
 
@@ -165,6 +165,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     def matchTodo(self, _modified= False):
+        self.autoList= False
         self.todoCursorPlace= False
         if len(self.view.sel())!=1: #more than one cursors skipped for number of reasons
             return;
@@ -194,7 +195,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 #todo 1239 (interaction, unsolved) +0: get rid of snippets for tags autocomplete
             #toggle autocomplete
-            self.autoList= False
             self.view.settings().erase('auto_complete_selector')
             if self.todoCursorPlace=='tags':
                 self.autoList= self.tagsAutoCollect()

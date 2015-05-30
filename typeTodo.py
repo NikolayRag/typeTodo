@@ -167,6 +167,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     def matchTodo(self, _modified= False):
+        self.autoList= False
         self.todoCursorPlace= False
         if len(self.view.sel())!=1: #more than one cursors skipped for number of reasons
             return;
@@ -196,7 +197,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 #todo 1239 (interaction, unsolved) +0: get rid of snippets for tags autocomplete
             #toggle autocomplete
-            self.autoList= False
             self.view.settings().erase('auto_complete_selector')
             if self.todoCursorPlace=='tags':
                 self.autoList= self.tagsAutoCollect()

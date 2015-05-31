@@ -269,12 +269,12 @@ class TodoDb():
 #       3.1. join into working list
 #       3.2. reset other db's 'saved' flag
 
-    def fetch(self, _id=False):
+    def fetch(self):
         success= False
 
         for dbN in self.dbA:
             cDb= self.dbA[dbN]
-            todoA= cDb.fetch(_id)
+            todoA= cDb.fetch()
             if todoA==False:
                 continue
 

@@ -1,0 +1,10 @@
+v1.8.4
+
+change:
+- 'find' with tag should show results view for one match
+
+fix:
+- 'browse' command didnt work
+- 'search' with blank field (in-view) failed
+- reviewed loose code that potentially skips saving of canceled doplets. Issue will have more observation.
+

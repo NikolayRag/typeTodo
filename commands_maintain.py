@@ -20,7 +20,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         codeColor= sublime.DRAW_NO_OUTLINE |sublime.DRAW_NO_FILL |sublime.DRAW_SOLID_UNDERLINE
 
 
-    def run(self, _edit, _delayed=True, _regionStart= False, _regionEnd= False):
+    def run(self, _edit, _delayed=True):
         if sublime.load_settings('typetodo.sublime-settings').get('typetodo_nocolorize'):
             self.view.erase_regions('dopletOpenPre')
             self.view.erase_regions('dopletOpen')
@@ -32,16 +32,12 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
             self.view.erase_regions('dopletInconsistent')
 
         else:
-            self.colorize(_edit, _delayed, _regionStart, _regionEnd)
+            self.colorize(_edit, _delayed)
 
 
 
 
-    def colorize(self, _edit, _delayed=True, _regionStart= False, _regionEnd= False):
-#todo 492 (command, cleanup) -5: should use specified region to speedup at editing
-#        if _regionStart and _regionEnd:
-#            _region= sublime.Region(_regionStart, _regionEnd)
-#        else:
+    def colorize(self, _edit, _delayed=True):
         _region= sublime.Region(0,self.view.size())
         content= self.view.substr(_region)
 

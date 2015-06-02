@@ -240,36 +240,41 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
         return todoId
 
+
     #store to db and, if changed state, remove comment
-#todo 690 (check) +0: since updVals passed delayed, there can be inconsistence
-    updVals= None
-    def substDoUpdate(self, _txt=False):
-        cView= self.updVals['_view']
-        if self.updVals['_tags'] != None:
-            self.lastCat[0]= self.updVals['_tags']
+#=todo 690 (check, fix) +0: since updVals passed delayed, there can be inconsistence
+    def substDoUpdate(self, _updVals):
+        def func(_txt=False):
+            if _txt==False or _txt=='':
+                _txt= _updVals['_comment']
 
-        if _txt==False or _txt=='':
-            _txt= self.updVals['_comment']
-        self.updVals['_id']= self.cfgStore(WCache().getDB(), self.updVals['_id'], self.updVals['_state'], self.updVals['_tags'], self.updVals['_lvl'] or 0, self.view.file_name(), _txt)
+            cView= _updVals['_view']
+            if _updVals['_tags'] != None:
+                self.lastCat[0]= _updVals['_tags']
 
-        if self.updVals['_wipe']:
-            todoRegion= cView.full_line(self.updVals['_region'])
-            if self.updVals['_prefix']!='': #midline todo
-                todoRegion= sublime.Region(
-                    todoRegion.a +len(self.updVals['_prefix']),
-                    todoRegion.b
-                )
+            _updVals['_id']= self.cfgStore(WCache().getDB(), _updVals['_id'], _updVals['_state'], _updVals['_tags'], _updVals['_lvl'] or 0, self.view.file_name(), _txt)
 
-            cView.run_command('typetodo_reg_replace', {'_regStart': todoRegion.a, '_regEnd': todoRegion.b-1})
+            if _updVals['_wipe']:
+                todoRegion= cView.full_line(_updVals['_region'])
+                if _updVals['_prefix']!='': #midline todo
+                    todoRegion= sublime.Region(
+                        todoRegion.a +len(_updVals['_prefix']),
+                        todoRegion.b
+                    )
+
+                cView.run_command('typetodo_reg_replace', {'_regStart': todoRegion.a, '_regEnd': todoRegion.b-1})
+
+
+        return func
 
 
     def substUpdate(self, _state, _id, _tags, _lvl, _comment, _prefix, _region, _wipe=False):
-        self.updVals= {'_view':self.view, '_state':_state, '_id':_id, '_tags':_tags, '_lvl':_lvl, '_comment':_comment, '_prefix':_prefix, '_region':_region, '_wipe':_wipe}
+        updVals= {'_view':self.view, '_state':_state, '_id':_id, '_tags':_tags, '_lvl':_lvl, '_comment':_comment, '_prefix':_prefix, '_region':_region, '_wipe':_wipe}
 
         if _state=='!':
-            self.view.window().show_input_panel('Reason of canceling:', '', self.substDoUpdate, None, self.substDoUpdate)
+            self.view.window().show_input_panel('Reason of canceling:', '', self.substDoUpdate(updVals), None, self.substDoUpdate(updVals))
         else:
-            self.substDoUpdate()
+            self.substDoUpdate(updVals)()
 
 
     def cfgStore(self, _db, _id, _state, _tags, _lvl, _fileName, _comment):

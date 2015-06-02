@@ -262,26 +262,27 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 matches.append(cMatch)
 
 
+        isId= re.match('^\d+$', _text)
         if not len(matches):
             markName= '#' +_text
-            
-            isId= re.match('^\d+$', _text)
             if not isId: 
                 markName= 'tagged "' +_text +'"'
             
             sublime.message_dialog('TypeTodo error:\n\n\tDoplet ' +markName +' was not found in source')
+            return
 
 
         #one found
-        if len(matches) == 1:
+        if len(matches)==1 and isId:
             cView= matches[0][0]
             if not cView:
                 cView= sublime.active_window().open_file(matches[0][5], sublime.TRANSIENT)
             self.focusView(cView, matches[0][1], matches[0][2])
 
+            return
+
         #many found
-        if len(matches)>1:
-            self.listTodos(_text, matches)
+        self.listTodos(_text, matches)
 
 
 

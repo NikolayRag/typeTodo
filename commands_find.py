@@ -83,7 +83,8 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         isId= re.match('^\d+$', _id)
 
         isExclude= False
-        if _id[0]=='-':
+
+        if len(_id) and _id[0]=='-':
             isExclude= True
             _id= _id[1:]
 

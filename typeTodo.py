@@ -291,7 +291,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
     def cfgStore(self, _id, _state, _tags, _lvl, _fileName, _comment):
         cDb= WCache().getDB()
         if cDb:
-            return _db.store(_id, _state, (_tags or '').split(','), _lvl, _fileName, _comment)
+            return cDb.store(_id, _state, (_tags or '').split(','), _lvl, _fileName, _comment)
 
         sublime.message_dialog('TypeTodo error:\n\n\tTypeTodo was not properly initialized. \n\tMaybe reinstalling will help')
 

@@ -38,6 +38,7 @@ class TodoDb():
     maxflushRetries= 3
     flushTimeout= 30 #seconds
     timerFlush= None
+    timerReset= None
     resetPending= 0
     resetId= 0
 
@@ -56,7 +57,7 @@ class TodoDb():
         self.dbA= {}
         self.todoA= {}
         self.timerFlush = Timer(0, None) #dummy
-
+        self.timerReset = Timer(0, None) #dummy
 
         self.callbackFetch= _callback
         self.config= _cfg
@@ -67,8 +68,6 @@ class TodoDb():
 
         self.pushReset()
         
-
-
 
 
 
@@ -84,6 +83,10 @@ class TodoDb():
 #       - flush if unchanged
 #    - fetch using new
 #    - flush using new
+    def resetDo(self):
+        self.fetch()
+        self.flush(True)
+
 
     def reset(self, _checkId):
         if _checkId!=self.resetPending:
@@ -91,9 +94,10 @@ class TodoDb():
         self.resetPending= 0
 
 
+        self.timerReset.cancel()
         if not self.config.update() and len(self.dbA):
-            self.fetch()
-            self.flush(True)
+            self.timerReset= Timer(0, self.resetDo)
+            self.timerReset.start()
             return
 
 
@@ -122,8 +126,8 @@ class TodoDb():
             self.todoA[iT].setSaved(SAVE_STATES.READY)
 
         self.reportFetchReset= True
-        self.fetch() #sync all db at first
-        self.flush(True)
+        self.timerReset= Timer(0, self.resetDo)
+        self.timerReset.start()
 
 
 
@@ -143,9 +147,12 @@ class TodoDb():
         okId= self.reservedId #first call is initial, result should not be used
 
         self.reserveEvent.clear() #second call to newId() will suspend till newIdGet() done
-        sublime.set_timeout(self.newIdGet, 0)
+        Timer(0, self.newIdGet).start()
 
         return okId
+
+
+
 
 
     def newIdGet(self):
@@ -170,7 +177,6 @@ class TodoDb():
         self.reservedId= cId
         print('TypeTodo: Id reserved: ' +str(self.reservedId))
         self.reserveEvent.set()
-
 
 
 

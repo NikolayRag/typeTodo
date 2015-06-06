@@ -1,3 +1,12 @@
+v1.8.5
+
+new:
+- resave doplets at filename change, basically for new unsaved files
+
+fix:
+- flush/fetch freeze removed (was accidentally brought in with v1.7.1)
+
+
 v1.8.4
 
 change:

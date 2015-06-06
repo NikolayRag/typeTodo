@@ -36,7 +36,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
     view= None
 
-    def on_deactivated(self,_view):
+    def on_deactivated(self, _view):
         cDb= WCache().getDB()
         if cDb:
             cDb.pushReset()
@@ -44,7 +44,10 @@ class TypetodoEvent(sublime_plugin.EventListener):
         sublime.set_timeout(WCache().exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
 
 
-    def on_activated(self,_view):
+    viewName= ''
+    def on_activated(self, _view):
+        self.viewName= _view.file_name()
+
         cDb= WCache().getDB(True, dbMaintainance) #really applies only once
 
         #set 'file' syntax where it is not right
@@ -56,22 +59,43 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
             cDb.pushReset()
 
-
         if WCache().checkResultsView(_view.buffer_id()):
             sublime.set_timeout(lambda: _view.set_read_only(True), 0)
   
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
-    def on_load(self,_view):
+    def on_load(self, _view):
         if WCache().checkResultsView(_view.buffer_id()):
             sublime.set_timeout(lambda: _view.set_read_only(True), 0)
  
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
-    def on_close(self,_view):
+    def on_close(self, _view):
         WCache().checkResultsView(_view.buffer_id(), True)
+
+
+
+
+#=todo 21 (interaction, feature) +0: handle filename change, basically for new unsaved files
+    def on_post_save(self, _view):
+        if self.viewName==_view.file_name():
+            return
+        self.viewName= _view.file_name()
+
+
+        cRregion= sublime.Region(0,_view.size())
+        content= _view.substr(cRregion)
+        cDb= WCache().getDB()
+        if not cDb or not RE_TODO_EXISTING.search(content):
+            return
+
+        for cTodo in RE_TODO_EXISTING.finditer(content):
+            cId= int(cTodo.group('id'))
+            self.cfgStore(cTodo.group('id'), cTodo.group('state'), cTodo.group('tags'), cTodo.group('priority') or 0, self.view.file_name(), cTodo.group('comment'))
+
+
 
 
 
@@ -149,12 +173,15 @@ class TypetodoEvent(sublime_plugin.EventListener):
     autoList= False
 
     def tagsAutoCollect(self):
+        cDb= WCache().getDB()
         tagsA= []
-        todosA= WCache().getDB().todoA
-        for cTask in todosA:
-            for cTag in todosA[cTask].tagsA:
-                if cTag not in tagsA:
-                    tagsA.append(cTag)
+
+        if cDb:
+            todosA= cDb.todoA
+            for cTask in todosA:
+                for cTag in todosA[cTask].tagsA:
+                    if cTag not in tagsA:
+                        tagsA.append(cTag)
 
         tagsListA= [(' ','')]
         for cTag in tagsA:
@@ -229,7 +256,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
     #create new todo in db and return string to replace original 'todo:'
     def substNew(self, _prefx, _postfx, _region):
-        todoId= self.cfgStore(WCache().getDB(), 0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
+        todoId= self.cfgStore(0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 
         todoComment= _prefx + 'todo ' +str(todoId) +' (${1:' +self.lastCat[0] +'}) ${2:' +self.lastLvl +'}: ${0:}' +_postfx +''
         self.view.run_command('typetodo_reg_replace', {'_regStart': _region.a, '_regEnd': _region.b})
@@ -242,7 +269,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     #store to db and, if changed state, remove comment
-#=todo 690 (check, fix) +0: since updVals passed delayed, there can be inconsistence
     def substDoUpdate(self, _updVals):
         def func(_txt=False):
             if _txt==False or _txt=='':
@@ -252,7 +278,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
             if _updVals['_tags'] != None:
                 self.lastCat[0]= _updVals['_tags']
 
-            _updVals['_id']= self.cfgStore(WCache().getDB(), _updVals['_id'], _updVals['_state'], _updVals['_tags'], _updVals['_lvl'] or 0, self.view.file_name(), _txt)
+            _updVals['_id']= self.cfgStore(_updVals['_id'], _updVals['_state'], _updVals['_tags'], _updVals['_lvl'] or 0, self.view.file_name(), _txt)
 
             if _updVals['_wipe']:
                 todoRegion= cView.full_line(_updVals['_region'])
@@ -277,13 +303,13 @@ class TypetodoEvent(sublime_plugin.EventListener):
             self.substDoUpdate(updVals)()
 
 
-    def cfgStore(self, _db, _id, _state, _tags, _lvl, _fileName, _comment):
-        if _db:
-            return _db.store(_id, _state, (_tags or '').split(','), _lvl, _fileName, _comment)
+    def cfgStore(self, _id, _state, _tags, _lvl, _fileName, _comment):
+        cDb= WCache().getDB()
+        if cDb:
+            return cDb.store(_id, _state, (_tags or '').split(','), _lvl, _fileName, _comment)
 
-        sublime.message_dialog('TypeTodo error:\n\n\tDoplet was not saved. \n\tThis is known issue and\n\twill be fixed')
+        sublime.message_dialog('TypeTodo error:\n\n\tTypeTodo was not properly initialized. \n\tMaybe reinstalling will help')
 
-#todo 21 (interaction, feature) +0: handle filename change, basically for new unsaved files
 
 
 try:

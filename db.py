@@ -16,7 +16,7 @@ else:
     from .dbHttp import *
     from .task import *
 
-#todo 44 (config, db, feature) +0: handle saving project - existing and blank; transfer db for involved files
+#todo 44 (config, db, feature, unsolved) +0: handle saving project - existing and blank; transfer db for involved files
 
 #todo 89 (db, feature) +0: save context (+-2 strings of code) with task. NOT for 'file' mode
 
@@ -38,6 +38,7 @@ class TodoDb():
     maxflushRetries= 3
     flushTimeout= 30 #seconds
     timerFlush= None
+    timerReset= None
     resetPending= 0
     resetId= 0
 
@@ -56,7 +57,7 @@ class TodoDb():
         self.dbA= {}
         self.todoA= {}
         self.timerFlush = Timer(0, None) #dummy
-
+        self.timerReset = Timer(0, None) #dummy
 
         self.callbackFetch= _callback
         self.config= _cfg
@@ -70,8 +71,7 @@ class TodoDb():
 
 
 
-
-
+#=todo 1662 (fix, db) +0: unsaved doplet is overriden probably at changing config
 
     def pushReset(self, _delay=1000): #leave 1 to remove spam
         rId= self.resetId+1
@@ -85,15 +85,20 @@ class TodoDb():
 #    - fetch using new
 #    - flush using new
 
+    def resetDo(self):
+        self.fetch()
+        self.flush(True)
+
     def reset(self, _checkId):
         if _checkId!=self.resetPending:
             return
         self.resetPending= 0
 
 
+        self.timerReset.cancel()
         if not self.config.update() and len(self.dbA):
-            self.fetch()
-            self.flush(True)
+            self.timerReset= Timer(0, self.resetDo)
+            self.timerReset.start()
             return
 
 
@@ -122,8 +127,8 @@ class TodoDb():
             self.todoA[iT].setSaved(SAVE_STATES.READY)
 
         self.reportFetchReset= True
-        self.fetch() #sync all db at first
-        self.flush(True)
+        self.timerReset= Timer(0, self.resetDo)
+        self.timerReset.start()
 
 
 
@@ -143,9 +148,12 @@ class TodoDb():
         okId= self.reservedId #first call is initial, result should not be used
 
         self.reserveEvent.clear() #second call to newId() will suspend till newIdGet() done
-        sublime.set_timeout(self.newIdGet, 0)
+        Timer(0, self.newIdGet).start()
 
         return okId
+
+
+
 
 
     def newIdGet(self):
@@ -170,7 +178,6 @@ class TodoDb():
         self.reservedId= cId
         print('TypeTodo: Id reserved: ' +str(self.reservedId))
         self.reserveEvent.set()
-
 
 
 

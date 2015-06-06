@@ -75,11 +75,11 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         self.view.add_regions('dopletOpenPre', regionsOpenPre, 'comment', 'dot')
         self.view.add_regions('dopletOpen', regionsOpen, 'comment', 'dot', self.codeColor)
 
-        sublime.set_timeout(lambda: self.view.add_regions('dopletProgressPre', regionsProgressPre, 'constant.language', 'dot'), 100*_delayed)
-        sublime.set_timeout(lambda: self.view.add_regions('dopletProgress', regionsProgress, 'constant.language', 'dot', self.codeColor), 100*_delayed)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletProgressPre', regionsProgressPre, 'constant.language', 'dot'), 150*_delayed)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletProgress', regionsProgress, 'constant.language', 'dot', self.codeColor), 150*_delayed)
 
-        sublime.set_timeout(lambda: self.view.add_regions('dopletInconsistentPre', regionsInconsistentPre, 'invalid', 'dot'), 200*_delayed)
-        sublime.set_timeout(lambda: self.view.add_regions('dopletInconsistent', regionsInconsistent, 'invalid', 'dot', self.codeColor), 200*_delayed)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletInconsistentPre', regionsInconsistentPre, 'invalid', 'dot'), 300*_delayed)
+        sublime.set_timeout(lambda: self.view.add_regions('dopletInconsistent', regionsInconsistent, 'invalid', 'dot', self.codeColor), 300*_delayed)
 
 
 

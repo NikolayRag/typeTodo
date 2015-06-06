@@ -16,7 +16,7 @@ else:
     from .dbHttp import *
     from .task import *
 
-#=todo 44 (config, db, feature) +0: handle saving project - existing and blank; transfer db for involved files
+#todo 44 (config, db, feature, unsolved) +0: handle saving project - existing and blank; transfer db for involved files
 
 #todo 89 (db, feature) +0: save context (+-2 strings of code) with task. NOT for 'file' mode
 
@@ -71,6 +71,7 @@ class TodoDb():
 
 
 
+#=todo 1662 (fix, db) +0: unsaved doplet is overriden probably at changing config
 
     def pushReset(self, _delay=1000): #leave 1 to remove spam
         rId= self.resetId+1
@@ -83,10 +84,10 @@ class TodoDb():
 #       - flush if unchanged
 #    - fetch using new
 #    - flush using new
+
     def resetDo(self):
         self.fetch()
         self.flush(True)
-
 
     def reset(self, _checkId):
         if _checkId!=self.resetPending:

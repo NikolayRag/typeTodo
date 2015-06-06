@@ -77,13 +77,25 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 
+
+#=todo 21 (interaction, feature) +0: handle filename change, basically for new unsaved files
     def on_post_save(self, _view):
         if self.viewName==_view.file_name():
             return
         self.viewName= _view.file_name()
 
-#        if sublime.ok_cancel_dialog('TypeTodo:\n\n\tFilename was changed.\n\tUpdate existing doplets to hold new context?'):
-#            print(1)
+
+        cRregion= sublime.Region(0,_view.size())
+        content= _view.substr(cRregion)
+        cDb= WCache().getDB()
+        if not cDb or not RE_TODO_EXISTING.search(content):
+            return
+
+        for cTodo in RE_TODO_EXISTING.finditer(content):
+            cId= int(cTodo.group('id'))
+            self.cfgStore(cTodo.group('id'), cTodo.group('state'), cTodo.group('tags'), cTodo.group('priority') or 0, self.view.file_name(), cTodo.group('comment'))
+
+
 
 
 
@@ -161,12 +173,15 @@ class TypetodoEvent(sublime_plugin.EventListener):
     autoList= False
 
     def tagsAutoCollect(self):
+        cDb= WCache().getDB()
         tagsA= []
-        todosA= WCache().getDB().todoA
-        for cTask in todosA:
-            for cTag in todosA[cTask].tagsA:
-                if cTag not in tagsA:
-                    tagsA.append(cTag)
+
+        if cDb:
+            todosA= cDb.todoA
+            for cTask in todosA:
+                for cTag in todosA[cTask].tagsA:
+                    if cTag not in tagsA:
+                        tagsA.append(cTag)
 
         tagsListA= [(' ','')]
         for cTag in tagsA:
@@ -295,7 +310,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
         sublime.message_dialog('TypeTodo error:\n\n\tTypeTodo was not properly initialized. \n\tMaybe reinstalling will help')
 
-#=todo 21 (interaction, feature) +0: handle filename change, basically for new unsaved files
 
 
 try:

@@ -50,7 +50,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
         cDb= WCache().getDB(True, dbMaintainance) #really applies only once
 
-        #set 'file' syntax where it is not right
+        #set 'file' syntax where it is not right and check consistency
         if cDb:
             for cSetting in cDb.config.settings:
                 if cSetting.engine=='file':
@@ -78,7 +78,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 
-#=todo 21 (interaction, feature) +0: handle filename change, basically for new unsaved files
     def on_post_save(self, _view):
         if self.viewName==_view.file_name():
             return

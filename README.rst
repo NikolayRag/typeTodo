@@ -43,7 +43,7 @@ Database is specified in *[projectName].do* text file which is placed inside the
 * Project's or Global *.do* are accessible with provided command.
 
 
-Changing ``//todo...`` to ``//+todo...`` (adding ``+`` sign or pressing <Alt>+<Shift>+<Numpad +>) changes state to 'done' in db and wipes that comment of the code.
+Changing ``//todo...`` to ``//+todo...`` (adding ``+`` sign or pressing <Alt>+<Shift>+<Numpad +>) changes state to 'done' in database and wipes that comment of the code.
 Full set of states are:
 
 * '' or '-' *(<Alt>+<Shift>+<Numpad ->)*  Opened TODO (default)
@@ -62,11 +62,10 @@ Doplet is a comment in form of ``//todo XXXX (tags) [+-]N: comment`` with follow
        - **mandatory**
        - would be auto-generated sequential number, unique within project
 * (tags)
-       - *optional*, comma-separated list
+       - comma-separated list
        - default: 'general'
        - When you rename it, new name will be reused with next new TODO
 * [+-]N
-       - *optional*
        - default: +0
        - priority level. Just signed (always) integer number for addition.
 * comment
@@ -77,7 +76,7 @@ Doplet is a comment in form of ``//todo XXXX (tags) [+-]N: comment`` with follow
 ---------------------------------
 
 *.do* file is used both as configuration and default storage database.
-If currently there IS project opened in Sublime, it is located inside the first project's folder: so if first folder included in project is */myProject*, then */myProject/myProject.do* file will be used as config.
+If currently there IS project opened in Sublime, *<projectName>.do* is located inside the first project's folder: so if first folder included in project is */myProject*, then */myProject/myProject.do* file will be used as config.
 
 *<projectName>.do* is automatically created if none found, and it's config is copied from global *.do*, which is also automatically created if there's no one.
 
@@ -88,14 +87,15 @@ Global *.do* is used one for all doplets when there's NO project used at a momen
        All configuration entries found in *.do* counts.
        *.do* file is checked periodically for configuration changes, and they reapplied on fly.
       
-       Default *.do* explicit configuration is HTTP, using http://typetodo.com as database. Also if no external **FILE** is specified, *.do* file itself is implicitly used as database storage.
+       Default *.do* explicit configuration is HTTP, using http://typetodo.com as host and newly created database with random name like ``~exwvpaytkfs6``. Also if no external **FILE** is specified, *.do* file itself is implicitly used as database storage.
 
        Acceptable configurations are **FILE**, **MYSQL** and **HTTP**
 
 
 4.1. **FILE** mode
        Specified by ``file <filename.ext>`` line.
-       Provided ``<filename.ext>`` is then created and used within the same place as *<projectName>.do*. It is available to specify relative or absolute path together with file name.
+
+       Provided ``<filename.ext>`` is created and used within the same place as *<projectName>.do*. It is available to specify relative or absolute path together with file name.
        If no explicit **FILE** database is defined, then *.do* is implicitly used as database.
 
 
@@ -127,9 +127,10 @@ Global *.do* is used one for all doplets when there's NO project used at a momen
 
 4.2. **MySQL** mode
        Specified by ``mysql <host> <user> <pass> <scheme>`` line.
+
        *<scheme>* specified MUST exist at server.
 
-       Following tables will be created:
+       Following tables will be created if not exists:
 
 * projects
 * categories (for tags)
@@ -144,13 +145,14 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
 
 4.3. **HTTP** mode
        Specified by ``http <host> <repository>`` or ``http <host> <repository> <user> <pass>`` line.
+
        If ``<user> <pass>`` logon credentials are specified, repository is treated as **personal**, otherwise it is **public**.
 
        Repository is accessible at http://typetodo.com/<repository>
 
 * public repository
        Is created at first run or can be recreated using *TypeTodo: Reset Global config* command. It is free to read and write by everyone who knows it's name.
-       Public repository name looks like ``*~exwvpaytkfs6*``
+       Public repository name looks like ``~exwvpaytkfs6``
 * personal repository
        Have same name as user registered at http://typetodo.com. It is readable by everyone (yet) but can be written only by providing logon username and pass. Using site service, you can grant write access for particular project to specified site user.
        

@@ -1,3 +1,9 @@
+v1.8.6
+
+fix:
+- (workaround) Sql crash localized, issue to fix futher
+
+
 v1.8.5
 
 new:

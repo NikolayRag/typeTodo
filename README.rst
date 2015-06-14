@@ -1,79 +1,71 @@
 typeTodo
 =========
 
-Manage TODO comments as tasks, as they're typed anywhere in project.
+Manage TODO comments, as they're typed anywhere in project code.
 
 
 
 .. contents::
 ..
 
+.. _`public server`: http://www.typetodo.com/
 
 1. Key features
 ---------------
 
-1.1.
-       TypeTodo stores and updates verbose TODO comments to external per-project database and leaves breef version inlined in the code.
+* TypeTodo stores and synchronizes TODO comments (doplets) within separate per-project database.
        
-1.2.
-       Available database modes are *.do* raw text **File**, **MySQL** or **HTTP**
+* Database can be text **File**, **MySQL** or **HTTP**, any number of them. Free `public server`_ exists to handle **HTTP** mode.
 
-1.3.
-       Most interaction is done by ordinary inline source code commenting,
-       without any menus and special shortcuts. Just type and don't look aside.
+* Each doplet is assigned ID at creation, unique within project.
 
-1.4.
-       Each TODO created is assigned ID, unique within project
+* Most interaction is done by ordinary inline source code commenting. Just type and don't look aside.
+
+* TypeTodo is intended to be used by multiple contributors over one project at one time without interference.
+
+* Explicit commands and keyboard shortcuts are available and are described in section `5. Related Commands`_.
+
 
 
 2. TODO creation and editing
 ----------------------------
 
-2.1.
-       Type ``//todo:`` or ``#todo:`` according to used language.
-       As colon ``:`` is typed, line is instantly expanded with snippet, having additional fields:
-       ``//todo:`` expands to ``//todo XXXX (category) [+-]N:``
+Start with typing ``//todo:`` or ``#todo:`` comment, according to used language.
+As colon ``:`` is typed, rest of line is instantly substituted with snippet, introducing additional fields: ``//todo XXXX (tag) [+-]N: <comment>`` where XXXX is assigned unique integer ID.
        
-* detailed fields description found in section 3
+Any futher edition of any of that comment field (doplet) will trigger to flush it to database, using XXXX as ID.
+Database is specified in *[projectName].do* text file which is placed inside the first project's folder.
 
-2.2.
-       ... and stored within user-specified database.
-       Database is specified within *[projectName].do* text file which is placed inside the first folder, included in project.
-
-* database configuration is described in section 4
+* detailed doplet fields description found in section `3. Doplet comment fields`_
+* database configuration is described in section `4. .do config file and default database`_
        
-2.3.
-       If at a moment there's no project used, then global *.do* file is used as a database.
-       (for win7 it's stored in *[user]\\AppData\\Roaming\\Sublime Text 2\\Packages\\User\\*)
-
-2.4.
-       Further edition of existing TODO comment will flush it to db as well, using XXXX as id.
-
-2.5.
-       Changing ``//todo...`` to ``//+todo...`` (adding '+' sign) changes state to 'done' in db
-       and wipes that comment of the code.
-       Full set of states are:
-       '' - Opened TODO (default)
-       '=' - TODO in progress, used for management of TODOs
-       '+' - Closed TODO, wiped as set
-       '!' - Canceled TODO; As set, you will be asked for reason of canceling. If specified, that reason replaces TODOs comment in database. Then TODO is wiped.
+* If at a moment there's no project used, then global *.do* file is used as a database.
+* Project's or Global *.do* are accessible with provided command.
 
 
-3. TODO comment fields
+Changing ``//todo...`` to ``//+todo...`` (adding ``+`` sign or pressing <Alt>+<Shift>+<Numpad +>) changes state to 'done' in database and wipes that comment of the code.
+Full set of states are:
+
+* '' or '-' *(<Alt>+<Shift>+<Numpad ->)*  Opened TODO (default)
+* '=' *(<Alt>+<Shift>+<=>)*  TODO in progress, used for management of TODOs
+* '+' *(<Alt>+<Shift>+<Numpad +>)*  Closed TODO, wiped when set
+* '!' *(<Alt>+<Shift>+<!>)*  Canceled TODO; As set, you will be asked for reason of canceling. If specified, that reason replaces TODOs comment in database. Then TODO is wiped.
+
+
+
+3. Doplet comment fields
 ----------------------
 
-3.1.
-       TODO is a comment in form of ``//todo XXXX (tags) [+-]N: comment`` with following fields used:
+Doplet is a comment in form of ``//todo XXXX (tags) [+-]N: comment`` with following fields used:
        
 * XXXX
        - **mandatory**
        - would be auto-generated sequential number, unique within project
 * (tags)
-       - *optional*, comma-separated list
+       - comma-separated list
        - default: 'general'
        - When you rename it, new name will be reused with next new TODO
 * [+-]N
-       - *optional*
        - default: +0
        - priority level. Just signed (always) integer number for addition.
 * comment
@@ -83,65 +75,66 @@ Manage TODO comments as tasks, as they're typed anywhere in project.
 4. .do config file and default database
 ---------------------------------
 
-4.1.
-       *[projectName].do* file is used both as configuration and storage database.
+*.do* file is used both as configuration and default storage database.
+If currently there IS project opened in Sublime, *<projectName>.do* is located inside the first project's folder: so if first folder included in project is */myProject*, then */myProject/myProject.do* file will be used as config.
 
-4.2.
-       It is placed inside the first project's folder.
-       That is, if first folder included in project is */project-1*, then */project-1/project-1.do* file will be used as config.
-       *[projectName].do* is automatically created if none found, when project is loaded, and it's config is copied from global *.do*.
+*<projectName>.do* is automatically created if none found, and it's config is copied from global *.do*, which is also automatically created if there's no one.
 
-4.3.
-       If there's no current project in Sublime, then *[sublimePackage]/typeTodo/.do* is used as configuration and DB itself.
-       
-4.4.
-       First non-blank lines of *.do* file are used to configure external database.
-       The configuration is taken from **last** line within this block, that matches supported settings.
-       *.do* file is checked periodically for database configuration, and it reapplies on fly if changed
+Global *.do* is used one for all doplets when there's NO project used at a moment.
+
+
+4.0.
+       All configuration entries found in *.do* counts.
+       *.do* file is checked periodically for configuration changes, and they reapplied on fly.
       
-4.5.
-       **.do** default configuration is external HTTP DB, using http://typetodo.com as database.
+       Default *.do* explicit configuration is HTTP, using http://typetodo.com as host and newly created database with random name like ``~exwvpaytkfs6``. Also if no external **FILE** is specified, *.do* file itself is implicitly used as database storage.
 
-4.6.
-       At **FILE** mode todo uses same *.do* file as one for default configuration.
-       It is always enabled (from v1.5.0), no matter if external DB is specified or not.
-       *.do* file holds tasks using following format:
+       Acceptable configurations are **FILE**, **MYSQL** and **HTTP**
+
+
+4.1. **FILE** mode
+       Specified by ``file <filename.ext>`` line.
+
+       Provided ``<filename.ext>`` is created and used within the same place as *<projectName>.do*. It is available to specify relative or absolute path together with file name.
+       If no explicit **FILE** database is defined, then *.do* is implicitly used as database.
+
+
+       File used for this mode (*.do* itself or external) holds tasks using following format:
        
-``(+|-|=|!)tags XXXX: [+|-N] creatorName creationStamp filename editorName editionStamp``
+       ``(+|-|=|!)tags XXXX: [+|-N] filename editorName editionStamp``
+       
+       ``comment``
 
-``comment``
-
-using  following fields:
+       where fields are:
 
 * (+|-|=|!)
-       - TODO state; ``-`` indicates open task, ``+`` - closed, ``=`` - in-progress, and ``!`` stands for canceled.
+       TODO state: ``-`` indicates open task, ``+`` - closed, ``=`` - in-progress, and ``!`` stands for canceled.
 * tags
-       - comma-separated tag list
+       comma-separated tag list
 * XXXX
-       - task integer id, unique within project
+       task integer ID, unique within project (and within *.do* file)
 * +|-N
-       - importance, arbitrary signed integer number
-* creatorName
-       - name of user which created task, is taken from environment variable
-* creationStamp
-       - date and time task was created. Using **dd/mm/yy hh:mm** format
+       priority, arbitrary signed integer number
 * filename
-       - file at which task was created. If *.sublime-project* is found, relative path is stored.
+       file at which task was created. If *.sublime-project* is found, relative path is stored.
 * editorName
-       - name of user which edited task last, is taken from environment variable
+       name of user which edited task last, it is taken from system environment
 * editionStamp
-       - date and time task was edited last. Using **dd/mm/yy hh:mm** format
+       date and time task was edited last. Using **dd/mm/yy hh:mm** format
 * comment, *at second line*
-       - arbitrary text
+       arbitrary text
 
-4.7.
-       **MySQL** mode is used if configuration ``mysql [host] [user] [pass] [scheme]`` line is found in *.do* config.
-       [Scheme] specified MUST exist at server.
-       Following tables will be created:
+
+4.2. **MySQL** mode
+       Specified by ``mysql <host> <user> <pass> <scheme>`` line.
+
+       *<scheme>* specified MUST exist at server.
+
+       Following tables will be created if not exists:
 
 * projects
-* categories (tags)
-* tag2Task
+* categories (for tags)
+* tag2task
 * files
 * users
 * states
@@ -149,83 +142,84 @@ using  following fields:
 
 All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved.
 
-4.8.
-       **HTTP** mode is used if ``http [host] [repository]`` or ``http [host] [repository] [user] [pass]`` configuration line is found in *.do* config.
-       If ``[user] [pass]`` logon credentials are specified, repository is treated as **personal**, otherwise it is **public**.
-       Repository is accessible at http://typetodo.com/[repname]
+
+4.3. **HTTP** mode
+       Specified by ``http <host> <repository>`` or ``http <host> <repository> <user> <pass>`` line.
+
+       If ``<user> <pass>`` logon credentials are specified, repository is treated as **personal**, otherwise it is **public**.
+
+       Repository is accessible at http://typetodo.com/<repository>
 
 * public repository
-       - Is created at first run or can be recreated using *TypeTodo: Reset Global config* command. It is free to read and write by everyone who knows it's name.
-       - Public repository name looks like *~exwvpaytkfs6*
+       Is created at first run or can be recreated using *TypeTodo: Reset Global config* command. It is free to read and write by everyone who knows it's name.
+       Public repository name looks like ``~exwvpaytkfs6``
 * personal repository
-       - Have same name as registered user. It is readable by everyone (yet) but can be written only by providing logon username and pass.
+       Have same name as user registered at http://typetodo.com. It is readable by everyone (yet) but can be written only by providing logon username and pass. Using site service, you can grant write access for particular project to specified site user.
        
-All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved.
+All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved (not yet displayed within www site).
+
 
 
 5. Related Commands
 --------------------
        
-       While using of TypeTodo is completely implicit, there're some support commands and keyboard shortcuts available:
+While using of TypeTodo is completely implicit, there're some support commands and keyboard shortcuts available:
 
-5.1.
-       **Set State** (keyboard shortcut ``Alt+d``)
-       This command offer list of states to change the state of current doplet. As the states count become more than just Open/Close, this command is going to be more useful.
+* **Set State** (<Alt>+<d> shortcut)
+       This command offers list of states to change the state of current doplet. As the states count will become more varied, this command is going to be more useful.
 
-5.2.
-       **Find Todo** (keyboard shortcut ``Alt+Shift+d``)
-       Performs searching of current doplet from source in ``.do`` file and visa-versa. If cursor is not placed over doplet, text field is offered, waiting for ID to search.
+* **Find Todo** (<Alt>+<Shift>+<d> shortcut)
+       Performs searching for doplets:
+       Find in *.do* using current doplet's ID (one that cursor stands in);
+       Find in source using current *.do* entry ID;
+       If not standing over any doplet, then find in source by specifying:
+       - ID
+       - Tags, comma-separated. All doplets which have at least one tag partially match will count. Regexps allowed.
+       - Exclusive tags. Same as tags search, but show all, BUT matched ones.
+       - List current view doplets, by searching blank string.
 
-5.3.
-       **Toggle Colorize**
+* **Toggle Colorize**
        By default all doplets in code are highlited with three colors: Opened, In-progress and Inconsistent. This can be switched off/on.
 
-5.4.
-       **Open Global/Project Config**
+* **Open Global/Project Config**
        Command for opening related ``.do`` file. While **Find todo** command is presented, there's no big use of opening config too often.
 
-5.5.
-       **Browse Project's Repository**
+* **Browse Project's Repository**
        Used to open current project within HTTP repository in browser. Server and repository are defined in ``.do` config.
 
-5.6.
-       **Reset Global Config**
+* **Reset Global Config**
        Reinitialise global ``.do`` config while keeping it's doplet records. Mainly reinitialisation means gathering of new public HTTP repository, while old one will remain forgotten on web-server.
 
-5.7.
-       Priority change.
-       This is not a dedicated command, but a behavior, which uses ``+`` and ``-`` keys to increment or decrement doplet priority when focused over it.
+* **Update Inconsistence**
+       For any doplet line that differs from database, duplicate that line by fetching it's actual form from database.
+
 
 
 6. Meaningful issues and behavior
 ---------------------------------
 
-6.1.
-       As TODO is created or edited, any changes are saved to dbase in background, even if current source file is not saved. If Sublime is closed afterall without save, doplet mismatch between source and dbase can occur.
+* As TODO is created or edited, any changes are saved to dbase in background, even if current source file is not saved. If Sublime is closed afterall without save, doplet mismatch between source and dbase can occur.
 
-6.2.
-       If more than ONE cursor present, saving to database is suppressed.
+* If more than ONE cursor present, saving to database is suppressed.
 
-6.3.
-       NO braces/hyphens checking is performed. So if ``#todo:`` line is a part of string, it WILL act as ordinary TODO.
+* NO braces/hyphens checking is performed. So if ``#todo:`` line is a part of string, it WILL act as ordinary doplet.
 
-6.4.
-       Todo string is mostly protected from editing its structure. Only Tags, Priority and Comment fields are allowed to be changed. This is mainly implemented to keep ID unchanged, because sudden change of it cause overwrite of other dbase entry.
+* Todo string is mostly protected from editing its structure. Only State, Tags, Priority and Comment fields are allowed to be changed. This is mainly implemented to keep ID unchanged, because sudden change of it cause overwrite of other database entry.
 
-6.5.
-       Consistency is checked periodically and doplets that differs from dbase are highlited. Highlighting occurs only if Colorizing NOT switched off.
+* Consistency is checked periodically and doplets that differs from dbase are highlited. Highlighting occurs only if Colorizing NOT switched off.
        
 
 7. --> WARNING<--
 -------------------------
 
-7.1.
-       There're some ways to bring inconsistence between code and dbase, which will result in highlighting problems:
-       * Any ``//todo`` comments editing outside ST.
-       * Reloading file without save, because changes to comments are flushed to database regardless of saving source file itself.
-       * Copy-Pasting doplet, so you have more than one entry with same ID. This is not prohibited, so later editing any one of them will make others outdated.
+There're some ways to bring inconsistence between code and dbase, which will result in highlighting problems:
 
-7.2.
-       Creating ``//todo XXXX:`` by defining XXXX explicitly will overwrite or create that specified XXXX task in database. As being used normally, doplet is protected from editing its ID (see issue 6.5)
+* Any ``//todo`` comments editing outside ST.
+
+* Reloading file without save, because changes to comments are flushed to database regardless of saving source file itself.
+
+* Copy-Pasting doplet, so you have more than one entry with same ID. This is not prohibited, so later editing any one of them will make others outdated.
+
+* Creating ``//todo XXXX:`` by defining XXXX explicitly will overwrite or create that specified XXXX task in database. As being used normally, doplet is protected from editing its ID (see issue 6.5)
 
    

@@ -18,7 +18,7 @@ else:
 
 #todo 44 (config, db, feature, unsolved) +0: handle saving project - existing and blank; transfer db for involved files
 
-#todo 89 (db, feature) +0: save context (+-2 strings of code) with task. NOT for 'file' mode
+#todo 89 (db, feature) +0: save context (+-2 strings of code) with task
 
 
 '''
@@ -33,7 +33,7 @@ else:
      thus making them synchronised.
 '''
 class TodoDb():
-    config= None
+    config= None #cfg()
 
     maxflushRetries= 3
     flushTimeout= 30 #seconds
@@ -42,11 +42,11 @@ class TodoDb():
     resetPending= 0
     resetId= 0
 
-    reservedId= 0
+    reservedId= 0 #returned by .new()
     reserveEvent= None
 
-    dbA= None
-    todoA= None
+    dbA= None #active databases, defined from config
+    todoA= None #doplets
 
     callbackFetch= None
 
@@ -127,7 +127,8 @@ class TodoDb():
             self.todoA[iT].setSaved(SAVE_STATES.READY)
 
         self.reportFetchReset= True
-        self.timerReset= Timer(0, self.resetDo)
+#=todo 1707 (fix, sql) +1: sql interfere if newId and fetch/flush run at once. Probably transaction issue
+        self.timerReset= Timer(2, self.resetDo)
         self.timerReset.start()
 
 
@@ -138,14 +139,17 @@ class TodoDb():
 
 
 #macro
-#   pre: pick event set
+#   pre: pick event state
 #   wait for pick event to set
 #   set return cached
 #   go pick next
+
+    
+    #first call is initial, instant result (default 0) should not be used
     def newId(self):
         self.reserveEvent.wait()
 
-        okId= self.reservedId #first call is initial, result should not be used
+        okId= self.reservedId
 
         self.reserveEvent.clear() #second call to newId() will suspend till newIdGet() done
         Timer(0, self.newIdGet).start()

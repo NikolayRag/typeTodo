@@ -18,8 +18,10 @@ class WCache(object):
         return cls.__instance
 
 
-    dbCache= {} #{window.id(): TodoDb} cache
+    dbCache= {} #{window.folders[0]: TodoDb} cache
 
+
+#=todo 1739 (db, fix) +0: switching project in window results in mixed database
 
     #only returns db after inited first time
     def getDB(self, _init= False, _callbackFetch= None):
@@ -27,15 +29,20 @@ class WCache(object):
         if not cWin:
             return False
 
-        wId= cWin.id()
-        if wId not in self.dbCache:
-            if not wId or not _init:
+        projectFolder= ''
+        projFoldersA= cWin.folders()
+        if len(projFoldersA):
+            projectFolder= projFoldersA[0]
+
+
+        if projectFolder not in self.dbCache:
+            if not cWin.id() or not _init:
                 return False
 
-            self.dbCache[wId]= False #hold place
-            self.dbCache[wId]= TodoDb(_callbackFetch, Config())
+            self.dbCache[projectFolder]= False #hold place
+            self.dbCache[projectFolder]= TodoDb(_callbackFetch, Config())
 
-        return self.dbCache[wId]
+        return self.dbCache[projectFolder]
 
 
 

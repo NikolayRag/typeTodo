@@ -60,6 +60,7 @@ class Config():
         self.cWnd= sublime.active_window()
         self.sublimeRoot= os.path.join(sublime.packages_path(), 'User')
 
+        self.lastProjectFolders= self.cWnd.folders()
         self.update()
 
 
@@ -75,9 +76,6 @@ class Config():
         self.projectName= ''
 
         if not self.isGlobal:
-            if self.isWindowExists(): #should skip 'coz secondary window will return [] as it closes
-                self.lastProjectFolders= self.cWnd.folders()
-
             if len(self.lastProjectFolders):
                 self.projectRoot= self.lastProjectFolders[0]
                 self.projectName= os.path.split(self.lastProjectFolders[0])[1]

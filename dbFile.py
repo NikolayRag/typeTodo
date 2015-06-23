@@ -85,6 +85,9 @@ class TodoDbFile():
 
 
     def newId(self, _wantedId=0):
+        if not self.maxId:
+            self.fetch()
+            
         if _wantedId==self.lastId:
             return self.lastId
 

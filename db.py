@@ -127,7 +127,7 @@ class TodoDb():
             self.todoA[iT].setSaved(SAVE_STATES.READY)
 
         self.reportFetchReset= True
-#=todo 1707 (fix, sql) +1: sql interfere if newId and fetch/flush run at once. Probably transaction issue
+
         self.timerReset= Timer(0, self.resetDo)
         self.timerReset.start()
 
@@ -152,7 +152,7 @@ class TodoDb():
         okId= self.reservedId
 
         self.reserveEvent.clear() #second call to newId() will suspend till newIdGet() done
-        Timer(2, self.newIdGet).start()
+        Timer(0, self.newIdGet).start()
 
         return okId
 

@@ -1,6 +1,6 @@
 # coding= utf-8
 
-import re, os, time, codecs, sys
+import re, os, time, codecs, sys, _strptime
 
 if sys.version < '3':
     from task import *
@@ -121,7 +121,8 @@ class TodoDbFile():
                             continue
 
                         #file holds local time, need to convert to GMT for runtime
-                        gmtTime= time.mktime (time.strptime(matchParse.group('edited'), '%y/%m/%d %H:%M'))
+                        rxETime= matchParse.group('edited')
+                        gmtTime= time.mktime (time.strptime(rxETime, '%y/%m/%d %H:%M'))
 
                         if __id not in todoA:
                             todoA[__id]= TodoTask(__id, self.parentDB.config.projectName, self.parentDB)

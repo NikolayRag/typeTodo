@@ -28,7 +28,6 @@ class Setting:
 
 class Config():
     sublimeRoot= ''
-    isGlobal= False
 
     cWnd= None
     defaultHttpApi= 'typetodo.com'
@@ -49,20 +48,22 @@ class Config():
 
     globalInited= False
 
-    lastProjectFolders= []
     lastProjectHeader= None
     lastCfgFile= None
 
     
-    def __init__(self, _forceGlobal=False):
-        self.isGlobal= _forceGlobal
-
+    def __init__(self, _projectFolder=''):
         self.cWnd= sublime.active_window()
         self.sublimeRoot= os.path.join(sublime.packages_path(), 'User')
 
-        self.lastProjectFolders= self.cWnd.folders()
-        self.update()
+        self.projectRoot= self.sublimeRoot
+        self.projectName= ''
 
+        if _projectFolder!='':
+            self.projectRoot= _projectFolder
+            self.projectName= os.path.split(_projectFolder)[1]
+
+        self.update()
 
 
 
@@ -71,14 +72,6 @@ class Config():
 
     def update(self):
         if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
-
-        self.projectRoot= self.sublimeRoot
-        self.projectName= ''
-
-        if not self.isGlobal:
-            if len(self.lastProjectFolders):
-                self.projectRoot= self.lastProjectFolders[0]
-                self.projectName= os.path.split(self.lastProjectFolders[0])[1]
 
         _cfgFile= os.path.join(self.projectRoot, self.projectName +'.do')
 

@@ -40,7 +40,7 @@ class WCache(object):
                 return False
 
             self.dbCache[projectFolder]= False #hold place
-            self.dbCache[projectFolder]= TodoDb(_callbackFetch, Config())
+            self.dbCache[projectFolder]= TodoDb(_callbackFetch, Config(projectFolder))
 
         return self.dbCache[projectFolder]
 

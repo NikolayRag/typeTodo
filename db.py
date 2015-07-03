@@ -33,14 +33,12 @@ else:
      thus making them synchronised.
 '''
 class TodoDb():
-    config= None #cfg()
+    config= None #Config()
 
     maxflushRetries= 3
     flushTimeout= 30 #seconds
     timerFlush= None
     timerReset= None
-    resetPending= 0
-    resetId= 0
 
     reservedId= 0 #returned by .new()
     reserveEvent= None
@@ -73,11 +71,12 @@ class TodoDb():
 
 #=todo 1662 (fix, db) +0: unsaved doplet is overriden probably at changing config
 
-    def pushReset(self, _delay=1000): #leave 1 to remove spam
-        rId= self.resetId+1
-        self.resetPending= rId
-        sublime.set_timeout(lambda: self.reset(rId), _delay)
-        self.resetId= rId
+    def pushReset(self, _delay=1): #leave 1 to remove spam
+        self.timerReset.cancel()
+        self.timerReset= Timer(_delay, self.reset)
+        self.timerReset.start()
+
+
 
 #Macro:
 #    - get new cfg
@@ -85,20 +84,10 @@ class TodoDb():
 #    - fetch using new
 #    - flush using new
 
-    def resetDo(self):
-        self.fetch()
-        self.flush(True)
-
-    def reset(self, _checkId):
-        if _checkId!=self.resetPending:
-            return
-        self.resetPending= 0
-
-
-        self.timerReset.cancel()
+    def reset(self):
         if not self.config.update() and len(self.dbA):
-            self.timerReset= Timer(0, self.resetDo)
-            self.timerReset.start()
+            self.fetch()
+            self.flush(True)
             return
 
 
@@ -127,9 +116,9 @@ class TodoDb():
             self.todoA[iT].setSaved(SAVE_STATES.READY)
 
         self.reportFetchReset= True
-#=todo 1707 (fix, sql) +1: sql interfere if newId and fetch/flush run at once. Probably transaction issue
-        self.timerReset= Timer(2, self.resetDo)
-        self.timerReset.start()
+
+        self.fetch()
+        self.flush(True)
 
 
 

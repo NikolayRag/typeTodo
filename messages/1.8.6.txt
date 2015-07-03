@@ -1,5 +1,5 @@
 v1.8.6
 
 fix:
-- (workaround) Sql crash localized, issue to fix futher
+- (workaround) Sql crash localized, issue to fix further
 

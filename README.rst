@@ -222,4 +222,4 @@ There're some ways to bring inconsistence between code and dbase, which will res
 
 * Creating ``//todo XXXX:`` by defining XXXX explicitly will overwrite or create that specified XXXX task in database. As being used normally, doplet is protected from editing its ID (see issue 6.5)
 
-   
+* Switching project in window does not have correct Sublime API support so it can end up in Flush error. Restarting Sublime is the solution.

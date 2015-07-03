@@ -37,9 +37,8 @@ class TypetodoEvent(sublime_plugin.EventListener):
     view= None
 
     def on_deactivated(self, _view):
-        cDb= WCache().getDB()
-        if cDb:
-            cDb.pushReset()
+#todo 1783 (cleanup) +0: switching project in window not clearly fixed, need review
+        sublime.set_timeout(lambda: self.on_activated(_view), 200) #spike to catch switching project in existing window
 
         sublime.set_timeout(WCache().exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
 

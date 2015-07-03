@@ -35,7 +35,7 @@
     },
 
     {
-        "caption": "TypeTodo: Update inconsistence",
+        "caption": "TypeTodo: Show inconsistence",
         "command": "typetodo_revivify"
     }
 ]

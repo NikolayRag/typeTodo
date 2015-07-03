@@ -97,7 +97,7 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
 
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        fn= Config(True).settings[0].file
+        fn= Config().settings[0].file
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\n\tNo global .do file,\n\tplease restart Sublime')
             return
@@ -128,4 +128,4 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
         if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings.\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tGlobal database content\n\twill be copied to new location.\n\n\tProcceed?'):
             return
 
-        self.cDb= TodoDb(self.resetCB, Config(True))
+        self.cDb= TodoDb(self.resetCB, Config())

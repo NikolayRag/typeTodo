@@ -119,15 +119,10 @@ class TodoDbSql():
         }
     }
 
-    db_pid= 0
-    db_uid= 0
-
     lastId= None
 
     settings= None
     parentDB= False
-
-    dbConn= None
 
 
     def __init__(self, _parentDB, _settings):
@@ -136,21 +131,17 @@ class TodoDbSql():
 
 
     def reconnect(self):
-        if self.dbConn:
-            return True
-
         try:
-            self.dbConn = pymysql.connect(host=self.settings.addr, port=3306, user=self.settings.login, passwd=self.settings.passw, db=self.settings.base, use_unicode=True, charset="utf8")
-            self.dbConn.autocommit(True)
+            cConnection= pymysql.connect(host=self.settings.addr, port=3306, user=self.settings.login, passwd=self.settings.passw, db=self.settings.base, use_unicode=True, charset="utf8")
+            cConnection.autocommit(True)
         except Exception as e:
 #todo 35 (sql, cleanup) +0: deal with connection errors: host, log, scheme
-            self.dbConn= None
             print('TypeTodo: MySQL error, Sql connection cannot be established, check MySQL settings:')
             print(e)
             return False
 
         #check table
-        cur = self.dbConn.cursor()
+        cur = cConnection.cursor()
         for tName in self.dbTablesSrc:
             tableDesc= self.dbTablesSrc[tName]
 
@@ -177,34 +168,34 @@ class TodoDbSql():
                 except Exception as e:
                     print('TypeTodo: MySQL error, Table \'' +tName +'\' cannot be created:')
                     print(e)
-                    self.dbConn= None
                     return False
 
         cur.execute(
             "INSERT INTO projects (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
             self.parentDB.config.projectName
         )
-        self.db_pid= self.dbConn._result.insert_id
+        cPid= cConnection.insert_id()
 
 
         cur.execute(
             "INSERT INTO users (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
             self.parentDB.config.projectUser
         )
-        self.db_uid= self.dbConn._result.insert_id
+        cUid= cConnection.insert_id()
 
         cur.close()
 
-        return True
+        return {'db': cConnection, 'pid': cPid, 'uid': cUid}
 
 
 #public#
 
 
     def flush(self, _dbN):
-        if not self.reconnect():
+        dbConn= self.reconnect()
+        if not dbConn:
             return False
-        cur = self.dbConn.cursor()
+        cur = dbConn['db'].cursor()
 
 
         for iT in self.parentDB.todoA:
@@ -218,27 +209,27 @@ class TodoDbSql():
                 "INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
                 STATE_LIST[curTodo.state]
             )
-            db_stateId= self.dbConn._result.insert_id
+            db_stateId= dbConn['db'].insert_id()
 
             cur.execute(
                 "INSERT INTO files (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-                (curTodo.fileName, self.db_pid)
+                (curTodo.fileName, dbConn['pid'])
             )
-            db_fileId= self.dbConn._result.insert_id
+            db_fileId= dbConn['db'].insert_id()
 
             db_tagIdA= []
             for tag in curTodo.tagsA: #insert all tags by one, holding 
                 cur.execute(
                     "INSERT INTO categories (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-                    (tag, self.db_pid)
+                    (tag, dbConn['pid'])
                 )
-                db_tagIdA.append(self.dbConn._result.insert_id)
+                db_tagIdA.append(dbConn['db'].insert_id())
 
             newVersion= 1
             newTagVersion= 1
             cur.execute(
                 "SELECT max(version),max(version_tag) FROM tasks WHERE id=%s AND id_project=%s",
-                (curTodo.id, self.db_pid)
+                (curTodo.id, dbConn['pid'])
             )
             recentTask= cur.fetchone()
             if recentTask and recentTask[0]:
@@ -247,14 +238,14 @@ class TodoDbSql():
 
             cur.execute(
                 "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment,stamp,version_tag) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s),%s)",
-                (curTodo.id, db_stateId, db_tagIdA[0], curTodo.lvl, self.db_uid, newVersion, db_fileId, self.db_pid, curTodo.comment, curTodo.stamp, newTagVersion)
+                (curTodo.id, db_stateId, db_tagIdA[0], curTodo.lvl, dbConn['uid'], newVersion, db_fileId, dbConn['pid'], curTodo.comment, curTodo.stamp, newTagVersion)
             )
 
             tagOrder= 0
             for tagId in db_tagIdA:
                 cur.execute(
                     "INSERT INTO tag2task (id_tag,id_task,version,`order`,id_project) VALUES (%s,%s,%s,%s,%s)",
-                    (tagId, curTodo.id, newTagVersion, tagOrder, self.db_pid)
+                    (tagId, curTodo.id, newTagVersion, tagOrder, dbConn['pid'])
                 )
                 tagOrder+= 1
 
@@ -272,13 +263,14 @@ class TodoDbSql():
         if _wantedId==self.lastId:
             return self.lastId
 
-        if not self.reconnect():
+        dbConn= self.reconnect()
+        if not dbConn:
             return False
-        cur = self.dbConn.cursor()
+        cur = dbConn['db'].cursor()
 
         cur.execute(
             "SELECT max(id) max_id FROM tasks WHERE id_project=%s",
-            self.db_pid
+            dbConn['pid']
         )
         _id= cur.fetchone()
         if _id and _id[0]:
@@ -290,7 +282,7 @@ class TodoDbSql():
 
         cur.execute(
             "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,0,0,0,%s,0,0,%s,'')",
-            (_id, self.db_uid, self.db_pid)
+            (_id, dbConn['uid'], dbConn['pid'])
         )
 
         cur.close()
@@ -301,9 +293,10 @@ class TodoDbSql():
 
 
     def fetch(self):
-        if not self.reconnect():
+        dbConn= self.reconnect()
+        if not dbConn:
             return False
-        cur = self.dbConn.cursor()
+        cur = dbConn['db'].cursor()
 
         cur.execute(
             "SELECT *, UNIX_TIMESTAMP(stamp) ustamp FROM (\
@@ -314,7 +307,7 @@ class TodoDbSql():
             LEFT JOIN (SELECT id idcat, name namecat FROM categories) _cats ON idcat=id_category\
             LEFT JOIN (SELECT id iduser, name nameuser FROM users) _users ON iduser=id_user\
             LEFT JOIN (SELECT id idfile, name namefile FROM files) _files ON idfile=id_filename",
-            (self.db_pid)
+            (dbConn['pid'])
         )
 
         sqn= {} #get id for field names
@@ -347,7 +340,7 @@ class TodoDbSql():
                 "SELECT nametag FROM tag2task \
                 LEFT JOIN (SELECT id idtag, name nametag FROM categories) _tags ON idtag=id_tag\
                 WHERE id_task=%s AND version=%s AND id_project=%s ORDER BY `order` ASC",
-                (taskId, ver_tags[taskId], self.db_pid)
+                (taskId, ver_tags[taskId], dbConn['pid'])
             )
             for tagnRow in cur.fetchall():
                 multitags.append(tagnRow[0])

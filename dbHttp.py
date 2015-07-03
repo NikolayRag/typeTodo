@@ -79,25 +79,25 @@ class TodoDbHttp():
             curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere
 
             postList.append(str(curTodo.id))
-            postTodoA['state' +str(curTodo.id)]= urllib2.quote(STATE_LIST[curTodo.state].encode('utf-8'))
-            postTodoA['file' +str(curTodo.id)]= urllib2.quote(curTodo.fileName.encode('utf-8'))
-            postTodoA['tags' +str(curTodo.id)]= urllib2.quote(','.join(curTodo.tagsA).encode('utf-8'))
+            postTodoA['state' +str(curTodo.id)]= STATE_LIST[curTodo.state]
+            postTodoA['file' +str(curTodo.id)]= curTodo.fileName
+            postTodoA['tags' +str(curTodo.id)]= ','.join(curTodo.tagsA)
             postTodoA['lvl' +str(curTodo.id)]= curTodo.lvl
-            postTodoA['comm' +str(curTodo.id)]= urllib2.quote(curTodo.comment.encode('utf-8'))
+            postTodoA['comm' +str(curTodo.id)]= curTodo.comment
             postTodoA['stamp' +str(curTodo.id)]= curTodo.stamp
-
         if not len(postList):
             return True
 
         postTodoA['ids']= ','.join(postList)
+        postData['v']= 1
         postData['todoa']= json.dumps(postTodoA)
-        postData['logName']= urllib2.quote(self.parentDB.config.projectUser.encode('utf-8'))
+        postData['logName']= urllib2.quote(self.parentDB.config.projectUser)
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.passw)
 
         postData['rep']= self.settings.base
-        postData['project']= urllib2.quote(self.parentDB.config.projectName.encode('utf-8'))
+        postData['project']= urllib2.quote(self.parentDB.config.projectName)
 
         req = urllib2.Request('http://' +self.settings.addr +'/?=flush', str.encode(urllib.urlencode(postData)))
         try:
@@ -143,13 +143,13 @@ class TodoDbHttp():
 
         postData= {}
         postData['wantedId']= _wantedId
-        postData['logName']= urllib2.quote(self.parentDB.config.projectUser.encode('utf-8'))
+        postData['logName']= urllib2.quote(self.parentDB.config.projectUser)
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.passw)
 
         postData['rep']= self.settings.base
-        postData['project']= urllib2.quote(self.parentDB.config.projectName.encode('utf-8'))
+        postData['project']= urllib2.quote(self.parentDB.config.projectName)
 
         req = urllib2.Request('http://' +self.settings.addr +'/?=newid', str.encode(urllib.urlencode(postData)))
         try:
@@ -171,7 +171,7 @@ class TodoDbHttp():
     def fetch(self):
         postData= {}
         postData['rep']= self.settings.base
-        postData['project']= urllib2.quote(self.parentDB.config.projectName.encode('utf-8'))
+        postData['project']= urllib2.quote(self.parentDB.config.projectName)
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.passw)

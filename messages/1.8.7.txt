@@ -1,0 +1,12 @@
+v1.8.7
+
+fix:
+- switching project in window results in mixed database; that was nasty untested behavior ever, sorry to all who step into.
+- sql made more stable; v1.8.6 sql issue removed
+
+change:
+- 'search' skips TEMP folder
+- 'Update inconsistence' command renamed to 'Show inconsistence'
+
+issues:
+- switching project in window is not considered as bugless since there's no strict Sublime event applied at the time. Anyway, previous mixing database is fixed, and in worst case you should restart Sublime if TypeTodo will throw Flush error.

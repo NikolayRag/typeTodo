@@ -21,8 +21,6 @@ class WCache(object):
     dbCache= {} #{window.folders[0]: TodoDb} cache
 
 
-#=todo 1739 (db, fix) +0: switching project in window results in mixed database
-
     #only returns db after inited first time
     def getDB(self, _init= False, _callbackFetch= None):
         cWin= sublime.active_window()

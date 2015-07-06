@@ -183,7 +183,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
         tagsListA= [(' ','')]
         for cTag in tagsA:
-            tagsListA.append((cTag, cTag))
+            tagsListA.append(('tag: '+cTag, cTag))
 
         return tagsListA
 

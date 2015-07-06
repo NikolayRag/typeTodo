@@ -21,17 +21,11 @@ else:
 #todo 89 (db, feature) +0: save context (+-2 strings of code) with task
 
 
-'''
-   per-project task set
-   Read config and set up db engine
-'''
+#
+#   Manages .todoA[] task collection within .dbA[] databases.
+#   Uses supplied .config to locate '.do' config file.
+#
 
-'''
-    Read and hold all latest versions of tasks at reset()
-     from all specified engines.
-    Then store them back if inconsistence found,
-     thus making them synchronised.
-'''
 class TodoDb():
     config= None #Config()
 
@@ -41,7 +35,7 @@ class TodoDb():
     timerReset= None
 
     reservedId= 0 #returned by .new()
-    reserveEvent= None
+    reserveLocker= None
 
     dbA= None #active databases, defined from config
     todoA= None #doplets
@@ -51,25 +45,30 @@ class TodoDb():
     reportFetchReset= False
     reportFlush= False
 
-    def __init__(self, _callback, _cfg):
+    def __init__(self, _fetchCallback, _cfg):
         self.dbA= {}
         self.todoA= {}
         self.timerFlush = Timer(0, None) #dummy
         self.timerReset = Timer(0, None) #dummy
 
-        self.callbackFetch= _callback
+        self.callbackFetch= _fetchCallback
         self.config= _cfg
 
         self.reservedId= 0
-        self.reserveEvent= threading.Event()
-        self.reserveEvent.set()
+        self.reserveLocker= threading.Event()
+        self.reserveLocker.set()
 
         self.pushReset()
         
 
 
-
+#=todo 1814 (db, fix) +10: startup lag again
 #=todo 1662 (fix, db) +0: unsaved doplet is overriden probably at changing config
+
+
+
+#   (re)Start .reset() asynchronously.
+#   _delay used to join spammed requests into one.
 
     def pushReset(self, _delay=1): #leave 1 to remove spam
         self.timerReset.cancel()
@@ -78,11 +77,15 @@ class TodoDb():
 
 
 
+#   Reread config for current project and maintain databases list consistency.
+#   Synchronises all databases contents by fetching all and then saving back
+#    difference.
+#
 #Macro:
-#    - get new cfg
-#       - flush if unchanged
-#    - fetch using new
-#    - flush using new
+#   1. get new cfg
+#       1.1. flush if unchanged
+#   2. fetch using new
+#   3. flush using new
 
     def reset(self):
         if not self.config.update() and len(self.dbA):
@@ -126,28 +129,30 @@ class TodoDb():
 
 
 
+#   Cache newIdGet() value to be returned next call.
+#   newId() works asynchronously to avoid database access lag, mostly HTTP.
+#   *First call is initial, returning 0;
+#    it caches new ID to be returned in subsequent calls
+#
+#   Return previously cached newIdGet() value
 
-#macro
-#   pre: pick event state
-#   wait for pick event to set
-#   set return cached
-#   go pick next
-
-    
-    #first call is initial, instant result (default 0) should not be used
     def newId(self):
-        self.reserveEvent.wait()
+        self.reserveLocker.wait()
 
         okId= self.reservedId
 
-        self.reserveEvent.clear() #second call to newId() will suspend till newIdGet() done
+        self.reserveLocker.clear() #second call to newId() will suspend till newIdGet() done
         Timer(0, self.newIdGet).start()
 
         return okId
 
 
 
+#   Get same mininum available new task ID from all databases.
+#
+#   Return new task ID
 
+#=todo 1797 (db, cleanup) +0: React on newId() errors correctly
 
     def newIdGet(self):
         cId= 0
@@ -170,7 +175,7 @@ class TodoDb():
 
         self.reservedId= cId
         print('TypeTodo: Id reserved: ' +str(self.reservedId))
-        self.reserveEvent.set()
+        self.reserveLocker.set()
 
 
 
@@ -178,7 +183,10 @@ class TodoDb():
 
 
 
-
+#   Form new or updated task and (re)init asynchronous flush()
+#
+#   Return actual task ID, meaningful for new task creation;
+#   Or 0 on error.
 
     def store(self, _id, _state, _tags, _lvl, _fileName, _comment):
         self.timerFlush.cancel()
@@ -224,7 +232,12 @@ class TodoDb():
 
 
 
-
+#   Flush all tasks from .todoA[] collection to all .dbA[] databases
+#   Retry on any error
+#   Shows error message at first error, reset at first succeed afterwards.
+#
+#   *Notice that task have .savedA[] state for every database so it should not be
+#    saved subsequently if succeeded once for particular database.
 
     def flush(self, _runOnce=False):
         self.timerFlush.cancel()
@@ -244,7 +257,7 @@ class TodoDb():
 
             return
 
-
+#=todo 1795 (db, flush) +0: make db flush error messaging less annoying
         if not _runOnce:
             self.flushRetries-= 1
             if self.flushRetries>0:
@@ -261,14 +274,20 @@ class TodoDb():
 
 
 
-
+#   Fetch all databases specified in .dbA[] (set within .reset())
+#   Updates active tasks .todoA[] collection with newtasks based on UTC timestamp
+#
+#   return True if ANY of DB was fetched
+#
 #macro
+#
 #   1. roll over all db's
-#   2. fetch unbinded task lists
-#   3. compare if new or updated or outdated
-#       3.1. join into working list
-#       3.2. reset other db's 'saved' flag
+#       1.1. fetch unbinded task lists
+#       1.2. compare if new or updated or outdated
+#           1.2.1. join into working list
+#           1.2.2. reset other db's 'saved' flag
 
+#todo 1818 (db) +0: make compairing inconsistencies by versions where they available (not file atm)
     def fetch(self):
         success= False
 

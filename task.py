@@ -24,7 +24,7 @@ class TodoTask():
     stamp= False # unix time
 
 
-    #shadow
+    #shadow, used to save on actual changes only
     old_state= ''
     old_tagsA= []
     old_lvl= ''

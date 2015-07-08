@@ -9,6 +9,11 @@ else:
     from .db import *
 
 
+#   Caching mini-god singleton class.
+#   Due to Sublime mechanism of having one shared API environment for number
+#    of opened windows, the single plugin is also share it stored variables.
+#    So it WCache is used to bind TodoDb() class to opened window.
+#
 
 class WCache(object):
     __instance = None
@@ -20,6 +25,12 @@ class WCache(object):
 
     dbCache= {} #{window.folders[0]: TodoDb} cache
 
+
+
+#   Get TodoDb() instance for current project.
+#   Project name is used as identifier.
+#
+#   return existing or newly created TodoDb() instance.
 
     #only returns db after inited first time
     def getDB(self, _init= False, _callbackFetch= None):
@@ -44,10 +55,16 @@ class WCache(object):
 
 
 
-    def exitHandler(self): # one for all, at very exit
-        if len(sublime.windows())==0:
+
+#   Plug to flush all databases when all Sublime windows closes.
+#   Called with sublime.set_timeout() is only way found so far to detect this event.
+#   No special flush neede on closing not-last window because Sublime environment
+#    remains live.
+
+    def exitHandler(self):
+        if len(sublime.windows())==0: #called at very exit
             for dbI in self.dbCache:
-               self.dbCache[dbI].flush(True)
+               self.dbCache[dbI].flush()
 
 
 
@@ -55,6 +72,9 @@ class WCache(object):
     
     resultsViewCache= {} #{window.id(): view} cache
 
+
+#   Get 'Search todo' results view for window.
+#   View is created if not cached or not found by name.
 
     def getResultsView(self, _create= True):
         cWin= sublime.active_window()
@@ -80,6 +100,11 @@ class WCache(object):
         return self.resultsViewCache[wId]
 
 
+
+#   Check if view with specified .buffer_id() is 'Search todo' results view.
+#
+#   *Didn't find better place, it shouldn't be here
+
     def checkResultsView(self, _viewId, _wipe=False):
         viewFind= self.getResultsView(False)
         if not viewFind:
@@ -92,4 +117,4 @@ class WCache(object):
             return True
 
 
-wCache= WCache() #hold against GC
+wCache= WCache() #hold against GC; Is it needed?

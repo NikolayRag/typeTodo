@@ -246,7 +246,14 @@ class TodoDb():
         flushOk= True
         for dbN in self.dbA:
             flushOk= flushOk and self.dbA[dbN].flush(dbN)
-        
+
+            #resave 'hang' tasks, mainly at db error
+            for iT in self.todoA:
+                curTodo= self.todoA[iT]
+                if curTodo.savedA[dbN]==SAVE_STATES.HOLD:
+                    curTodo.setSaved(SAVE_STATES.READY, dbN)
+
+
         if flushOk:
             if self.reportFlush:
                 sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)

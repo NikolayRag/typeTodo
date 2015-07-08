@@ -64,7 +64,7 @@ class WCache(object):
     def exitHandler(self):
         if len(sublime.windows())==0: #called at very exit
             for dbI in self.dbCache:
-               self.dbCache[dbI].flush(True)
+               self.dbCache[dbI].flush()
 
 
 

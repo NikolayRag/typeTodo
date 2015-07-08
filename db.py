@@ -29,9 +29,8 @@ else:
 class TodoDb():
     config= None #Config()
 
-    maxflushRetries= 3
+    flushLastResult= True
     flushTimeout= 30 #seconds
-    timerFlush= None
     timerReset= None
 
     reservedId= 0 #returned by .new()
@@ -48,7 +47,6 @@ class TodoDb():
     def __init__(self, _fetchCallback, _cfg):
         self.dbA= {}
         self.todoA= {}
-        self.timerFlush = Timer(0, None) #dummy
         self.timerReset = Timer(0, None) #dummy
 
         self.callbackFetch= _fetchCallback
@@ -90,7 +88,7 @@ class TodoDb():
     def reset(self):
         if not self.config.update() and len(self.dbA):
             self.fetch()
-            self.flush(True)
+            self.flush()
             return
 
 
@@ -121,7 +119,7 @@ class TodoDb():
         self.reportFetchReset= True
 
         self.fetch()
-        self.flush(True)
+        self.flush()
 
 
 
@@ -189,8 +187,6 @@ class TodoDb():
 #   Or 0 on error.
 
     def store(self, _id, _state, _tags, _lvl, _fileName, _comment):
-        self.timerFlush.cancel()
-
         if _fileName and self.config.projectRoot:
             if (os.path.splitdrive(_fileName)[0]==os.path.splitdrive(self.config.projectRoot)[0]):
                 _fileName= os.path.relpath(_fileName, self.config.projectRoot)
@@ -220,9 +216,7 @@ class TodoDb():
                 strStamp= int(time.time())
                 self.todoA[cId].set(_state, _tags, _lvl, _fileName, _comment, self.config.projectUser, strStamp)
 
-        self.flushRetries= self.maxflushRetries
-        self.timerFlush= Timer(self.flushTimeout, self.flush)
-        self.timerFlush.start()
+        self.pushReset(self.flushTimeout)
 
         return cId
 
@@ -239,11 +233,9 @@ class TodoDb():
 #   *Notice that task have .savedA[] state for every database so it should not be
 #    saved subsequently if succeeded once for particular database.
 
-    def flush(self, _runOnce=False):
-        self.timerFlush.cancel()
-
-
+    def flush(self):
         flushOk= True
+
         for dbN in self.dbA:
             flushOk= flushOk and self.dbA[dbN].flush(dbN)
 
@@ -258,22 +250,25 @@ class TodoDb():
             if self.reportFlush:
                 sublime.set_timeout(lambda: sublime.status_message('TypeTodo saved'), 0)
 
+            self.pushReset(self.flushTimeout)
+
             self.reportFlush= False
-
-            self.pushReset(30000)
-
+            self.flushLastResult= True
             return
 
-#=todo 1795 (db, flush) +0: make db flush error messaging less annoying
-        if not _runOnce:
-            self.flushRetries-= 1
-            if self.flushRetries>0:
-                sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry ' +str(self.flushRetries) +' more times in ' +str(self.flushTimeout) +' sec\'s'), 0)
-                self.timerFlush = Timer(self.flushTimeout, self.flush)
-                self.timerFlush.start()
 
-        if _runOnce or self.flushRetries==0:
-            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tcannot flush todo\'s'), 0)
+        if self.flushLastResult:
+            self.flushLastResult= False
+            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tcannot flush todo\'s.  Will retry later'), 0)
+        else:
+            sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry later'), 0)
+
+
+        self.pushReset(self.flushTimeout)
+
+#=todo 1795 (db, flush) +0: make flush retries endless with error messaging less annoying
+
+
 
 
 

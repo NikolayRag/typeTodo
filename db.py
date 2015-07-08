@@ -60,8 +60,8 @@ class TodoDb():
         
 
 
-#=todo 1814 (db, fix) +10: startup lag again
-#=todo 1662 (check, db) +0: unsaved doplet is overriden probably at changing config
+
+#todo 1662 (check, db) +0: unsaved doplet is overriden probably at changing config
 
 
 

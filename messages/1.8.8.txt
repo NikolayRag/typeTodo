@@ -1,0 +1,9 @@
+v.1.8.8
+
+new:
+- made autocompletion list in form of "tag: ..."
+
+fix:
+- flushing with error removed tasks from being saved further
+- 'Flush error' message is less annoyig, it will be shown only first time till flush complete totally ok.
+

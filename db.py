@@ -61,7 +61,7 @@ class TodoDb():
 
 
 #=todo 1814 (db, fix) +10: startup lag again
-#=todo 1662 (fix, db) +0: unsaved doplet is overriden probably at changing config
+#=todo 1662 (check, db) +0: unsaved doplet is overriden probably at changing config
 
 
 
@@ -266,7 +266,6 @@ class TodoDb():
 
         self.pushReset(self.flushTimeout)
 
-#=todo 1795 (db, flush) +0: make flush retries endless with error messaging less annoying
 
 
 

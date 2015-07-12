@@ -36,6 +36,11 @@ class TypetodoEvent(sublime_plugin.EventListener):
     mutexUnlocked= 1
     view= None
 
+
+
+#   React on all Sublime window close event.
+#   React on switching project in window.
+
     def on_deactivated(self, _view):
 #todo 1783 (cleanup) +0: switching project in window not clearly fixed, need review
         sublime.set_timeout(lambda: self.on_activated(_view), 200) #spike to catch switching project in existing window
@@ -44,6 +49,13 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
     viewName= ''
+
+
+
+#   React on swintching into view, initializing DB fetch-synchronize-save.
+#   Switching into view actually duplicated number of times with several
+#    handlers, but this handler is main and is used for TodoDb() creation.
+
     def on_activated(self, _view):
         self.viewName= _view.file_name()
 
@@ -51,31 +63,45 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
         #set 'file' syntax where it is not right and check consistency
         if cDb:
+            cDb.pushReset()
+
+            #set .do synthax for all 'file' databases
             for cSetting in cDb.config.settings:
                 if cSetting.engine=='file':
                     if cSetting.file==_view.file_name() and _view.settings().get('syntax')!='Packages/TypeTodo/typeTodo.tmLanguage':
                         _view.set_syntax_file('Packages/TypeTodo/typeTodo.tmLanguage')
 
-            cDb.pushReset()
 
-        if WCache().checkResultsView(_view.buffer_id()):
-            sublime.set_timeout(lambda: _view.set_read_only(True), 0)
-  
-        sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
+        self.on_load_activate(_view)
 
+
+
+#   Shortcut for on_activated()
 
     def on_load(self, _view):
+        self.on_load_activate(_view)
+
+
+
+#   Set readonly for results, maintain and colorize
+
+    def on_load_activate(self, _view):
         if WCache().checkResultsView(_view.buffer_id()):
             sublime.set_timeout(lambda: _view.set_read_only(True), 0)
  
         sublime.set_timeout(lambda: _view.run_command('typetodo_maintain', {}), 0)
 
 
+
+#   Wipe results view from cache
+
     def on_close(self, _view):
         WCache().checkResultsView(_view.buffer_id(), True)
 
 
 
+#   Resave all doplets within current view on filename changed.
+#   ? Unsure it should be at all
 
     def on_post_save(self, _view):
         if self.viewName==_view.file_name():
@@ -90,14 +116,16 @@ class TypetodoEvent(sublime_plugin.EventListener):
             return
 
         for cTodo in RE_TODO_EXISTING.finditer(content):
-            cId= int(cTodo.group('id'))
             self.cfgStore(cTodo.group('id'), cTodo.group('state'), cTodo.group('tags'), cTodo.group('priority') or 0, self.view.file_name(), cTodo.group('comment'))
 
 
 
-
+#   Both on_modified and on_selection_modified deal with cursor position,
+#    saving current inside-doplet context to be user later,
+#    on_modified also reacts on doplet editing.
 
     def on_selection_modified(self, _view):
+        #not for results view
         if WCache().checkResultsView(_view.buffer_id()):
             return
 
@@ -117,10 +145,14 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 
+#   Use previously format autocompletion list.
+#   It is formed every time when cursor moves into doplet.
+
     def on_query_completions(self, view, prefix, locations):
         return self.autoList
 
 
+#   Handler to react on keyboard shortcuts
 
     def on_query_context(self, _view, _key, _op, _val, _match):
 
@@ -170,6 +202,11 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
     autoList= False
 
+
+#   Collect all tags from existing database and form them for autocompletion.
+#
+#   Return list suitable for autocompletion.
+
     def tagsAutoCollect(self):
         cDb= WCache().getDB()
         tagsA= []
@@ -188,6 +225,17 @@ class TypetodoEvent(sublime_plugin.EventListener):
         return tagsListA
 
 
+
+#   Check current line at every cursor movement or text modification.
+#   If line is doplet then:
+#       context is saved for later use (on_query_context)
+#       autocomplete list is formed from database tags
+#       readonly is set
+#       doplet edits are saved into database
+#   If line is doplet keyword (#todo):
+#       new doplet is created
+#   If line is neither:
+#       readonly is removed
 
     def matchTodo(self, _modified= False):
         self.autoList= False
@@ -219,7 +267,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
             self.view.set_read_only(self.todoCursorPlace=='todo')
 
 #todo 1239 (interaction, unsolved) +0: get rid of snippets for tags autocomplete
-            #toggle autocomplete
+            #toggle default autocomplete to avoid exceeding entries for doplet
             self.view.settings().erase('auto_complete_selector')
             if self.todoCursorPlace=='tags':
                 self.autoList= self.tagsAutoCollect()
@@ -252,7 +300,11 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
             return
 
-    #create new todo in db and return string to replace original 'todo:'
+
+#   Create new todo in db and return string to replace original 'todo:'
+#   Saves first version of task if _postfx supplied, that is used when
+#    creating doplet in mid-line.
+
     def substNew(self, _prefx, _postfx, _region):
         todoId= self.cfgStore(0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 
@@ -266,7 +318,10 @@ class TypetodoEvent(sublime_plugin.EventListener):
         return todoId
 
 
-    #store to db and, if changed state, remove comment
+#   Store to db and, if changed state, remove comment
+#
+#   Return function to be used in substUpdate()
+
     def substDoUpdate(self, _updVals):
         def func(_txt=False):
             if _txt==False or _txt=='':
@@ -292,6 +347,9 @@ class TypetodoEvent(sublime_plugin.EventListener):
         return func
 
 
+#   Update existing task.
+#   Ask for 'reason' for 'cancel' state.
+
     def substUpdate(self, _state, _id, _tags, _lvl, _comment, _prefix, _region, _wipe=False):
         updVals= {'_view':self.view, '_state':_state, '_id':_id, '_tags':_tags, '_lvl':_lvl, '_comment':_comment, '_prefix':_prefix, '_region':_region, '_wipe':_wipe}
 
@@ -300,6 +358,10 @@ class TypetodoEvent(sublime_plugin.EventListener):
         else:
             self.substDoUpdate(updVals)()
 
+
+
+#   Gate to TodoDB().store()
+#   Store new or existing values as task.
 
     def cfgStore(self, _id, _state, _tags, _lvl, _fileName, _comment):
         cDb= WCache().getDB()

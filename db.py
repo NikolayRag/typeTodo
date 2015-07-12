@@ -150,7 +150,7 @@ class TodoDb():
 #
 #   Return new task ID
 
-#=todo 1797 (db, cleanup) +0: React on newId() errors correctly
+#todo 1797 (db, cleanup) +0: React on newId() errors correctly
 
     def newIdGet(self):
         cId= 0

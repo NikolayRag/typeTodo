@@ -48,7 +48,7 @@ class WCache(object):
             if not cWin.id() or not _init:
                 return False
 
-            self.dbCache[projectFolder]= False #hold place
+            self.dbCache[projectFolder]= False #hold place, elseway error appears
             self.dbCache[projectFolder]= TodoDb(_callbackFetch, Config(projectFolder))
 
         return self.dbCache[projectFolder]

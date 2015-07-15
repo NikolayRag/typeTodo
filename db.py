@@ -183,7 +183,6 @@ class TodoDb():
 
 #   Release database's unused reserved ID
 #   Called at the Sublime's exit.
-#=todo 258 (db, cleanup) +5: release prefetched id at exit
 
     def releaseId(self):
         for db in self.dbA:

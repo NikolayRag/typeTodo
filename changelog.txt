@@ -1,3 +1,9 @@
+
+
+new:
+- unused reserved database ID is released oh Sublime exit, no more continuos ID incrementing as a result of several Sublime restarts.
+
+
 v.1.8.8
 
 change:

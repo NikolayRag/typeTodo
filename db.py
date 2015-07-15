@@ -20,6 +20,9 @@ else:
 
 #todo 89 (db, feature) +0: save context (+-2 strings of code) with task
 
+#todo 1876 (db, feature) +0: make and use ability to switch off engines due to errors, and lated bring them back.
+
+#=todo 1878 (db, fix) +5: unstable time inconsistence detected at start
 
 #
 #   Manages .todoA[] task collection within .dbA[] databases.
@@ -93,7 +96,8 @@ class TodoDb():
 
 
         print ('TypeTodo: reset db')
-
+#todo 1875 (db, cleanup) +0: new db added in config is not synchronized
+#=todo 1877 (db) +0: deal with engine removal; it is likely to be a consistency hole
         dbId= -1
         self.dbA.clear() #new db array
 
@@ -150,7 +154,7 @@ class TodoDb():
 #
 #   Return new task ID
 
-#todo 1797 (db, cleanup) +0: React on newId() errors correctly
+#todo 1797 (db, cleanup) +0: React on newId() errors correctly; see todo 1876
 
     def newIdGet(self):
         cId= 0
@@ -208,7 +212,6 @@ class TodoDb():
 
         cId= _id or 0
         if not _id:
-#todo 1499 (check, db) -5: check newId() fail
             cId= self.newId()
 
             if not cId:

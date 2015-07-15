@@ -151,7 +151,7 @@ class TodoDbHttp():
         postData['rep']= self.settings.base
         postData['project']= urllib2.quote(self.parentDB.config.projectName)
 
-        req = urllib2.Request('http://' +self.settings.addr +'/?=newid', str.encode(urllib.urlencode(postData)))
+        req = urllib2.Request('http://' +self.settings.addr +'/?=new_task_id', str.encode(urllib.urlencode(postData)))
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
         except Exception as e:
@@ -175,7 +175,7 @@ class TodoDbHttp():
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.passw)
-        req = urllib2.Request('http://' +self.settings.addr +'/?=fetchtasks', str.encode(urllib.urlencode(postData)))
+        req = urllib2.Request('http://' +self.settings.addr +'/?=fetch_tasks', str.encode(urllib.urlencode(postData)))
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
         except Exception as e:

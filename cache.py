@@ -65,6 +65,7 @@ class WCache(object):
         if len(sublime.windows())==0: #called at very exit
             for dbI in self.dbCache:
                self.dbCache[dbI].flush()
+               self.dbCache[dbI].releaseId()
 
 
 

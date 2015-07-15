@@ -85,8 +85,7 @@ class TodoDbFile():
 
 
     def newId(self, _wantedId=0):
-        if not self.maxId:
-            self.fetch()
+        self.fetch()
             
         if _wantedId==self.lastId:
             return self.lastId
@@ -97,6 +96,11 @@ class TodoDbFile():
         
         self.lastId= self.maxId
         return self.lastId
+
+
+
+    def releaseId(self, _id):
+        None;
 
 
 

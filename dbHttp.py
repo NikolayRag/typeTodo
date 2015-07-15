@@ -132,9 +132,6 @@ class TodoDbHttp():
         return allOk
 
 
-#todo 258 (http, cleanup) +5: release prefetched id at exit
-    def newIdRelease(self):
-        None
 
 
     def newId(self, _wantedId=0):
@@ -164,6 +161,12 @@ class TodoDbHttp():
 
         self.lastId= int(response)
         return self.lastId
+
+
+
+
+    def releaseId(self, _id):
+        None;
 
 
 

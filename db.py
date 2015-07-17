@@ -114,10 +114,10 @@ class TodoDb():
                 continue
 
             self.dbA[dbId]= cEngClass(self, cSetting)
-
+            dbId+= 1
 
         self.newId() #run prefetch
-            dbId+= 1
+
         for iT in self.todoA: #set all unsaved
             self.todoA[iT].setSaved(SAVE_STATES.READY)
 

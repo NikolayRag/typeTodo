@@ -18,11 +18,9 @@ else:
 
 #todo 44 (config, db, feature, unsolved) +0: handle saving project - existing and blank; transfer db for involved files
 
-#todo 89 (db, feature) +0: save context (+-2 strings of code) with task
+#todo 89 (db, feature, unsure) +0: save context (+-2 strings of code) with task
 
 #todo 1876 (db, feature) +0: make and use ability to switch off engines due to errors, and lated bring them back.
-
-#=todo 1878 (db, fix) +5: unstable time inconsistence detected at start
 
 #
 #   Manages .todoA[] task collection within .dbA[] databases.
@@ -36,7 +34,7 @@ class TodoDb():
     flushTimeout= 30 #seconds
     timerReset= None
 
-    reservedId= 0 #returned by .new()
+    reservedId= None #returned by .new()
     reserveLocker= None
 
     dbA= None #active databases, defined from config
@@ -55,8 +53,7 @@ class TodoDb():
         self.callbackFetch= _fetchCallback
         self.config= _cfg
 
-        self.reservedId= 0
-        self.reserveLocker= threading.Event()
+        self.reserveLocker= threading.Event() #dummy
         self.reserveLocker.set()
 
         self.pushReset()
@@ -70,7 +67,7 @@ class TodoDb():
 
 #   (re)Start .reset() asynchronously.
 #   _delay used to join spammed requests into one.
-
+#=todo 1898 (fix) +5: new todo just right after Sublime start is not delayed to save
     def pushReset(self, _delay=1): #leave 1 to remove spam
         self.timerReset.cancel()
         self.timerReset= Timer(_delay, self.reset)
@@ -97,7 +94,7 @@ class TodoDb():
 
         print ('TypeTodo: reset db')
 #todo 1875 (db, cleanup) +0: new db added in config is not synchronized
-#=todo 1877 (db) +0: deal with engine removal; it is likely to be a consistency hole
+
         self.releaseId()
 
         dbId= 0
@@ -134,10 +131,10 @@ class TodoDb():
 
 #   Cache newIdGet() value to be returned next call.
 #   newId() works asynchronously to avoid database access lag, mostly HTTP.
-#   *First call is initial, returning 0;
+#   *First call is initial, returning None;
 #    it caches new ID to be returned in subsequent calls
 #
-#   Return previously cached newIdGet() value
+#   Return previously cached newIdGet() value, None on first call
 
     def newId(self):
         self.reserveLocker.wait()
@@ -187,7 +184,7 @@ class TodoDb():
 
 
 #   Release database's unused reserved ID
-#   Called at the Sublime's exit.
+#   Called at the Sublime's exit and config reset.
 
     def releaseId(self):
         if not self.reservedId:

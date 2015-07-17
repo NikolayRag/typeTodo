@@ -292,6 +292,41 @@ class TodoDbSql():
 
 
 
+    def releaseId(self, _wantedId):
+        dbConn= self.reconnect()
+        if not dbConn:
+            return False
+
+        cur = dbConn['db'].cursor()
+
+        cur.execute(
+            "SELECT max(id) max_id FROM tasks WHERE id_project=%s",
+            dbConn['pid']
+        )
+
+        _id= cur.fetchone()
+        if not _id:
+            return False
+
+        _id= int(_id[0])
+        if not _id or _id != _wantedId:
+            return False
+
+        cur.execute(
+            "SELECT max(version) FROM tasks WHERE id=%s AND id_project=%s",
+            (_id, dbConn['pid'])
+        )
+
+        recentTask= cur.fetchone()
+        if recentTask[0]>0:
+            return False
+
+        cur.execute(
+            "DELETE FROM tasks WHERE id=%s AND id_project=%s",
+            (_id, dbConn['pid'])
+        )
+
+
     def fetch(self):
         dbConn= self.reconnect()
         if not dbConn:

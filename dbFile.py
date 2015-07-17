@@ -84,9 +84,17 @@ class TodoDbFile():
 
 
 
+
+#   newId() is suited to be called in a short sequence, to iplement lowcost retrying.
+#   .lastId holds reserved Id and is cached out if matches _wantedId.
+#   Id is initially rteserved if _wantedId=0, thich is case on every sequence start.
+#
+#   return actually reserved new Id
+#
+#   Same is true for other engines.
+
     def newId(self, _wantedId=0):
-        if not self.maxId:
-            self.fetch()
+        self.fetch()
             
         if _wantedId==self.lastId:
             return self.lastId
@@ -97,6 +105,11 @@ class TodoDbFile():
         
         self.lastId= self.maxId
         return self.lastId
+
+
+
+    def releaseId(self, _id):
+        None;
 
 
 

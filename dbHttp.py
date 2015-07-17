@@ -132,9 +132,6 @@ class TodoDbHttp():
         return allOk
 
 
-#todo 258 (http, cleanup) +5: release prefetched id at exit
-    def newIdRelease(self):
-        None
 
 
     def newId(self, _wantedId=0):
@@ -151,7 +148,7 @@ class TodoDbHttp():
         postData['rep']= self.settings.base
         postData['project']= urllib2.quote(self.parentDB.config.projectName)
 
-        req = urllib2.Request('http://' +self.settings.addr +'/?=newid', str.encode(urllib.urlencode(postData)))
+        req = urllib2.Request('http://' +self.settings.addr +'/?=new_task_id', str.encode(urllib.urlencode(postData)))
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
         except Exception as e:
@@ -168,6 +165,33 @@ class TodoDbHttp():
 
 
 
+    def releaseId(self, _wantedId):
+        postData= {}
+        postData['wantedId']= _wantedId
+        postData['logName']= urllib2.quote(self.parentDB.config.projectUser)
+        if self.settings.login!='' and self.settings.passw!='':
+            postData['logName']= urllib2.quote(self.settings.login)
+            postData['logPass']= urllib2.quote(self.settings.passw)
+
+        postData['rep']= self.settings.base
+        postData['project']= urllib2.quote(self.parentDB.config.projectName)
+
+        req = urllib2.Request('http://' +self.settings.addr +'/?=release_task_id', str.encode(urllib.urlencode(postData)))
+        try:
+            response= bytes.decode( urllib2.urlopen(req).read() )
+        except Exception as e:
+            print('TypeTodo: HTTP server error creating todo')
+            print(e)
+            response= False;
+        if str(int(response)) != response:
+            print('TypeTodo: HTTP server fails creating todo')
+            response= False
+
+        return response
+
+
+
+
     def fetch(self):
         postData= {}
         postData['rep']= self.settings.base
@@ -175,7 +199,7 @@ class TodoDbHttp():
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.passw)
-        req = urllib2.Request('http://' +self.settings.addr +'/?=fetchtasks', str.encode(urllib.urlencode(postData)))
+        req = urllib2.Request('http://' +self.settings.addr +'/?=fetch_tasks', str.encode(urllib.urlencode(postData)))
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
         except Exception as e:

@@ -1,11 +1,21 @@
-v.1.8.8
+v.1.8.9
 
 new:
+- unused database ID is released oh Sublime exit. No more continuos ID incrementing as a result of several Sublime restarts.
+
+fix/change:
+- resaving on filename change was performed at wrong time, leading to unwanted tasks resavings. Taking that resaving is not surely needed, it was removed at all.
+
+
+v.1.8.8
+
+change:
 - made autocompletion list in form of "tag: ..."
 
 fix:
-- flushing with error removed tasks from being saved further
+- flushing with error removed tasks from being saved further, no more issue, tasks will be surely resaved on errors.
 - 'Flush error' message is less annoyig, it will be shown only first time till flush complete totally ok.
+
 
 
 v1.8.7

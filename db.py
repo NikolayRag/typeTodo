@@ -18,8 +18,9 @@ else:
 
 #todo 44 (config, db, feature, unsolved) +0: handle saving project - existing and blank; transfer db for involved files
 
-#todo 89 (db, feature) +0: save context (+-2 strings of code) with task
+#todo 89 (db, feature, unsure) +0: save context (+-2 strings of code) with task
 
+#todo 1876 (db, feature) +0: make and use ability to switch off engines due to errors, and lated bring them back.
 
 #
 #   Manages .todoA[] task collection within .dbA[] databases.
@@ -33,7 +34,7 @@ class TodoDb():
     flushTimeout= 30 #seconds
     timerReset= None
 
-    reservedId= 0 #returned by .new()
+    reservedId= None #returned by .new()
     reserveLocker= None
 
     dbA= None #active databases, defined from config
@@ -52,22 +53,21 @@ class TodoDb():
         self.callbackFetch= _fetchCallback
         self.config= _cfg
 
-        self.reservedId= 0
-        self.reserveLocker= threading.Event()
+        self.reserveLocker= threading.Event() #dummy
         self.reserveLocker.set()
 
         self.pushReset()
         
 
 
-#=todo 1814 (db, fix) +10: startup lag again
-#=todo 1662 (check, db) +0: unsaved doplet is overriden probably at changing config
+
+#todo 1662 (check, db) +0: unsaved doplet is overriden probably at changing config
 
 
 
 #   (re)Start .reset() asynchronously.
 #   _delay used to join spammed requests into one.
-
+#=todo 1898 (fix) +5: new todo just right after Sublime start is not delayed to save
     def pushReset(self, _delay=1): #leave 1 to remove spam
         self.timerReset.cancel()
         self.timerReset= Timer(_delay, self.reset)
@@ -93,12 +93,14 @@ class TodoDb():
 
 
         print ('TypeTodo: reset db')
+#todo 1875 (db, cleanup) +0: new db added in config is not synchronized
 
-        dbId= -1
+        self.releaseId()
+
+        dbId= 0
         self.dbA.clear() #new db array
 
         for cSetting in self.config.settings:
-            dbId+= 1
             if cSetting.engine=='file':
                 cEngClass= TodoDbFile
             elif cSetting.engine=='mysql':
@@ -109,7 +111,7 @@ class TodoDb():
                 continue
 
             self.dbA[dbId]= cEngClass(self, cSetting)
-
+            dbId+= 1
 
         self.newId() #run prefetch
 
@@ -129,10 +131,10 @@ class TodoDb():
 
 #   Cache newIdGet() value to be returned next call.
 #   newId() works asynchronously to avoid database access lag, mostly HTTP.
-#   *First call is initial, returning 0;
+#   *First call is initial, returning None;
 #    it caches new ID to be returned in subsequent calls
 #
-#   Return previously cached newIdGet() value
+#   Return previously cached newIdGet() value, None on first call
 
     def newId(self):
         self.reserveLocker.wait()
@@ -150,7 +152,7 @@ class TodoDb():
 #
 #   Return new task ID
 
-#=todo 1797 (db, cleanup) +0: React on newId() errors correctly
+#todo 1797 (db, cleanup) +0: React on newId() errors correctly; see todo 1876
 
     def newIdGet(self):
         cId= 0
@@ -181,6 +183,20 @@ class TodoDb():
 
 
 
+#   Release database's unused reserved ID
+#   Called at the Sublime's exit and config reset.
+
+    def releaseId(self):
+        if not self.reservedId:
+            return
+
+        for db in self.dbA:
+            self.dbA[db].releaseId(self.reservedId)
+
+
+
+
+
 #   Form new or updated task and (re)init asynchronous flush()
 #
 #   Return actual task ID, meaningful for new task creation;
@@ -197,7 +213,6 @@ class TodoDb():
 
         cId= _id or 0
         if not _id:
-#todo 1499 (check, db) -5: check newId() fail
             cId= self.newId()
 
             if not cId:

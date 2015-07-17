@@ -48,7 +48,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
         sublime.set_timeout(WCache().exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
 
 
-    viewName= ''
 
 
 
@@ -57,8 +56,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #    handlers, but this handler is main and is used for TodoDb() creation.
 
     def on_activated(self, _view):
-        self.viewName= _view.file_name()
-
         cDb= WCache().getDB(True, dbMaintainance) #really applies only once
 
         #set 'file' syntax where it is not right and check consistency
@@ -99,24 +96,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
         WCache().checkResultsView(_view.buffer_id(), True)
 
 
-
-#   Resave all doplets within current view on filename changed.
-#   ? Unsure it should be at all
-
-    def on_post_save(self, _view):
-        if self.viewName==_view.file_name():
-            return
-        self.viewName= _view.file_name()
-
-
-        cRregion= sublime.Region(0,_view.size())
-        content= _view.substr(cRregion)
-        cDb= WCache().getDB()
-        if not cDb or not RE_TODO_EXISTING.search(content):
-            return
-
-        for cTodo in RE_TODO_EXISTING.finditer(content):
-            self.cfgStore(cTodo.group('id'), cTodo.group('state'), cTodo.group('tags'), cTodo.group('priority') or 0, self.view.file_name(), cTodo.group('comment'))
 
 
 

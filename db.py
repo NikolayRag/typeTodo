@@ -98,12 +98,12 @@ class TodoDb():
         print ('TypeTodo: reset db')
 #todo 1875 (db, cleanup) +0: new db added in config is not synchronized
 #=todo 1877 (db) +0: deal with engine removal; it is likely to be a consistency hole
-        dbId= -1
         self.releaseId()
+
+        dbId= 0
         self.dbA.clear() #new db array
 
         for cSetting in self.config.settings:
-            dbId+= 1
             if cSetting.engine=='file':
                 cEngClass= TodoDbFile
             elif cSetting.engine=='mysql':
@@ -117,7 +117,7 @@ class TodoDb():
 
 
         self.newId() #run prefetch
-
+            dbId+= 1
         for iT in self.todoA: #set all unsaved
             self.todoA[iT].setSaved(SAVE_STATES.READY)
 

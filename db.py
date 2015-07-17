@@ -99,6 +99,7 @@ class TodoDb():
 #todo 1875 (db, cleanup) +0: new db added in config is not synchronized
 #=todo 1877 (db) +0: deal with engine removal; it is likely to be a consistency hole
         dbId= -1
+        self.releaseId()
         self.dbA.clear() #new db array
 
         for cSetting in self.config.settings:
@@ -189,6 +190,9 @@ class TodoDb():
 #   Called at the Sublime's exit.
 
     def releaseId(self):
+        if not self.reservedId:
+            return
+
         for db in self.dbA:
             self.dbA[db].releaseId(self.reservedId)
 

@@ -83,18 +83,15 @@ class TodoTask():
 
 
     def shadowCast(self):
-        allIdle= True
         for cSaved in self.savedA:
             if self.savedA[cSaved]!=SAVE_STATES.IDLE:
-                allIdle= False
-                break
+                return
 
-        if allIdle:
-            self.old_state= self.state
-            self.old_tagsA= self.tagsA
-            self.old_lvl= self.lvl
-            self.old_fileName= self.fileName
-            self.old_comment= self.comment
+        self.old_state= self.state
+        self.old_tagsA= self.tagsA
+        self.old_lvl= self.lvl
+        self.old_fileName= self.fileName
+        self.old_comment= self.comment
 
 
 

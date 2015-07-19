@@ -252,7 +252,8 @@ class TodoDb():
         flushOk= True
 
         for dbN in self.dbA:
-            flushOk= flushOk and self.dbA[dbN].flush(dbN)
+            flushEngineOk= self.dbA[dbN].flush(dbN)
+            flushOk= flushOk and flushEngineOk
 
             #resave 'hang' tasks, mainly at db error
             for iT in self.todoA:

@@ -42,7 +42,6 @@ class TodoDb():
 
     callbackFetch= None
 
-    reportFetchReset= False
     reportFlush= False
 
     def __init__(self, _fetchCallback, _cfg):
@@ -93,7 +92,6 @@ class TodoDb():
 
 
         print ('TypeTodo: reset db')
-#todo 1875 (db, cleanup) +0: new db added in config is not synchronized
 
         self.releaseId()
 
@@ -115,12 +113,7 @@ class TodoDb():
 
         self.newId() #run prefetch
 
-        for iT in self.todoA: #set all unsaved
-            self.todoA[iT].setSaved(SAVE_STATES.READY)
-
-        self.reportFetchReset= True
-
-        self.fetch()
+        self.fetch(True)
         self.flush()
 
 
@@ -258,8 +251,8 @@ class TodoDb():
             #resave 'hang' tasks, mainly at db error
             for iT in self.todoA:
                 curTodo= self.todoA[iT]
-                if curTodo.savedA[dbN]==SAVE_STATES.HOLD:
-                    curTodo.setSaved(SAVE_STATES.READY, dbN)
+                if curTodo.saveProgress(dbN):
+                    curTodo.setSaved(SAVE_STATES.FORCE, dbN) #'FORCE' coz task already pass shadow filter
 
 
         if flushOk:
@@ -305,7 +298,11 @@ class TodoDb():
 #           1.2.2. reset other db's 'saved' flag
 
 #todo 1818 (db) +0: make compairing inconsistencies by versions where they available (not file atm)
-    def fetch(self):
+    def fetch(self, _resetDb=False):
+        if _resetDb:
+            for iT in self.todoA: #reset all existing unsaved, coz states got loose from db's
+                self.todoA[iT].savedReset()
+
         success= False
 
         for dbN in self.dbA:
@@ -329,32 +326,47 @@ class TodoDb():
 #todo 279 (check) +0: see if states dont interfere while task is in-save
 
                 if isNew or diffStamp>0:
-                    if not self.reportFetchReset or diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
+                    if not _resetDb or diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
                         print ('TypeTodo: \'' +cDb.name +'\' DB is new at ' +str(__id))
                     elif diffStamp>0:
                         maybeNew+= 1
+
+#=todo 1905 (db, fix) +0: unexistent task is not checked against existing second time fetch() is called
                     self.todoA[__id]= task
-                    self.todoA[__id].setSaved(SAVE_STATES.READY) #all but current db are saved for task
+                    self.todoA[__id].setSaved(SAVE_STATES.FORCE) #all but current db are saved for task
                     self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
 
                 elif diffStamp<0:
-                    if self.reportFetchReset:
+                    if _resetDb:
                         if diffStamp<-60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
                             print ('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(__id))
                         else:
                             maybeOld+= 1
-                    self.todoA[__id].setSaved(SAVE_STATES.READY, dbN)
+                    if self.todoA[__id].taskDiffers(task):
+                        self.todoA[__id].setSaved(SAVE_STATES.FORCE, dbN)
+                    else:
+                        self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
 
+#=todo 1911 (check, db) +0: what if other states are not IDLExa
+
+                #relax equal tasks
+                if not isNew and diffStamp==0:
+                    self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
+
+
+            #fill INIT back for one was unexistent in dbN
+            for iT in self.todoA: #reset all existing unsaved, coz states got loose from db's
+                if self.todoA[iT].saveInit(dbN):
+                    print ('TypeTodo: \'' +cDb.name +'\' DB is missing at ' +str(iT), dbN)
+                    self.todoA[iT].setSaved(SAVE_STATES.FORCE, dbN)
 
             #'apparently new' mean that stamp difference is less than 60s. It is likely a subject, when comparing with 'file' DB with seconds truncated. In this case 'file' is treated as little older and is replaced. As 'file' is anyway replaced at each flush, it doesn't make any difference to normal behavior and is messaged just in case.
-            if self.reportFetchReset:
+            if _resetDb:
                 if maybeNew>0:
                     print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
                 if maybeOld>0:
                     print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeOld) +' tasks apparently old')
 
-
-        self.reportFetchReset= False
 
         if self.callbackFetch:
             sublime.set_timeout(self.callbackFetch, 0)

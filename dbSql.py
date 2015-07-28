@@ -200,7 +200,7 @@ class TodoDbSql():
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if curTodo.savedA[_dbN]!=SAVE_STATES.READY or not curTodo.shadowDiffers():
+            if not curTodo.savePending(_dbN):
                 continue
 
             curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere
@@ -250,8 +250,7 @@ class TodoDbSql():
                 tagOrder+= 1
 
             #todo 285 (sql, cleanup) +0: detect sql saving error
-            #newState= SAVE_STATES.READY
-            if curTodo.savedA[_dbN]==SAVE_STATES.HOLD: #edited-while-save todo will not become idle here
+            if curTodo.saveProgress(_dbN): #edited-while-save todo will not become idle here
                 curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
 
         cur.close()

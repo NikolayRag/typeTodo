@@ -73,7 +73,7 @@ class TodoDbHttp():
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if curTodo.savedA[_dbN]!=SAVE_STATES.READY or not curTodo.shadowDiffers():
+            if not curTodo.savePending(_dbN):
                 continue
 
             curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere
@@ -122,10 +122,9 @@ class TodoDbHttp():
 
             elif response[respId]!=0:
                 print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
-                curTodo.setSaved(SAVE_STATES.READY, _dbN)
                 allOk= False
             else:
-                if curTodo.savedA[_dbN]==SAVE_STATES.HOLD: #edited-while-save todo will not become idle here
+                if curTodo.saveProgress(_dbN): #edited-while-save todo will not become idle here
                     curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
 
 

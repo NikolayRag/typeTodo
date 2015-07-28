@@ -35,7 +35,7 @@ class TodoDb():
     flushTimeout= 30 #seconds
     timerReset= None
 
-    reservedId= None #returned by .new()
+    reservedId= 0 #returned by .new()
     reserveLocker= None
 
     dbA= None #active databases, defined from config
@@ -150,7 +150,7 @@ class TodoDb():
 
 #=todo 1915 (db, fix) +0: respect current db max ID when switching to entirely new one
     def newIdGet(self):
-        cId= 0
+        cId= self.reservedId +1
 
         tries= 10
         while True:
@@ -182,11 +182,11 @@ class TodoDb():
 #   Called at the Sublime's exit and config reset.
 
     def releaseId(self):
-        if not self.reservedId:
-            return
-
+        self.reservedId-= 1 #used to continue id when all db's changed at once
         for db in self.dbA:
-            self.dbA[db].releaseId(self.reservedId)
+            self.dbA[db].releaseId()
+
+
 
 
 
@@ -296,9 +296,11 @@ class TodoDb():
 #
 #   1. roll over all db's
 #       1.1. fetch unbinded task lists
-#       1.2. compare if new or updated or outdated
-#           1.2.1. join into working list
-#           1.2.2. reset other db's 'saved' flag
+#       1.2. compare each fetched task against actual for being:
+#           1.2.1. new or updated
+#           1.2.2. outdated
+#           1.2.3. equal
+#       1.3. all remaining tasks are marked to be saved as unexistent
 
 #todo 1818 (db) +0: make compairing inconsistencies by versions where they available (not file atm)
     def fetch(self, _resetDb=False):
@@ -318,7 +320,8 @@ class TodoDb():
 
             maybeNew= 0
             maybeOld= 0
-            for iT in todoA: #each fetched task have to be compared to existing
+
+            for iT in todoA:
                 task= todoA[iT]
 
                 isNew= iT not in self.todoA
@@ -329,7 +332,7 @@ class TodoDb():
 
                 if isNew or diffStamp>0:
                     if not _resetDb or diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
-                        print ('TypeTodo: \'' +cDb.name +'\' DB is new at ' +str(iT))
+                        print('TypeTodo: \'' +cDb.name +'\' DB is new at ' +str(iT))
                     elif diffStamp>0:
                         maybeNew+= 1
 
@@ -340,9 +343,10 @@ class TodoDb():
                 elif diffStamp<0:
                     if _resetDb:
                         if diffStamp<-60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
-                            print ('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(iT))
+                            print('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(iT))
                         else:
                             maybeOld+= 1
+                    
                     self.todoA[iT].setSaved(SAVE_STATES.FORCE, dbN)
 
 
@@ -354,15 +358,15 @@ class TodoDb():
             #fill INIT back for one was unexistent in dbN
             for iT in self.todoA:
                 if self.todoA[iT].saveInit(dbN):
-                    print ('TypeTodo: \'' +cDb.name +'\' DB is missing at ' +str(iT), dbN)
+                    print('TypeTodo: \'' +cDb.name +'\' DB is missing at ' +str(iT))
                     self.todoA[iT].setSaved(SAVE_STATES.FORCE, dbN)
 
             #'apparently new' mean that stamp difference is less than 60s. It is likely a subject, when comparing with 'file' DB with seconds truncated. In this case 'file' is treated as little older and is replaced. As 'file' is anyway replaced at each flush, it doesn't make any difference to normal behavior and is messaged just in case.
             if _resetDb:
                 if maybeNew>0:
-                    print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
+                    print('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
                 if maybeOld>0:
-                    print ('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeOld) +' tasks apparently old')
+                    print('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeOld) +' tasks apparently old')
 
 
         if self.callbackFetch:

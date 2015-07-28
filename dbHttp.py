@@ -164,9 +164,9 @@ class TodoDbHttp():
 
 
 
-    def releaseId(self, _wantedId):
+    def releaseId(self):
         postData= {}
-        postData['wantedId']= _wantedId
+        postData['wantedId']= self.lastId
         postData['logName']= urllib2.quote(self.parentDB.config.projectUser)
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)
@@ -178,6 +178,7 @@ class TodoDbHttp():
         req = urllib2.Request('http://' +self.settings.addr +'/?=release_task_id', str.encode(urllib.urlencode(postData)))
         try:
             response= bytes.decode( urllib2.urlopen(req).read() )
+            self.lastId= None
         except Exception as e:
             print('TypeTodo: HTTP server error creating todo')
             print(e)

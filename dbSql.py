@@ -291,7 +291,7 @@ class TodoDbSql():
 
 
 
-    def releaseId(self, _wantedId):
+    def releaseId(self):
         dbConn= self.reconnect()
         if not dbConn:
             return False
@@ -308,7 +308,7 @@ class TodoDbSql():
             return False
 
         _id= int(_id[0])
-        if not _id or _id != _wantedId:
+        if not _id or _id != self.lastId:
             return False
 
         cur.execute(
@@ -324,6 +324,8 @@ class TodoDbSql():
             "DELETE FROM tasks WHERE id=%s AND id_project=%s",
             (_id, dbConn['pid'])
         )
+
+        self.lastId= None
 
 
     def fetch(self):

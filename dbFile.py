@@ -108,8 +108,8 @@ class TodoDbFile():
 
 
 
-    def releaseId(self, _id):
-        None;
+    def releaseId(self):
+        self.lastId= None
 
 
 

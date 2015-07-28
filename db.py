@@ -21,6 +21,7 @@ else:
 #todo 89 (db, feature, unsure) +0: save context (+-2 strings of code) with task
 
 #todo 1876 (db, feature) +0: make and use ability to switch off engines due to errors, and lated bring them back.
+#=todo 1910 (feature) +0: show inconsistency on leftclick
 
 #
 #   Manages .todoA[] task collection within .dbA[] databases.
@@ -147,6 +148,7 @@ class TodoDb():
 
 #todo 1797 (db, cleanup) +0: React on newId() errors correctly; see todo 1876
 
+#=todo 1915 (db, fix) +0: respect current db max ID when switching to entirely new one
     def newIdGet(self):
         cId= 0
 
@@ -206,6 +208,7 @@ class TodoDb():
 
         cId= _id or 0
         if not _id:
+#=todo 1909 (db, feature) +0: release id for immediately canceled task
             cId= self.newId()
 
             if not cId:
@@ -317,45 +320,39 @@ class TodoDb():
             maybeOld= 0
             for iT in todoA: #each fetched task have to be compared to existing
                 task= todoA[iT]
-                __id= task.id
 
-                isNew= __id not in self.todoA
+                isNew= iT not in self.todoA
                 diffStamp= 0
                 if not isNew:
-                    diffStamp= task.stamp -self.todoA[__id].stamp
-#todo 279 (check) +0: see if states dont interfere while task is in-save
+                    diffStamp= task.stamp -self.todoA[iT].stamp
+
 
                 if isNew or diffStamp>0:
                     if not _resetDb or diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
-                        print ('TypeTodo: \'' +cDb.name +'\' DB is new at ' +str(__id))
+                        print ('TypeTodo: \'' +cDb.name +'\' DB is new at ' +str(iT))
                     elif diffStamp>0:
                         maybeNew+= 1
 
-#=todo 1905 (db, fix) +0: unexistent task is not checked against existing second time fetch() is called
-                    self.todoA[__id]= task
-                    self.todoA[__id].setSaved(SAVE_STATES.FORCE) #all but current db are saved for task
-                    self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
+                    self.todoA[iT]= task
+                    self.todoA[iT].setSaved(SAVE_STATES.FORCE) #all but current db are saved for task
+                    self.todoA[iT].setSaved(SAVE_STATES.IDLE, dbN)
 
                 elif diffStamp<0:
                     if _resetDb:
                         if diffStamp<-60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
-                            print ('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(__id))
+                            print ('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(iT))
                         else:
                             maybeOld+= 1
-                    if self.todoA[__id].taskDiffers(task):
-                        self.todoA[__id].setSaved(SAVE_STATES.FORCE, dbN)
-                    else:
-                        self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
+                    self.todoA[iT].setSaved(SAVE_STATES.FORCE, dbN)
 
-#=todo 1911 (check, db) +0: what if other states are not IDLExa
 
                 #relax equal tasks
                 if not isNew and diffStamp==0:
-                    self.todoA[__id].setSaved(SAVE_STATES.IDLE, dbN)
+                    self.todoA[iT].setSaved(SAVE_STATES.IDLE, dbN)
 
 
             #fill INIT back for one was unexistent in dbN
-            for iT in self.todoA: #reset all existing unsaved, coz states got loose from db's
+            for iT in self.todoA:
                 if self.todoA[iT].saveInit(dbN):
                     print ('TypeTodo: \'' +cDb.name +'\' DB is missing at ' +str(iT), dbN)
                     self.todoA[iT].setSaved(SAVE_STATES.FORCE, dbN)

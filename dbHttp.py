@@ -117,11 +117,11 @@ class TodoDbHttp():
             curTodo= self.parentDB.todoA[int(respId)]
 
             if not self.parentDB.todoA[int(respId)]:
-                print ('TypeTodo: Server responded task ' +respId +' that doesn\'t exists. Skipping')
+                print('TypeTodo: Server responded task ' +respId +' that doesn\'t exists. Skipping')
                 continue
 
             elif response[respId]!=0:
-                print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
+                print('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
                 allOk= False
             else:
                 if curTodo.saveProgress(_dbN): #edited-while-save todo will not become idle here

@@ -88,7 +88,7 @@ class Config():
 
 
                 if not os.path.isfile(_cfgFile):
-                    print ('TypeTodo init: Writing project\'s config.')
+                    print('TypeTodo init: Writing project\'s config.')
                     try:
                         with codecs.open(_cfgFile, 'w+', 'UTF-8') as f:
                             f.write(self.lastProjectHeader)
@@ -99,7 +99,7 @@ class Config():
                 return True
             return
 
-        print ('TypeTodo error: Config could not be read.')
+        print('TypeTodo error: Config could not be read.')
         self.lastCfgFile= None
         self.lastProjectHeader= None
 

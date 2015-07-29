@@ -21,7 +21,6 @@ else:
 #todo 89 (db, feature, unsure) +0: save context (+-2 strings of code) with task
 
 #todo 1876 (db, feature) +0: make and use ability to switch off engines due to errors, and lated bring them back.
-#=todo 1910 (feature) +0: show inconsistency on leftclick
 
 #
 #   Manages .todoA[] task collection within .dbA[] databases.
@@ -69,7 +68,6 @@ class TodoDb():
 
 #   (re)Start .reset() asynchronously.
 #   _delay used to join spammed requests into one.
-#=todo 1898 (fix) +5: new todo just right after Sublime start is not delayed to save
     def pushReset(self, _delay=1): #leave 1 to remove spam
         if self.resetMutex:
             return
@@ -101,7 +99,7 @@ class TodoDb():
             return
 
 
-        print ('TypeTodo: reset db')
+        print('TypeTodo: reset db')
 
         self.releaseId()
 
@@ -159,7 +157,6 @@ class TodoDb():
 
 #todo 1797 (db, cleanup) +0: React on newId() errors correctly; see todo 1876
 
-#=todo 1915 (db, fix) +0: respect current db max ID when switching to entirely new one
     def newIdGet(self):
         cId= self.reservedId +1
 
@@ -176,7 +173,7 @@ class TodoDb():
             if tries<=0:
                 print('TypeTodo warning: Cannot synchronize new Id within db\'s.')
                 break
-        
+
             tries-= 1
 
         self.reservedId= cId
@@ -219,7 +216,6 @@ class TodoDb():
 
         cId= _id or 0
         if not _id:
-#=todo 1909 (db, feature) +0: release id for immediately canceled task
             if self.reusedId:
                 cId= self.reusedId
                 self.reusedId= None

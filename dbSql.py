@@ -157,14 +157,14 @@ class TodoDbSql():
                     testFieldName= testField.split()[0].strip('`')
                     if not testFieldName in fields:
                         cur.execute("ALTER TABLE " +tName +" ADD COLUMN " +testField)
-                        print ('TypeTodo MySQL: added `' +testFieldName +'` field into `' +tName +'` table')
+                        print('TypeTodo MySQL: added `' +testFieldName +'` field into `' +tName +'` table')
             except:
                 flagTableOk= False
 
             if not flagTableOk:
                 try:
                     cur.execute("CREATE TABLE  `" +tName +"` (" +','.join(tableDesc['fields']+[tableDesc['suffix']]) +") DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1")
-                    print ('TypeTodo MySQL: created `' +tName +'` table')
+                    print('TypeTodo MySQL: created `' +tName +'` table')
                 except Exception as e:
                     print('TypeTodo: MySQL error, Table \'' +tName +'\' cannot be created:')
                     print(e)

@@ -37,6 +37,7 @@ class TodoDb():
 
     reservedId= 0 #returned by .new()
     reserveLocker= None
+    reusedId= None #for immediately canceled tasks
 
     dbA= None #active databases, defined from config
     todoA= None #doplets
@@ -209,7 +210,11 @@ class TodoDb():
         cId= _id or 0
         if not _id:
 #=todo 1909 (db, feature) +0: release id for immediately canceled task
-            cId= self.newId()
+            if self.reusedId:
+                cId= self.reusedId
+                self.reusedId= None
+            else:
+                cId= self.newId()
 
             if not cId:
                 sublime.status_message('Todo creation failed, see console for info')
@@ -222,6 +227,7 @@ class TodoDb():
         if _id:
             if self.todoA[cId].initial and _comment=='' and (_state=='+' or _state=='!'):
                 del self.todoA[cId]
+                self.reusedId= cId
             else:
                 self.reportFlush= True
                 strStamp= int(time.time())

@@ -17,7 +17,7 @@ class TodoTask():
     #updatable
     state= ''
     tagsA= []
-    lvl= ''
+    lvl= 0
     fileName= ''
     comment= ''
     editor= ''

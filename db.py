@@ -34,6 +34,7 @@ class TodoDb():
     flushLastResult= True
     flushTimeout= 30 #seconds
     timerReset= None
+    resetMutex= False
 
     reservedId= 0 #returned by .new()
     reserveLocker= None
@@ -70,6 +71,9 @@ class TodoDb():
 #   _delay used to join spammed requests into one.
 #=todo 1898 (fix) +5: new todo just right after Sublime start is not delayed to save
     def pushReset(self, _delay=1): #leave 1 to remove spam
+        if self.resetMutex:
+            return
+            
         self.timerReset.cancel()
         self.timerReset= Timer(_delay, self.reset)
         self.timerReset.start()
@@ -87,9 +91,13 @@ class TodoDb():
 #   3. flush using new
 
     def reset(self):
+        self.resetMutex= True
+
         if not self.config.update() and len(self.dbA):
             self.fetch()
             self.flush()
+
+            self.resetMutex= False
             return
 
 
@@ -117,6 +125,8 @@ class TodoDb():
 
         self.fetch(True)
         self.flush()
+
+        self.resetMutex= False
 
 
 

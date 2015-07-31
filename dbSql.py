@@ -135,7 +135,7 @@ class TodoDbSql():
             cConnection= pymysql.connect(host=self.settings.addr, port=3306, user=self.settings.login, passwd=self.settings.passw, db=self.settings.base, use_unicode=True, charset="utf8")
             cConnection.autocommit(True)
         except Exception as e:
-#todo 35 (sql, cleanup) +0: deal with connection errors: host, log, scheme
+#=todo 35 (sql, cleanup) +0: deal with connection errors: host, log, scheme
             print('TypeTodo: MySQL error, Sql connection cannot be established, check MySQL settings:')
             print(e)
             return False
@@ -249,7 +249,7 @@ class TodoDbSql():
                 )
                 tagOrder+= 1
 
-            #todo 285 (sql, cleanup) +0: detect sql saving error
+#=todo 285 (sql, cleanup) +0: detect sql saving error
             if curTodo.saveProgress(_dbN): #edited-while-save todo will not become idle here
                 curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
 

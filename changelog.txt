@@ -1,4 +1,19 @@
-v.1.8.9
+fix:
+- database synchronisation fixed for multidbs: tasks were resaved with same stamp at startup (at least); live-edited db redefinitions now synchronised as well.
+- new explicitely defined 'file' database was not created
+- reserved ID was wrongly reset when switching all (even if one) databases onfly
+- concurrent fetch() and flush() detected and removed
+- jumping from search result for duplicated doplets started new search, not issue no more
+
+change:
+- release id for immediately canceled task
+
+issue:
+- some missynchronisations detected when databases are continuosly added/deleted while changing doplets. But since this plugin was not intended to be heavily synchronising tool, such behavior is accepted.
+  No data loss noticed. Anyway everything should be nicely synchronised when all neccessary databases are in place.
+
+
+v1.8.9
 
 new:
 - unused database ID is released oh Sublime exit. No more continuos ID incrementing as a result of several Sublime restarts.
@@ -7,7 +22,7 @@ fix/change:
 - resaving on filename change was performed at wrong time, leading to unwanted tasks resavings. Taking that resaving is not surely needed, it was removed at all.
 
 
-v.1.8.8
+v1.8.8
 
 change:
 - made autocompletion list in form of "tag: ..."
@@ -42,6 +57,7 @@ v1.8.5
 
 new:
 - resave doplets at filename change, basically for new unsaved files
+  (removed in v1.8.9)
 
 fix:
 - flush/fetch freeze removed (was accidentally brought in with v1.7.1)

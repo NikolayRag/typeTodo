@@ -20,7 +20,9 @@ else:
 
 #todo 89 (db, feature, unsure) +0: save context (+-2 strings of code) with task
 
-#todo 1876 (db, feature) +0: make and use ability to switch off engines due to errors, and lated bring them back.
+#=todo 1876 (db, feature) +0: make and use ability to switch off engines due to errors, and lated bring them back.
+
+#todo 1965 (db, feature) -1: add github-issue engine
 
 #
 #   Manages .todoA[] task collection within .dbA[] databases.
@@ -157,7 +159,7 @@ class TodoDb():
 #
 #   Return new task ID
 
-#todo 1797 (db, cleanup) +0: React on newId() errors correctly; see todo 1876
+#=todo 1797 (db, cleanup) +0: React on newId() errors correctly; see todo 1876
 
     def newIdGet(self):
         cId= self.reservedId +1

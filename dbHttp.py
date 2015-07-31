@@ -63,7 +63,7 @@ class TodoDbHttp():
         self.settings= _settings
         self.parentDB= _parentDB
 
-#todo 270 (http, cleanup) +0: implement http timeout
+#=todo 270 (http, cleanup) +0: implement http timeout
 
 #todo 307 (http, cleanup, unsure) +0: change URL addressing scheme to rep/proj; join registered/anon name
     def flush(self, _dbN):
@@ -111,7 +111,7 @@ class TodoDbHttp():
             return False
 
         allOk= True
-#todo 281 (db, flush, cleanup) +0: compare with postList
+#=todo 281 (db, flush, cleanup) +0: compare with postList
         response= json.loads(response)
         for respId in response:
             curTodo= self.parentDB.todoA[int(respId)]

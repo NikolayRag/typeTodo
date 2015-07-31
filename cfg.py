@@ -186,6 +186,13 @@ class Config():
                 cSetting.base=      curCfg['baseh']
 
 
+            if curCfg['enginegithub']:
+                cSetting.engine=    'github'
+                cSetting.login=     curCfg['loging']
+                cSetting.passw=     curCfg['passwg']
+                cSetting.base=      curCfg['baseg']
+
+
             if cSetting:
                 cSettings.append(cSetting)
 

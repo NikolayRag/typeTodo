@@ -113,6 +113,8 @@ class TodoDb():
                 cEngClass= TodoDbSql
             elif cSetting.engine=='http':
                 cEngClass= TodoDbHttp
+            elif cSetting.engine=='github':
+                cEngClass= TodoDbGithub
             else:
                 continue
 

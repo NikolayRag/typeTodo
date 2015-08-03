@@ -63,7 +63,7 @@ class TodoDbHttp():
         self.settings= _settings
         self.parentDB= _parentDB
 
-#todo 270 (http, cleanup) +0: implement http timeout
+    timeout= 10
 
 #todo 307 (http, cleanup, unsure) +0: change URL addressing scheme to rep/proj; join registered/anon name
     def flush(self, _dbN):
@@ -101,7 +101,7 @@ class TodoDbHttp():
 
         req = urllib2.Request('http://' +self.settings.addr +'/?=flush', str.encode(urllib.urlencode(postData)))
         try:
-            response = bytes.decode( urllib2.urlopen(req).read() )
+            response = bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
         except Exception as e:
             print('TypeTodo: HTTP server error while flushing. Repository: ' +self.settings.base)
             print(e)
@@ -149,7 +149,7 @@ class TodoDbHttp():
 
         req = urllib2.Request('http://' +self.settings.addr +'/?=new_task_id', str.encode(urllib.urlencode(postData)))
         try:
-            response= bytes.decode( urllib2.urlopen(req).read() )
+            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
         except Exception as e:
             print('TypeTodo: HTTP server error creating todo')
             print(e)
@@ -177,7 +177,7 @@ class TodoDbHttp():
 
         req = urllib2.Request('http://' +self.settings.addr +'/?=release_task_id', str.encode(urllib.urlencode(postData)))
         try:
-            response= bytes.decode( urllib2.urlopen(req).read() )
+            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
             self.lastId= None
         except Exception as e:
             print('TypeTodo: HTTP server error creating todo')
@@ -201,7 +201,7 @@ class TodoDbHttp():
             postData['logPass']= urllib2.quote(self.settings.passw)
         req = urllib2.Request('http://' +self.settings.addr +'/?=fetch_tasks', str.encode(urllib.urlencode(postData)))
         try:
-            response= bytes.decode( urllib2.urlopen(req).read() )
+            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
         except Exception as e:
             print('TypeTodo: cant fetch http')
             print(e)

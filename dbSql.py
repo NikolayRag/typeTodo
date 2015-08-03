@@ -124,10 +124,33 @@ class TodoDbSql():
     settings= None
     parentDB= False
 
+    cPid= None
+    cUid= None
+
+    tablesPassed= False
 
     def __init__(self, _parentDB, _settings):
         self.settings= _settings
         self.parentDB= _parentDB
+
+
+    def sqExecute(self, _connA, _cur, _stmt, _args=False):
+        if not _connA[0]:
+            return False
+
+        try:
+            if _args:
+                _cur.execute(_stmt, _args)
+            else:
+                _cur.execute(_stmt)
+            return True
+        except:
+            print ('TypeTodo MySQL statement error, skipped')
+            _connA[0]= False
+            _cur.close()
+
+            return False
+
 
 
     def reconnect(self):
@@ -135,67 +158,93 @@ class TodoDbSql():
             cConnection= pymysql.connect(host=self.settings.addr, port=3306, user=self.settings.login, passwd=self.settings.passw, db=self.settings.base, use_unicode=True, charset="utf8")
             cConnection.autocommit(True)
         except Exception as e:
-#todo 35 (sql, cleanup) +0: deal with connection errors: host, log, scheme
             print('TypeTodo: MySQL error, Sql connection cannot be established, check MySQL settings:')
             print(e)
             return False
 
-        #check table
-        cur = cConnection.cursor()
-        for tName in self.dbTablesSrc:
-            tableDesc= self.dbTablesSrc[tName]
+        if not self.checkTables(cConnection):
+            return False
 
-            #if exists
-            flagTableOk= True
-            try: #check bad table and insert absent fields
-                cur.execute("DESCRIBE " +tName)
-                fields= []
-                for task in cur.fetchall():
-                    fields.append(task[0])
+        cur= cConnection.cursor()
 
-                for testField in tableDesc['fields']:
-                    testFieldName= testField.split()[0].strip('`')
-                    if not testFieldName in fields:
-                        cur.execute("ALTER TABLE " +tName +" ADD COLUMN " +testField)
-                        print('TypeTodo MySQL: added `' +testFieldName +'` field into `' +tName +'` table')
-            except:
-                flagTableOk= False
-
-            if not flagTableOk:
-                try:
-                    cur.execute("CREATE TABLE  `" +tName +"` (" +','.join(tableDesc['fields']+[tableDesc['suffix']]) +") DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1")
-                    print('TypeTodo MySQL: created `' +tName +'` table')
-                except Exception as e:
-                    print('TypeTodo: MySQL error, Table \'' +tName +'\' cannot be created:')
-                    print(e)
-                    return False
-
-        cur.execute(
-            "INSERT INTO projects (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-            self.parentDB.config.projectName
-        )
-        cPid= cConnection.insert_id()
+        if not self.cPid:
+            if self.sqExecute([cConnection], cur,
+                "INSERT INTO projects (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
+                self.parentDB.config.projectName
+            ):
+                self.cPid= cConnection.insert_id()
 
 
-        cur.execute(
-            "INSERT INTO users (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-            self.parentDB.config.projectUser
-        )
-        cUid= cConnection.insert_id()
+        if not self.cUid:
+            if self.sqExecute([cConnection], cur,
+                "INSERT INTO users (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
+                self.parentDB.config.projectUser
+            ):
+                self.cUid= cConnection.insert_id()
 
         cur.close()
 
-        return {'db': cConnection, 'pid': cPid, 'uid': cUid}
+        if self.cUid!=None and self.cUid!=None:
+            return cConnection
+
+
+
+
+    def checkTables(self, _conn):
+        if self.tablesPassed:
+            return True
+
+        cur= _conn.cursor()
+
+        flagTablesAllOk= True
+
+        for tName in self.dbTablesSrc:
+            tableDesc= self.dbTablesSrc[tName]
+
+            flagTableOk= True
+
+            if not self.sqExecute([_conn], cur, "DESCRIBE `%s`" % tName):
+                flagTablesAllOk= False
+                continue
+
+            fields= []
+
+            for task in cur.fetchall():
+                fields.append(task[0])
+
+            for testField in tableDesc['fields']:
+                testFieldName= testField.split()[0].strip('`')
+                if not testFieldName in fields:
+                    if self.sqExecute([_conn], cur, "ALTER TABLE " +tName +" ADD COLUMN " +testField):
+                        print('TypeTodo MySQL: added `' +testFieldName +'` field into `' +tName +'` table')
+                    else:
+                        flagTableOk= False
+                        flagTablesAllOk= False
+
+
+            if not flagTableOk:
+                if self.sqExecute([_conn], cur, "CREATE TABLE  `" +tName +"` (" +','.join(tableDesc['fields']+[tableDesc['suffix']]) +") DEFAULT CHARSET=utf8 ENGINE=MyISAM DELAY_KEY_WRITE=1"):
+                    print('TypeTodo MySQL: created `' +tName +'` table')
+                else:
+                    print('TypeTodo: MySQL error, Table \'' +tName +'\' cannot be created')
+
+
+        if flagTablesAllOk:
+            cur.close()
+            self.tablesPassed= True
+
+            return True
+
 
 
 #public#
 
 
     def flush(self, _dbN):
-        dbConn= self.reconnect()
-        if not dbConn:
+        dbConn= [self.reconnect()]
+        if not dbConn[0]:
             return False
-        cur = dbConn['db'].cursor()
+        cur = dbConn[0].cursor()
 
 
         for iT in self.parentDB.todoA:
@@ -205,51 +254,57 @@ class TodoDbSql():
 
             curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere
 
-            cur.execute(
+            if not self.sqExecute(dbConn, cur,
                 "INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
                 STATE_LIST[curTodo.state]
-            )
-            db_stateId= dbConn['db'].insert_id()
+            ):
+                return False
+            db_stateId= dbConn[0].insert_id()
 
-            cur.execute(
+            if not self.sqExecute(dbConn, cur,
                 "INSERT INTO files (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-                (curTodo.fileName, dbConn['pid'])
-            )
-            db_fileId= dbConn['db'].insert_id()
+                (curTodo.fileName, self.cPid)
+            ):
+                return False
+            db_fileId= dbConn[0].insert_id()
 
             db_tagIdA= []
             for tag in curTodo.tagsA: #insert all tags by one, holding 
-                cur.execute(
+                if not self.sqExecute(dbConn, cur,
                     "INSERT INTO categories (name,id_project) VALUES (%s,%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-                    (tag, dbConn['pid'])
-                )
-                db_tagIdA.append(dbConn['db'].insert_id())
+                    (tag, self.cPid)
+                ):
+                    return False
+                db_tagIdA.append(dbConn[0].insert_id())
 
             newVersion= 1
             newTagVersion= 1
-            cur.execute(
+            if not self.sqExecute(dbConn, cur,
                 "SELECT max(version),max(version_tag) FROM tasks WHERE id=%s AND id_project=%s",
-                (curTodo.id, dbConn['pid'])
-            )
+                (curTodo.id, self.cPid)
+            ):
+                return False
             recentTask= cur.fetchone()
             if recentTask and recentTask[0]:
                 newVersion= recentTask[0]+1
                 newTagVersion= recentTask[1]+1
 
-            cur.execute(
+            if not self.sqExecute(dbConn, cur,
                 "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment,stamp,version_tag) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s),%s)",
-                (curTodo.id, db_stateId, db_tagIdA[0], curTodo.lvl, dbConn['uid'], newVersion, db_fileId, dbConn['pid'], curTodo.comment, curTodo.stamp, newTagVersion)
-            )
+                (curTodo.id, db_stateId, db_tagIdA[0], curTodo.lvl, self.cUid, newVersion, db_fileId, self.cPid, curTodo.comment, curTodo.stamp, newTagVersion)
+            ):
+                return False
 
             tagOrder= 0
             for tagId in db_tagIdA:
-                cur.execute(
+                if not self.sqExecute(dbConn, cur,
                     "INSERT INTO tag2task (id_tag,id_task,version,`order`,id_project) VALUES (%s,%s,%s,%s,%s)",
-                    (tagId, curTodo.id, newTagVersion, tagOrder, dbConn['pid'])
-                )
+                    (tagId, curTodo.id, newTagVersion, tagOrder, self.cPid)
+                ):
+                    return False
                 tagOrder+= 1
 
-            #todo 285 (sql, cleanup) +0: detect sql saving error
+
             if curTodo.saveProgress(_dbN): #edited-while-save todo will not become idle here
                 curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
 
@@ -262,15 +317,16 @@ class TodoDbSql():
         if _wantedId==self.lastId:
             return self.lastId
 
-        dbConn= self.reconnect()
-        if not dbConn:
+        dbConn= [self.reconnect()]
+        if not dbConn[0]:
             return False
-        cur = dbConn['db'].cursor()
+        cur = dbConn[0].cursor()
 
-        cur.execute(
+        if not self.sqExecute(dbConn, cur,
             "SELECT max(id) max_id FROM tasks WHERE id_project=%s",
-            dbConn['pid']
-        )
+            self.cPid
+        ):
+            return False
         _id= cur.fetchone()
         if _id and _id[0]:
             _id= int(_id[0]) +1
@@ -279,10 +335,11 @@ class TodoDbSql():
         else:
             _id= 1
 
-        cur.execute(
+        if not self.sqExecute(dbConn, cur,
             "INSERT INTO tasks (id,id_state,id_category,priority,id_user,version,id_filename,id_project,comment) VALUES (%s,0,0,0,%s,0,0,%s,'')",
-            (_id, dbConn['uid'], dbConn['pid'])
-        )
+            (_id, self.cUid, self.cPid)
+        ):
+            return False
 
         cur.close()
 
@@ -292,49 +349,52 @@ class TodoDbSql():
 
 
     def releaseId(self):
-        dbConn= self.reconnect()
-        if not dbConn:
+        dbConn= [self.reconnect()]
+        if not dbConn[0]:
             return False
-
-        cur = dbConn['db'].cursor()
-
-        cur.execute(
+        cur = dbConn[0].cursor()
+        
+        if not self.sqExecute(dbConn, cur,
             "SELECT max(id) max_id FROM tasks WHERE id_project=%s",
-            dbConn['pid']
-        )
+            self.cPid
+        ):
+            return False
 
         _id= cur.fetchone()
         if not _id:
             return False
 
         _id= int(_id[0])
-        if not _id or _id != self.lastId:
-            return False
 
-        cur.execute(
+        if not self.sqExecute(dbConn, cur,
             "SELECT max(version) FROM tasks WHERE id=%s AND id_project=%s",
-            (_id, dbConn['pid'])
-        )
+            (_id, self.cPid)
+        ):
+            return False
 
         recentTask= cur.fetchone()
-        if recentTask[0]>0:
+        if recentTask[0]>0: #release only reserved ones
             return False
 
-        cur.execute(
+        if not self.sqExecute(dbConn, cur,
             "DELETE FROM tasks WHERE id=%s AND id_project=%s",
-            (_id, dbConn['pid'])
-        )
+            (_id, self.cPid)
+        ):
+            return False
 
-        self.lastId= None
+        if _id == self.lastId:
+            self.lastId= None
+
+        return True
 
 
     def fetch(self):
-        dbConn= self.reconnect()
-        if not dbConn:
+        dbConn= [self.reconnect()]
+        if not dbConn[0]:
             return False
-        cur = dbConn['db'].cursor()
+        cur = dbConn[0].cursor()
 
-        cur.execute(
+        if not self.sqExecute(dbConn, cur,
             "SELECT *, UNIX_TIMESTAMP(stamp) ustamp FROM (\
               SELECT id_project maxp,id maxi,max(version) maxv FROM tasks WHERE id_project=%s GROUP BY id\
             ) maxv INNER JOIN tasks ON id_project=maxp AND id=maxi AND version=maxv AND version>0\
@@ -343,8 +403,9 @@ class TodoDbSql():
             LEFT JOIN (SELECT id idcat, name namecat FROM categories) _cats ON idcat=id_category\
             LEFT JOIN (SELECT id iduser, name nameuser FROM users) _users ON iduser=id_user\
             LEFT JOIN (SELECT id idfile, name namefile FROM files) _files ON idfile=id_filename",
-            (dbConn['pid'])
-        )
+            (self.cPid)
+        ):
+            return False
 
         sqn= {} #get id for field names
         for field in cur.description:
@@ -372,12 +433,13 @@ class TodoDbSql():
 
         for taskId in todoA: #read multitags over
             multitags= []
-            cur.execute(
+            if not self.sqExecute(dbConn, cur,
                 "SELECT nametag FROM tag2task \
                 LEFT JOIN (SELECT id idtag, name nametag FROM categories) _tags ON idtag=id_tag\
                 WHERE id_task=%s AND version=%s AND id_project=%s ORDER BY `order` ASC",
-                (taskId, ver_tags[taskId], dbConn['pid'])
-            )
+                (taskId, ver_tags[taskId], self.cPid)
+            ):
+                return False
             for tagnRow in cur.fetchall():
                 multitags.append(tagnRow[0])
 

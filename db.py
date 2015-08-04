@@ -160,18 +160,24 @@ class TodoDb():
     def newIdGet(self):
         cId= self.reservedId +1
 
-        tries= 10
+        tries= 1
         while True:
             ids= []
-            for db in self.dbA:
-                ids.append(self.dbA[db].newId(cId) or 0)
+            for cDb in self.dbA:
+                ids.append(self.dbA[cDb].newId(cId) or 0)
 
             cId= max(ids)
             if cId==min(ids):
                 break
 
             if tries<=0:
-                print('TypeTodo warning: Cannot synchronize new Id within db\'s.')
+                if not max(ids):
+                    print('TypeTodo error: Cannot reserve new ID for any databases. Check their settings.')
+
+                for cDb in self.dbA:
+                    if ids[cDb] != max(ids):
+                        print('TypeTodo warning: Cannot synchronize new Id within ' +self.dbA[cDb].name +' database.')
+
                 break
 
             tries-= 1

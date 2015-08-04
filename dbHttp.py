@@ -58,12 +58,11 @@ class TodoDbHttp():
     settings= None
     parentDB= False
 
+    timeout= 10
 
     def __init__(self, _parentDB, _settings):
         self.settings= _settings
         self.parentDB= _parentDB
-
-    timeout= 10
 
 #todo 307 (http, cleanup, unsure) +0: change URL addressing scheme to rep/proj; join registered/anon name
     def flush(self, _dbN):
@@ -153,7 +152,8 @@ class TodoDbHttp():
         except Exception as e:
             print('TypeTodo: HTTP server error creating todo')
             print(e)
-            response= False;
+            return False
+
         if str(int(response)) != response:
             print('TypeTodo: HTTP server fails creating todo')
             response= False
@@ -180,11 +180,12 @@ class TodoDbHttp():
             response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
             self.lastId= None
         except Exception as e:
-            print('TypeTodo: HTTP server error creating todo')
+            print('TypeTodo: HTTP server error releasing todo')
             print(e)
-            response= False;
+            return False
+            
         if str(int(response)) != response:
-            print('TypeTodo: HTTP server fails creating todo')
+            print('TypeTodo: HTTP server fails releasing todo')
             response= False
 
         return response

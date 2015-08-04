@@ -3,9 +3,11 @@
 import re
 
 class SAVE_STATES:
-	IDLE= 0
-	READY= 1
-	HOLD= 2
+	INIT= 0
+	IDLE= 1
+	READY= 2
+	FORCE= 3 #same as READY but without shadow compairing
+	HOLD= 4
 
 STATE_LIST= {
     '': 'Open',

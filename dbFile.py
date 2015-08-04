@@ -33,7 +33,7 @@ class TodoDbFile():
         dirty= False
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if curTodo.savedA[_dbN]==SAVE_STATES.READY and curTodo.shadowDiffers():
+            if curTodo.savePending(_dbN):
                 dirty= True
 
         if not dirty:
@@ -87,12 +87,13 @@ class TodoDbFile():
 
 #   newId() is suited to be called in a short sequence, to iplement lowcost retrying.
 #   .lastId holds reserved Id and is cached out if matches _wantedId.
-#   Id is initially rteserved if _wantedId=0, thich is case on every sequence start.
+#   Id is initially reserved if _wantedId=0, thich is case on every sequence start.
 #
 #   return actually reserved new Id
 #
 #   Same is true for other engines.
 
+#todo 1942 (file, cleanup) -1: think of reservation for 'file', maybe using re-newID
     def newId(self, _wantedId=0):
         self.fetch()
             
@@ -108,8 +109,8 @@ class TodoDbFile():
 
 
 
-    def releaseId(self, _id):
-        None;
+    def releaseId(self):
+        self.lastId= None
 
 
 

@@ -4,6 +4,7 @@
 #todo 11 (interaction, unsure) -10: make more TODO formats available
 
 #todo 232 (feature) +0: introduce sub-todo's that are part of other
+#todo 1910 (feature) +0: left mouseclick context actions
 
 
 import sublime, sublime_plugin
@@ -332,7 +333,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
     def substUpdate(self, _state, _id, _tags, _lvl, _comment, _prefix, _region, _wipe=False):
         updVals= {'_view':self.view, '_state':_state, '_id':_id, '_tags':_tags, '_lvl':_lvl, '_comment':_comment, '_prefix':_prefix, '_region':_region, '_wipe':_wipe}
 
-        if _state=='!':
+        if _state=='!' and _comment!='':
             self.view.window().show_input_panel('Reason of canceling:', '', self.substDoUpdate(updVals), None, self.substDoUpdate(updVals))
         else:
             self.substDoUpdate(updVals)()

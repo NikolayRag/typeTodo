@@ -17,7 +17,7 @@ class TodoTask():
     #updatable
     state= ''
     tagsA= []
-    lvl= ''
+    lvl= 0
     fileName= ''
     comment= ''
     editor= ''
@@ -66,46 +66,91 @@ class TodoTask():
 
 
 
+
+
+    def savedReset(self):
+        self.savedA= {}
+        self.setSaved(SAVE_STATES.INIT)
+
+
     def setSaved(self, _state, _dbIdx=-1):
         self.initial= False
 
         if _dbIdx<0: #set all
-            self.savedA= {}
-            for dbEN in self.parentDb.dbA:
-                self.savedA[dbEN]= _state
+            for _dbIdx in self.parentDb.dbA:
+                self.setSavedDb(_state, _dbIdx)
 
         else:
-            self.savedA[_dbIdx]= _state
+            self.setSavedDb(_state, _dbIdx)
 
 
         self.shadowCast()
 
 
 
+    def setSavedDb(self, _state, _dbIdx):
+        #restrict FORCE to READY
+        if _dbIdx in self.savedA and _state==SAVE_STATES.READY and self.savedA[_dbIdx]==SAVE_STATES.FORCE:
+            return
+
+        self.savedA[_dbIdx]= _state
+
+
+
+
+
+#   Store rest state for saved (all-IDLE) only
+
     def shadowCast(self):
-        allIdle= True
         for cSaved in self.savedA:
             if self.savedA[cSaved]!=SAVE_STATES.IDLE:
-                allIdle= False
-                break
+                return
 
-        if allIdle:
-            self.old_state= self.state
-            self.old_tagsA= self.tagsA
-            self.old_lvl= self.lvl
-            self.old_fileName= self.fileName
-            self.old_comment= self.comment
+        self.old_state= self.state
+        self.old_tagsA= self.tagsA
+        self.old_lvl= self.lvl
+        self.old_fileName= self.fileName
+        self.old_comment= self.comment
 
 
 
     def shadowDiffers(self):
-        if self.old_state!= self.state:
+        return self.differs(self.old_state, self.old_tagsA, self.old_lvl, self.old_fileName, self.old_comment)
+
+
+    def taskDiffers(self, _task):
+        return self.differs(_task.state, _task.tagsA, _task.lvl, _task.fileName, _task.comment)
+
+
+    def differs(self, _state, _tagsA, _lvl, _fileName, _comment):
+        if _state!= self.state:
             return True
-        if sorted(self.old_tagsA)!= sorted(self.tagsA):
+        if sorted(_tagsA)!= sorted(self.tagsA):
             return True
-        if self.old_lvl!= self.lvl:
+        if _lvl!= self.lvl:
             return True
-        if self.old_fileName!= self.fileName:
+        if _fileName!= self.fileName:
             return True
-        if self.old_comment!= self.comment:
+        if _comment!= self.comment:
+            return True
+
+
+
+
+
+    def savePending(self, _dbIdx):
+        if self.savedA[_dbIdx]==SAVE_STATES.FORCE:
+            return True
+
+        if self.savedA[_dbIdx]==SAVE_STATES.READY and self.shadowDiffers():
+            return True
+
+
+    def saveProgress(self, _dbIdx):
+        if self.savedA[_dbIdx]==SAVE_STATES.HOLD:
+            return True
+
+
+    def saveInit(self, _dbIdx):
+        if self.savedA[_dbIdx]==SAVE_STATES.INIT:
             return True

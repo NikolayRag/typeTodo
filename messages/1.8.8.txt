@@ -1,4 +1,4 @@
-v.1.8.8
+v1.8.8
 
 change:
 - made autocompletion list in form of "tag: ..."

@@ -88,7 +88,7 @@ class Config():
 
 
                 if not os.path.isfile(_cfgFile):
-                    print ('TypeTodo init: Writing project\'s config.')
+                    print('TypeTodo init: Writing project\'s config.')
                     try:
                         with codecs.open(_cfgFile, 'w+', 'UTF-8') as f:
                             f.write(self.lastProjectHeader)
@@ -99,7 +99,7 @@ class Config():
                 return True
             return
 
-        print ('TypeTodo error: Config could not be read.')
+        print('TypeTodo error: Config could not be read.')
         self.lastCfgFile= None
         self.lastProjectHeader= None
 
@@ -137,52 +137,57 @@ class Config():
         headerCollect= ''
 
         fileSetFound= False
+
         while True:
-            l= f.readline().splitlines()
-            if l==[] or l[0]=='' or not l[0]:
+            cfgString= f.readline()
+            if cfgString=='' or cfgString=='\n':
                 break
-
-            cfgString= l[0]
-
-            headerCollect+= cfgString +"\n"
+            
+            headerCollect+= cfgString
             #catch last matched config
-            cfgFoundTry= RE_CFG.match(cfgString)
-            if cfgFoundTry:
-                cSetting= Setting()
+            cfgFoundTry= RE_CFG.match(cfgString.rstrip('\n'))
+            if not cfgFoundTry:
+                continue
 
-                curCfg= cfgFoundTry.groupdict()
-                if curCfg['enginefile']:
-                    fileSetFound= True
-                    cSetting.engine=    'file'
-                    if os.path.dirname(curCfg['fname'])=='':
-                        cSetting.file=  os.path.join(self.projectRoot, curCfg['fname'])
-                    else:
-                        cSetting.file=  curCfg['fname']
-                    cSetting.head=      ''
+            cSetting= Setting()
 
-                    if os.path.normcase(cSetting.file)==os.path.normcase(_cfgFile):
-                        cSetting= False #prevent explicit .do as 'file'
-                        fileSetFound= False
+            curCfg= cfgFoundTry.groupdict()
+            if curCfg['enginefile']:
+                fileSetFound= True
+                cSetting.engine=    'file'
+                if os.path.dirname(curCfg['fname'])=='':
+                    cSetting.file=  os.path.join(self.projectRoot, curCfg['fname'])
+                else:
+                    cSetting.file=  curCfg['fname']
+                cSetting.head=      ''
 
+                if os.path.normcase(cSetting.file)==os.path.normcase(_cfgFile):
+                    cSetting= False #prevent explicit .do as 'file'
+                    fileSetFound= False
 
-                if curCfg['enginesql']:
-                    cSetting.engine=    'mysql'
-                    cSetting.addr=      curCfg['addrs']
-                    cSetting.login=     curCfg['logins']
-                    cSetting.passw=     curCfg['passws']
-                    cSetting.base=      curCfg['bases']
+                if not os.path.isfile(cSetting.file):
+                    with codecs.open(cSetting.file, 'w+', 'UTF-8') as fNew:
+                        fNew.write('')   
 
 
-                if curCfg['enginehttp']:
-                    cSetting.engine=    'http'
-                    cSetting.addr=      curCfg['addrh']
-                    cSetting.login=     curCfg['loginh']
-                    cSetting.passw=     curCfg['passwh']
-                    cSetting.base=      curCfg['baseh']
+            if curCfg['enginesql']:
+                cSetting.engine=    'mysql'
+                cSetting.addr=      curCfg['addrs']
+                cSetting.login=     curCfg['logins']
+                cSetting.passw=     curCfg['passws']
+                cSetting.base=      curCfg['bases']
 
 
-                if cSetting:
-                    cSettings.append(cSetting)
+            if curCfg['enginehttp']:
+                cSetting.engine=    'http'
+                cSetting.addr=      curCfg['addrh']
+                cSetting.login=     curCfg['loginh']
+                cSetting.passw=     curCfg['passwh']
+                cSetting.base=      curCfg['baseh']
+
+
+            if cSetting:
+                cSettings.append(cSetting)
 
 
 

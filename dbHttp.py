@@ -58,12 +58,11 @@ class TodoDbHttp():
     settings= None
     parentDB= False
 
+    timeout= 10
 
     def __init__(self, _parentDB, _settings):
         self.settings= _settings
         self.parentDB= _parentDB
-
-#todo 270 (http, cleanup) +0: implement http timeout
 
 #todo 307 (http, cleanup, unsure) +0: change URL addressing scheme to rep/proj; join registered/anon name
     def flush(self, _dbN):
@@ -73,7 +72,7 @@ class TodoDbHttp():
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if curTodo.savedA[_dbN]!=SAVE_STATES.READY or not curTodo.shadowDiffers():
+            if not curTodo.savePending(_dbN):
                 continue
 
             curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere
@@ -101,7 +100,7 @@ class TodoDbHttp():
 
         req = urllib2.Request('http://' +self.settings.addr +'/?=flush', str.encode(urllib.urlencode(postData)))
         try:
-            response = bytes.decode( urllib2.urlopen(req).read() )
+            response = bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
         except Exception as e:
             print('TypeTodo: HTTP server error while flushing. Repository: ' +self.settings.base)
             print(e)
@@ -111,21 +110,20 @@ class TodoDbHttp():
             return False
 
         allOk= True
-#todo 281 (db, flush, cleanup) +0: compare with postList
+
         response= json.loads(response)
         for respId in response:
             curTodo= self.parentDB.todoA[int(respId)]
 
             if not self.parentDB.todoA[int(respId)]:
-                print ('TypeTodo: Server responded task ' +respId +' that doesn\'t exists. Skipping')
+                print('TypeTodo: Server responded task ' +respId +' that doesn\'t exists. Skipping')
                 continue
 
             elif response[respId]!=0:
-                print ('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
-                curTodo.setSaved(SAVE_STATES.READY, _dbN)
+                print('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
                 allOk= False
             else:
-                if curTodo.savedA[_dbN]==SAVE_STATES.HOLD: #edited-while-save todo will not become idle here
+                if curTodo.saveProgress(_dbN): #edited-while-save todo will not become idle here
                     curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
 
 
@@ -150,11 +148,12 @@ class TodoDbHttp():
 
         req = urllib2.Request('http://' +self.settings.addr +'/?=new_task_id', str.encode(urllib.urlencode(postData)))
         try:
-            response= bytes.decode( urllib2.urlopen(req).read() )
+            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
         except Exception as e:
             print('TypeTodo: HTTP server error creating todo')
             print(e)
-            response= False;
+            return False
+
         if str(int(response)) != response:
             print('TypeTodo: HTTP server fails creating todo')
             response= False
@@ -165,9 +164,9 @@ class TodoDbHttp():
 
 
 
-    def releaseId(self, _wantedId):
+    def releaseId(self):
         postData= {}
-        postData['wantedId']= _wantedId
+        postData['wantedId']= self.lastId
         postData['logName']= urllib2.quote(self.parentDB.config.projectUser)
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)
@@ -178,13 +177,15 @@ class TodoDbHttp():
 
         req = urllib2.Request('http://' +self.settings.addr +'/?=release_task_id', str.encode(urllib.urlencode(postData)))
         try:
-            response= bytes.decode( urllib2.urlopen(req).read() )
+            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
+            self.lastId= None
         except Exception as e:
-            print('TypeTodo: HTTP server error creating todo')
+            print('TypeTodo: HTTP server error releasing todo')
             print(e)
-            response= False;
+            return False
+            
         if str(int(response)) != response:
-            print('TypeTodo: HTTP server fails creating todo')
+            print('TypeTodo: HTTP server fails releasing todo')
             response= False
 
         return response
@@ -201,7 +202,7 @@ class TodoDbHttp():
             postData['logPass']= urllib2.quote(self.settings.passw)
         req = urllib2.Request('http://' +self.settings.addr +'/?=fetch_tasks', str.encode(urllib.urlencode(postData)))
         try:
-            response= bytes.decode( urllib2.urlopen(req).read() )
+            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
         except Exception as e:
             print('TypeTodo: cant fetch http')
             print(e)

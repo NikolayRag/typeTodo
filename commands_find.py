@@ -306,9 +306,28 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             # jump from Search results
             foundView= WCache().getResultsView(False)
             if foundView and foundView.buffer_id()==self.view.buffer_id():
-                self.findNamed(todoIncode.group('id'))
+                jumpLine= re.match('\s*(\d+):', self.view.substr(todoRegion))
+                if not jumpLine:
+                    return
+                jumpLine= int(jumpLine.groups()[0])
+
+                tryLine= self.view.rowcol(self.view.sel()[0].a)[0] -1
+                while tryLine>0:
+                    jumpFile= self.view.substr(self.view.line(self.view.text_point(tryLine, 0)))
+                    if re.match('[^\s].*[^\s]$', jumpFile):
+                        break
+
+                    tryLine-= 1
+
+                if not tryLine:
+                    return
+
+                cView= sublime.active_window().open_file(jumpFile, sublime.TRANSIENT)
+                self.focusView(cView, jumpLine-1, 0)
+#todo 1978 (command, find, fix) +1: will fail if jump to unsaved view
                 return
 
+            # jump from code to .do
             cDb= WCache().getDB()
             fn= ''
             for cSetting in cDb.config.settings:

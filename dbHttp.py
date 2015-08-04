@@ -110,7 +110,7 @@ class TodoDbHttp():
             return False
 
         allOk= True
-#todo 281 (db, flush, cleanup) +0: compare with postList
+
         response= json.loads(response)
         for respId in response:
             curTodo= self.parentDB.todoA[int(respId)]

@@ -324,7 +324,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
                 cView= sublime.active_window().open_file(jumpFile, sublime.TRANSIENT)
                 self.focusView(cView, jumpLine-1, 0)
-
+#todo 1978 (command, find, fix) +1: will fail if jump to unsaved view
                 return
 
             # jump from code to .do

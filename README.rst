@@ -13,9 +13,9 @@ Manage TODO comments, as they're typed anywhere in project code.
 1. Key features
 ---------------
 
-* TypeTodo stores and synchronizes TODO comments (doplets) within separate per-project database.
+* TypeTodo stores and synchronizes TODO comments (doplets) into external per-project database.
        
-* Database can be text **File**, **MySQL** or **HTTP**, any number of them. Free `public server`_ exists to handle **HTTP** mode.
+* Database can be text **File**, **MySQL** or **HTTP**, any number of them. Free `public server`_ (pre-release) exists to handle **HTTP** mode.
 
 * Each doplet is assigned ID at creation, unique within project.
 
@@ -31,7 +31,7 @@ Manage TODO comments, as they're typed anywhere in project code.
 ----------------------------
 
 Start with typing ``//todo:`` or ``#todo:`` comment, according to used language.
-As colon ``:`` is typed, rest of line is instantly substituted with snippet, introducing additional fields: ``//todo XXXX (tag) [+-]N: <comment>`` where XXXX is assigned unique integer ID.
+As colon ``:`` is typed, rest of line is instantly substituted with snippet, introducing additional fields: ``//todo XXXX (tag) [+-]N: <comment>``. XXXX will be instantly assigned with integer ID, unique within project.
        
 Any futher edition of any of that comment field (doplet) will trigger to flush it to database, using XXXX as ID.
 Database is specified in *[projectName].do* text file which is placed inside the first project's folder.
@@ -87,7 +87,7 @@ Global *.do* is used one for all doplets when there's NO project used at a momen
        All configuration entries found in *.do* counts.
        *.do* file is checked periodically for configuration changes, and they reapplied on fly.
       
-       Default *.do* explicit configuration is HTTP, using http://typetodo.com as host and newly created database with random name like ``~exwvpaytkfs6``. Also if no external **FILE** is specified, *.do* file itself is implicitly used as database storage.
+       Default *.do* explicit configuration is HTTP, using `public server`_ as host and newly created database with random name like ``~exwvpaytkfs6``. Also if no external **FILE** is specified, *.do* file itself is implicitly used as database storage.
 
        Acceptable configurations are **FILE**, **MYSQL** and **HTTP**
 
@@ -148,7 +148,7 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
 
        If ``<user> <pass>`` logon credentials are specified, repository is treated as **personal**, otherwise it is **public**.
 
-       Repository is accessible at http://typetodo.com/<repository>
+       Repository is accessible at `public server`_<repository>
 
 * public repository
        Is created at first run or can be recreated using *TypeTodo: Reset Global config* command. It is free to read and write by everyone who knows it's name.
@@ -185,13 +185,13 @@ While using of TypeTodo is completely implicit, there're some support commands a
        Command for opening related ``.do`` file. While **Find todo** command is presented, there's no big use of opening config too often.
 
 * **Browse Project's Repository**
-       Used to open current project within HTTP repository in browser. Server and repository are defined in ``.do` config.
+       Used to open current project within HTTP repository in browser. Server and repository to browse are defined in ``.do` config.
 
 * **Reset Global Config**
        Reinitialise global ``.do`` config while keeping it's doplet records. Mainly reinitialisation means gathering of new public HTTP repository, while old one will remain forgotten on web-server.
 
 * **Update Inconsistence**
-       For any doplet line that differs from database, duplicate that line by fetching it's actual form from database.
+       For any doplet line that differs from database, duplicate that line by fetching it's actual content from database.
 
 
 
@@ -204,7 +204,7 @@ While using of TypeTodo is completely implicit, there're some support commands a
 
 * NO braces/hyphens checking is performed. So if ``#todo:`` line is a part of string, it WILL act as ordinary doplet.
 
-* Todo string is mostly protected from editing its structure. Only State, Tags, Priority and Comment fields are allowed to be changed. This is mainly implemented to keep ID unchanged, because sudden change of it cause overwrite of other database entry.
+* Todo string is mostly protected from editing its structure. Only State, Tags, Priority and Comment fields are allowed to be changed. This is implemented mainly to keep ID unchanged, because sudden change of it cause overwrite of other database entry.
 
 * Consistency is checked periodically and doplets that differs from dbase are highlited. Highlighting occurs only if Colorizing NOT switched off.
        
@@ -212,7 +212,7 @@ While using of TypeTodo is completely implicit, there're some support commands a
 7. --> WARNING<--
 -------------------------
 
-There're some ways to bring inconsistence between code and dbase, which will result in highlighting problems:
+There're some ways to bring inconsistence between code and dbase, which will result in highlighting problems (**avoid acting like this**):
 
 * Any ``//todo`` comments editing outside ST.
 

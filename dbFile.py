@@ -93,7 +93,7 @@ class TodoDbFile():
 #
 #   Same is true for other engines.
 
-#todo 1942 (file, cleanup) -1: think of reservation for 'file', maybe using re-newID
+#todo 1942 (file, cleanup) +1: think of reservation for 'file', maybe using re-newID
     def newId(self, _wantedId=0):
         self.fetch()
             

@@ -16,9 +16,9 @@ else:
     from .dbHttp import *
     from .task import *
 
-#todo 44 (config, db, feature, unsolved) +0: handle saving project - existing and blank; transfer db for involved files
+#todo 44 (config, db, feature, unsolved) -1: handle saving project - existing and blank; transfer db for involved files
 
-#todo 89 (db, feature, unsure) +0: save context (+-2 strings of code) with task
+#todo 89 (db, feature, unsure) +1: save context (+-2 strings of code) with task
 
 #todo 1965 (db, feature) -1: add github-issue engine
 
@@ -62,7 +62,6 @@ class TodoDb():
 
 
 
-#todo 1662 (check, db) +0: unsaved doplet is overriden probably at changing config
 
 
 

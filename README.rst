@@ -3,6 +3,12 @@ typeTodo
 
 Manage TODO comments, as they're typed anywhere in project code.
 
+Blitz:
+- Install TypeTodo, accept to ``Start with new public HTTP storage``,
+- Type ``//todo:`` or ``#todo:`` comment right in your code,
+- Fill rest of expanded line,
+- Check for *[projectName].do* file created in you project
+- Run Sublime's ``TypeTodo: Browse for project's repository``
 
 
 .. contents::

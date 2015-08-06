@@ -43,7 +43,7 @@ class TypetodoJumpPointCommand(sublime_plugin.TextCommand):
 
 
 
-#todo 1859 (command, find, fix) +0: sometimes 'search' dont show results if view is previously closed
+#todo 1859 (command, find, fix, uncertain) -1: sometimes 'search' dont show results if view is previously closed
 class TypetodoJumpCommand(sublime_plugin.TextCommand):
     def focusView(self, _view, _line, _col):
         sublime.active_window().focus_view(_view)
@@ -324,7 +324,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
                 cView= sublime.active_window().open_file(jumpFile, sublime.TRANSIENT)
                 self.focusView(cView, jumpLine-1, 0)
-#todo 1978 (command, find, fix) +1: will fail if jump to unsaved view
+#todo 1978 (command, find, fix) +0: use explicit view search if no file found
                 return
 
             # jump from code to .do

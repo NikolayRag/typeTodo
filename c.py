@@ -26,7 +26,8 @@ RE_TODO_STORED_COMMENT= re.compile('^\t?(?P<comment>.*)$')
 re_mysql_str= "(?P<enginesql>mysql)\s+(?P<addrs>[^\s]+)\s+(?P<logins>[^\s]+)\s+(?P<passws>[^\s]+)\s+(?P<bases>[^\s]+)"
 re_http_str= "(?P<enginehttp>http)\s+(?P<addrh>[^\s]+)\s+(?P<baseh>[^\s]+)\s*(?P<loginh>[^\s]*)\s*(?P<passwh>[^\s]*)"
 re_file_str= "(?P<enginefile>file)\s+(?P<fname>[^\s]+)"
-RE_CFG= re.compile("^\s*(?:" +re_mysql_str +"|" +re_http_str +"|" +re_file_str +")\s*$")
+re_redmine_str= "(?P<engineredmine>redmine)\s+(?P<addrr>[^\s]+)\s+(?P<loginr>[^\s]+)\s+(?P<passwr>[^\s]+)\s+(?P<baser>[^\s]+)"
+RE_CFG= re.compile("^\s*(?:" +re_mysql_str +"|" +re_http_str +"|" +re_file_str +"|" +re_redmine_str +")\s*$")
 
 SKIP_SEARCH_DIR= ['tmp', 'temp']
 SKIP_SEARCH_FILES= ['*.', '*.sublime-workspace', '*.gz', '*.mov', '*.avi', '*.qt']

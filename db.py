@@ -8,12 +8,14 @@ if sys.version < '3':
     from dbFile import *
     from dbSql import *
     from dbHttp import *
+    from dbRedmine import *
     from task import *
 else:
     from .cfg import *
     from .dbFile import *
     from .dbSql import *
     from .dbHttp import *
+    from .dbRedmine import *
     from .task import *
 
 #todo 44 (config, db, feature, unsolved) -1: handle saving project - existing and blank; transfer db for involved files
@@ -112,6 +114,8 @@ class TodoDb():
                 cEngClass= TodoDbSql
             elif cSetting.engine=='http':
                 cEngClass= TodoDbHttp
+            elif cSetting.engine=='redmine':
+                cEngClass= TodoDbRedmine
             else:
                 continue
 

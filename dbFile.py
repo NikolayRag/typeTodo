@@ -66,7 +66,7 @@ class TodoDbFile():
                     #runtime GMT time to local
                     gmtTime= time.localtime(curTodo.stamp)
 
-                    f.write(stateSign +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
+                    f.write(stateSign +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M:%S', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
 
 
         except Exception as e:
@@ -135,8 +135,10 @@ class TodoDbFile():
                             continue
 
                         #file holds local time, need to convert to GMT for runtime
-                        rxETime= matchParse.group('edited')
-                        gmtTime= time.mktime (time.strptime(rxETime, '%y/%m/%d %H:%M'))
+                        rxEDate= matchParse.group('editdate')
+                        rxETime= matchParse.group('edittime')
+                        rxESecs= matchParse.group('editsecs') or ':00'
+                        gmtTime= time.mktime (time.strptime('%s %s%s' % (rxEDate, rxETime, rxESecs), '%y/%m/%d %H:%M:%S'))
 
                         if __id not in todoA:
                             todoA[__id]= TodoTask(__id, self.parentDB.config.projectName, self.parentDB)

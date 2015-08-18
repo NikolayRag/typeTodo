@@ -8,14 +8,14 @@ if sys.version < '3':
     from dbFile import *
     from dbSql import *
     from dbHttp import *
-    from dbRedmine import *
+#    from dbRedmine import *
     from task import *
 else:
     from .cfg import *
     from .dbFile import *
     from .dbSql import *
     from .dbHttp import *
-    from .dbRedmine import *
+#    from .dbRedmine import *
     from .task import *
 
 #todo 44 (config, db, feature, unsolved) -1: handle saving project - existing and blank; transfer db for involved files
@@ -338,9 +338,6 @@ class TodoDb():
 
             success= True
 
-            maybeNew= 0
-            maybeOld= 0
-
             for iT in todoA:
                 task= todoA[iT]
 
@@ -351,21 +348,17 @@ class TodoDb():
 
 
                 if isNew or diffStamp>0:
-                    if not _resetDb or diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
+                    if not _resetDb or diffStamp>0:
                         print('TypeTodo: \'' +cDb.name +'\' DB is new at ' +str(iT))
-                    elif diffStamp>0:
-                        maybeNew+= 1
 
                     self.todoA[iT]= task
                     self.todoA[iT].setSaved(SAVE_STATES.FORCE) #all but current db are saved for task
                     self.todoA[iT].setSaved(SAVE_STATES.IDLE, dbN)
 
+
                 elif diffStamp<0:
                     if _resetDb:
-                        if diffStamp<-60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
-                            print('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(iT))
-                        else:
-                            maybeOld+= 1
+                        print('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(iT))
                     
                     self.todoA[iT].setSaved(SAVE_STATES.FORCE, dbN)
 
@@ -381,12 +374,6 @@ class TodoDb():
                     print('TypeTodo: \'' +cDb.name +'\' DB is missing at ' +str(iT))
                     self.todoA[iT].setSaved(SAVE_STATES.FORCE, dbN)
 
-            #'apparently new' mean that stamp difference is less than 60s. It is likely a subject, when comparing with 'file' DB with seconds truncated. In this case 'file' is treated as little older and is replaced. As 'file' is anyway replaced at each flush, it doesn't make any difference to normal behavior and is messaged just in case.
-            if _resetDb:
-                if maybeNew>0:
-                    print('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
-                if maybeOld>0:
-                    print('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeOld) +' tasks apparently old')
 
 
         if self.callbackFetch:

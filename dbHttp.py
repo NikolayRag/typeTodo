@@ -57,25 +57,29 @@ class TodoDbHttp():
 
     settings= None
     parentDB= False
+    dbId= None
 
     timeout= 10
 
-    def __init__(self, _parentDB, _settings):
+
+    def __init__(self, _parentDB, _settings, _dbId):
         self.settings= _settings
         self.parentDB= _parentDB
+        self.dbId= _dbId
+
 
 #todo 307 (http, cleanup, unsure) +0: change URL addressing scheme to rep/proj; join registered/anon name
-    def flush(self, _dbN):
+    def flush(self):
         postData= {}
         postList= list()
         postTodoA= {}
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if not curTodo.savePending(_dbN):
+            if not curTodo.savePending(self.dbId):
                 continue
 
-            curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere
+            curTodo.setSaved(SAVE_STATES.HOLD, self.dbId) #poke out from saving elsewhere
 
             postList.append(str(curTodo.id))
             postTodoA['state' +str(curTodo.id)]= STATE_LIST[curTodo.state]
@@ -123,8 +127,8 @@ class TodoDbHttp():
                 print('TypeTodo: Task ' +respId +' was not saved yet. Error returned: ' +response[respId])
                 allOk= False
             else:
-                if curTodo.saveProgress(_dbN): #edited-while-save todo will not become idle here
-                    curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
+                if curTodo.saveProgress(self.dbId): #edited-while-save todo will not become idle here
+                    curTodo.setSaved(SAVE_STATES.IDLE, self.dbId)
 
 
         return allOk

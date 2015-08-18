@@ -20,20 +20,22 @@ class TodoDbFile():
 
     settings= None
     parentDB= False
+    dbId= None
 
-    def __init__(self, _parentDB, _settings):
+    def __init__(self, _parentDB, _settings, _dbId):
         self.settings= _settings
         self.parentDB= _parentDB
+        self.dbId= _dbId
 
 
 #public#
 
 
-    def flush(self, _dbN):
+    def flush(self):
         dirty= False
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if curTodo.savePending(_dbN):
+            if curTodo.savePending(self.dbId):
                 dirty= True
 
         if not dirty:
@@ -77,7 +79,7 @@ class TodoDbFile():
 
 
         for iT in self.parentDB.todoA:
-            self.parentDB.todoA[iT].setSaved(SAVE_STATES.IDLE, _dbN)
+            self.parentDB.todoA[iT].setSaved(SAVE_STATES.IDLE, self.dbId)
 
 
         return True

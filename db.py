@@ -119,7 +119,7 @@ class TodoDb():
             else:
                 continue
 
-            self.dbA[dbId]= cEngClass(self, cSetting)
+            self.dbA[dbId]= cEngClass(self, cSetting, dbId)
             dbId+= 1
 
         self.newId() #run prefetch
@@ -268,7 +268,7 @@ class TodoDb():
         flushOk= True
 
         for dbN in self.dbA:
-            flushEngineOk= self.dbA[dbN].flush(dbN)
+            flushEngineOk= self.dbA[dbN].flush()
             flushOk= flushOk and flushEngineOk
 
             #resave 'hang' tasks, mainly at db error

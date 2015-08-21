@@ -11,12 +11,12 @@ else:
 
 class TodoDbFile():
     name= 'File'
-    maxIdSaved= 0
-    dbOk= True
 
+    dbOk= True
 
     lastId= None
     maxId= 0
+    maxIdSaved= 0
 
     settings= None
     parentDB= False
@@ -164,7 +164,8 @@ class TodoDbFile():
                             todoA[cId]= TodoTask(cId, self.parentDB.config.projectName, self.parentDB)
                         ctxTodo= matchParse
 
-                        self.maxIdSaved= self.maxId= max(self.maxId, cId)
+                        if cId > self.maxId: 
+                            self.maxIdSaved= self.maxId= cId
                         continue
 
                     if ctxTodo:
@@ -178,7 +179,9 @@ class TodoDbFile():
 
                     maxIdParse= RE_TODO_FILE_MAXID.match(ln)
                     if maxIdParse:
-                        self.maxIdSaved= self.maxId= max(self.maxId, int(maxIdParse.group('maxid')))
+                        cId= int(maxIdParse.group('maxid'))
+                        if cId > self.maxId:
+                            self.maxIdSaved= self.maxId= cId
                         continue
 
 

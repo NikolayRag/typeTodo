@@ -43,6 +43,7 @@ class TodoDb():
 
     dbA= None #active databases, defined from config
     todoA= None #doplets
+    todoAInited= False
 
     callbackFetch= None
 
@@ -324,6 +325,8 @@ class TodoDb():
 
 #todo 1818 (db) +0: make compairing inconsistencies by versions where they available (not file atm)
     def fetch(self, _resetDb=False):
+        self.todoAInited= False #lock, mainly for file newId/resetId consistence
+
         if _resetDb:
             for iT in self.todoA: #reset all existing unsaved, coz states got loose from db's
                 self.todoA[iT].savedReset()
@@ -374,9 +377,8 @@ class TodoDb():
                     print('TypeTodo: \'' +cDb.name +'\' DB is missing at ' +str(iT))
                     self.todoA[iT].setSaved(SAVE_STATES.FORCE, dbN)
 
+            self.todoAInited= True
 
 
         if self.callbackFetch:
             sublime.set_timeout(self.callbackFetch, 0)
-
-        return success

@@ -11,7 +11,7 @@ else:
 
 class TodoDbFile():
     name= 'File'
-
+    maxIdSaved= 0
     dbOk= True
 
 
@@ -45,7 +45,7 @@ class TodoDbFile():
             if curTodo.savePending(self.dbId):
                 dirty= True
 
-        if dirty:
+        if dirty or self.maxIdSaved!=self.maxId:
             try:
                 with codecs.open(self.settings.file, 'w+', 'UTF-8') as f:
                     f.write(self.settings.head)
@@ -67,6 +67,8 @@ class TodoDbFile():
 
                         f.write(stateSign +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M:%S', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
 
+                    f.write('Reserved: %d' % self.maxId)
+
 
             except Exception as e:
                 print("TypeTodo: 'file' db experienced error while flushing")
@@ -78,12 +80,7 @@ class TodoDbFile():
         for iT in self.parentDB.todoA:
             self.parentDB.todoA[iT].setSaved(SAVE_STATES.IDLE, self.dbId)
 
-        if self.maxId:
-            try:
-                with codecs.open('%s.maxid' % self.settings.file, 'w+', 'UTF-8') as f:
-                    f.write(str(self.maxId))
-            except:
-                None
+        self.maxIdSaved= self.maxId
 
         return True
 
@@ -109,9 +106,9 @@ class TodoDbFile():
         if _wantedId>self.maxId:
             self.maxId= _wantedId
         
-        self.lastId= self.maxId
-
         self.flush()
+
+        self.lastId= self.maxId
 
         return self.lastId
 
@@ -167,7 +164,7 @@ class TodoDbFile():
                             todoA[cId]= TodoTask(cId, self.parentDB.config.projectName, self.parentDB)
                         ctxTodo= matchParse
 
-                        self.maxId= max(self.maxId, cId)
+                        self.maxIdSaved= self.maxId= max(self.maxId, cId)
                         continue
 
                     if ctxTodo:
@@ -176,6 +173,13 @@ class TodoDbFile():
                         matchComment= RE_TODO_STORED_COMMENT.match(ln)
                         todoA[int(ctxTodo.group('id'))].set(__state, ctxTodo.group('tags').split(','), int(ctxTodo.group('priority')), ctxTodo.group('context'), matchComment.group('comment'), ctxTodo.group('editor'), gmtTime)
                         ctxTodo= None
+                        continue
+
+
+                    maxIdParse= RE_TODO_FILE_MAXID.match(ln)
+                    if maxIdParse:
+                        self.maxIdSaved= self.maxId= max(self.maxId, int(maxIdParse.group('maxid')))
+                        continue
 
 
         except Exception as e:
@@ -185,13 +189,5 @@ class TodoDbFile():
             self.dbOk= False
             return False
 
-
-        try:
-            with codecs.open('%s.maxid' % self.settings.file, 'r', 'UTF-8') as f:
-                storedId= int(f.read())
-                self.maxId= max(self.maxId, storedId)
-
-        except:
-            None
 
         return todoA

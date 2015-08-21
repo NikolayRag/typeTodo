@@ -21,6 +21,7 @@ RE_TODO_OLD= re.compile('(?P<prefix>.*)(?://|#)\s*(?P<state>[\+\=\!]?)\s+(?P<id>
 RE_TODO_EXISTING= re.compile('(?P<prefix>.*)(?://|#)\s*(?P<state>[\+\=\!]?)todo\s+(?P<id>\d+)(?:\s+\((?P<tags>.*)\))?(?:\s+(?P<priority>[\+\-]\d+))?\s*:(?P<postfix>[ \t]*(?P<comment>.*)[ \t]*)')
 RE_TODO_STORED= re.compile('^(?P<prefix>[\+\-\!\=])(?P<tags>.*) (?P<id>\d+): (?P<priority>[\+\-]\d+) (.+ \d\d/\d\d/\d\d \d\d:\d\d )?\"(?P<context>.*)\" (?P<editor>.+) (?P<editdate>\d\d/\d\d/\d\d) (?P<edittime>\d\d:\d\d)(?P<editsecs>:\d\d)?(?P<comment>)$')
 RE_TODO_STORED_COMMENT= re.compile('^\t?(?P<comment>.*)$')
+RE_TODO_FILE_MAXID= re.compile('^(?P<prefix>Reserved: )(?P<maxid>\d*)$')
 
 
 re_mysql_str= "(?P<enginesql>mysql)\s+(?P<addrs>[^\s]+)\s+(?P<logins>[^\s]+)\s+(?P<passws>[^\s]+)\s+(?P<bases>[^\s]+)"

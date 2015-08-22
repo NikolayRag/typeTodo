@@ -103,7 +103,7 @@ class TodoDb():
 
         print('TypeTodo: reset db')
 
-        self.releaseId(True)
+        self.releaseId()
 
         dbId= 0
         self.dbA.clear() #new db array
@@ -199,10 +199,10 @@ class TodoDb():
 #   Called at the Sublime's exit and config reset.
 
 #todo 1984 (db, issue) +0: some db's are skipped at exit if *some* dbs configured (tested 3 other than File)
-    def releaseId(self, _reset=False):
+    def releaseId(self, _atExit=False):
         self.reservedId-= 1 #used to continue id when all db's changed at once
         for db in self.dbA:
-            self.dbA[db].releaseId(_reset)
+            self.dbA[db].releaseId(_atExit)
 
 
 

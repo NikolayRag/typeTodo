@@ -351,7 +351,7 @@ class TodoDbSql():
 
 
 
-    def releaseId(self):
+    def releaseId(self, _reset=False):
         dbConn= [self.reconnect()]
         if not dbConn[0]:
             return False

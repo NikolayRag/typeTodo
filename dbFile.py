@@ -116,12 +116,13 @@ class TodoDbFile():
 
 #   decrease stored maxid if it is same as current
 
-    def releaseId(self):
+    def releaseId(self, _reset=False):
         self.fetch()
         
         if self.lastId==self.maxId:
             self.maxId-= 1
-            self.flush()
+            if not _reset:
+                self.flush()
         else:
             self.maxId= 0
 

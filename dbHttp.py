@@ -168,7 +168,7 @@ class TodoDbHttp():
 
 
 
-    def releaseId(self):
+    def releaseId(self, _reset=False):
         postData= {}
         postData['wantedId']= self.lastId
         postData['logName']= urllib2.quote(self.parentDB.config.projectUser)

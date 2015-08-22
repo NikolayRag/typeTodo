@@ -30,7 +30,6 @@ class TodoDbFile():
 
 #public#
 
-
     def flush(self):
         if not self.parentDB.todoAInited:
             return True
@@ -67,7 +66,7 @@ class TodoDbFile():
 
                         f.write(stateSign +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M:%S', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
 
-                    f.write('Reserved: %d' % self.maxId)
+                    f.write('\nReserved: %d' % self.maxId)
 
 
             except Exception as e:
@@ -95,7 +94,6 @@ class TodoDbFile():
 #
 #   Same is true for other engines.
 
-#=todo 1942 (file, change) +1: make reservation for 'file', storing maxId in file itself
     def newId(self, _wantedId=0):
         if _wantedId==self.lastId:
             return self.lastId

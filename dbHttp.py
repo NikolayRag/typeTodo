@@ -68,7 +68,6 @@ class TodoDbHttp():
         self.dbId= _dbId
 
 
-#todo 307 (http, cleanup, unsure) +0: change URL addressing scheme to rep/proj; join registered/anon name
     def flush(self):
         postData= {}
         postList= list()

@@ -385,8 +385,8 @@ class TodoDbSql():
         ):
             return False
 
-        if _id == self.lastId:
-            self.lastId= None
+#        if _id == self.lastId:
+        self.lastId= None
 
         return True
 

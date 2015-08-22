@@ -8,21 +8,21 @@ if sys.version < '3':
     from dbFile import *
     from dbSql import *
     from dbHttp import *
-#    from dbRedmine import *
+    from dbRedmine import *
     from task import *
 else:
     from .cfg import *
     from .dbFile import *
     from .dbSql import *
     from .dbHttp import *
-#    from .dbRedmine import *
+    from .dbRedmine import *
     from .task import *
 
 #todo 44 (config, db, feature, unsolved) -1: handle saving project - existing and blank; transfer db for involved files
 
 #todo 89 (db, feature, unsure) +1: save context (+-2 strings of code) with task
 
-#todo 1965 (db, feature) -1: add github-issue engine
+#=todo 1965 (db, feature) +1: add redmine engine
 
 #
 #   Manages .todoA[] task collection within .dbA[] databases.
@@ -198,6 +198,7 @@ class TodoDb():
 #   Release database's unused reserved ID
 #   Called at the Sublime's exit and config reset.
 
+#todo 1984 (db, issue) +0: some db's are skipped at exit if *some* dbs configured (tested 3 other than File)
     def releaseId(self, _reset=False):
         self.reservedId-= 1 #used to continue id when all db's changed at once
         for db in self.dbA:
@@ -331,15 +332,11 @@ class TodoDb():
             for iT in self.todoA: #reset all existing unsaved, coz states got loose from db's
                 self.todoA[iT].savedReset()
 
-        success= False
-
         for dbN in self.dbA:
             cDb= self.dbA[dbN]
             todoA= cDb.fetch()
             if todoA==False:
                 continue
-
-            success= True
 
             for iT in todoA:
                 task= todoA[iT]
@@ -351,7 +348,7 @@ class TodoDb():
 
 
                 if isNew or diffStamp>0:
-                    if not _resetDb or diffStamp>0:
+                    if not _resetDb or diffStamp>0: #skip initially added, coz its redundant
                         print('TypeTodo: \'' +cDb.name +'\' DB is new at ' +str(iT))
 
                     self.todoA[iT]= task
@@ -360,7 +357,7 @@ class TodoDb():
 
 
                 elif diffStamp<0:
-                    if _resetDb:
+                    if _resetDb: #show verbose only at start/reconfiguring, otherwise 'new' message is enough
                         print('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(iT))
                     
                     self.todoA[iT].setSaved(SAVE_STATES.FORCE, dbN)

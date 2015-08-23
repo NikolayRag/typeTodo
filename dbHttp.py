@@ -180,7 +180,7 @@ class TodoDbHttp():
 
         req = urllib2.Request('http://' +self.settings.addr +'/?=release_task_id', str.encode(urllib.urlencode(postData)))
         try:
-            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
+            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() ) or 0
             self.lastId= None
         except Exception as e:
             print('TypeTodo: HTTP server error releasing todo')

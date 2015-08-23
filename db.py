@@ -8,19 +8,21 @@ if sys.version < '3':
     from dbFile import *
     from dbSql import *
     from dbHttp import *
+    from dbRedmine import *
     from task import *
 else:
     from .cfg import *
     from .dbFile import *
     from .dbSql import *
     from .dbHttp import *
+    from .dbRedmine import *
     from .task import *
 
-#todo 44 (config, db, feature, unsolved) +0: handle saving project - existing and blank; transfer db for involved files
+#todo 44 (config, db, feature, unsolved) -1: handle saving project - existing and blank; transfer db for involved files
 
-#todo 89 (db, feature, unsure) +0: save context (+-2 strings of code) with task
+#todo 89 (db, feature, unsure) +1: save context (+-2 strings of code) with task
 
-#todo 1965 (db, feature) -1: add github-issue engine
+#=todo 1965 (db, feature) +1: add redmine engine
 
 #
 #   Manages .todoA[] task collection within .dbA[] databases.
@@ -41,6 +43,7 @@ class TodoDb():
 
     dbA= None #active databases, defined from config
     todoA= None #doplets
+    todoAInited= False
 
     callbackFetch= None
 
@@ -62,7 +65,6 @@ class TodoDb():
 
 
 
-#todo 1662 (check, db) +0: unsaved doplet is overriden probably at changing config
 
 
 
@@ -113,10 +115,12 @@ class TodoDb():
                 cEngClass= TodoDbSql
             elif cSetting.engine=='http':
                 cEngClass= TodoDbHttp
+#            elif cSetting.engine=='redmine':
+#                cEngClass= TodoDbRedmine
             else:
                 continue
 
-            self.dbA[dbId]= cEngClass(self, cSetting)
+            self.dbA[dbId]= cEngClass(self, cSetting, dbId)
             dbId+= 1
 
         self.newId() #run prefetch
@@ -194,10 +198,11 @@ class TodoDb():
 #   Release database's unused reserved ID
 #   Called at the Sublime's exit and config reset.
 
-    def releaseId(self):
+#todo 1984 (db, issue) +0: some db's are skipped at exit if *some* dbs configured (tested 3 other than File)
+    def releaseId(self, _atExit=False):
         self.reservedId-= 1 #used to continue id when all db's changed at once
         for db in self.dbA:
-            self.dbA[db].releaseId()
+            self.dbA[db].releaseId(_atExit)
 
 
 
@@ -265,7 +270,7 @@ class TodoDb():
         flushOk= True
 
         for dbN in self.dbA:
-            flushEngineOk= self.dbA[dbN].flush(dbN)
+            flushEngineOk= self.dbA[dbN].flush()
             flushOk= flushOk and flushEngineOk
 
             #resave 'hang' tasks, mainly at db error
@@ -321,22 +326,17 @@ class TodoDb():
 
 #todo 1818 (db) +0: make compairing inconsistencies by versions where they available (not file atm)
     def fetch(self, _resetDb=False):
+        self.todoAInited= False #lock, mainly for file newId/resetId consistence
+
         if _resetDb:
             for iT in self.todoA: #reset all existing unsaved, coz states got loose from db's
                 self.todoA[iT].savedReset()
-
-        success= False
 
         for dbN in self.dbA:
             cDb= self.dbA[dbN]
             todoA= cDb.fetch()
             if todoA==False:
                 continue
-
-            success= True
-
-            maybeNew= 0
-            maybeOld= 0
 
             for iT in todoA:
                 task= todoA[iT]
@@ -348,21 +348,17 @@ class TodoDb():
 
 
                 if isNew or diffStamp>0:
-                    if not _resetDb or diffStamp>60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
+                    if not _resetDb or diffStamp>0: #skip initially added, coz its redundant
                         print('TypeTodo: \'' +cDb.name +'\' DB is new at ' +str(iT))
-                    elif diffStamp>0:
-                        maybeNew+= 1
 
                     self.todoA[iT]= task
                     self.todoA[iT].setSaved(SAVE_STATES.FORCE) #all but current db are saved for task
                     self.todoA[iT].setSaved(SAVE_STATES.IDLE, dbN)
 
+
                 elif diffStamp<0:
-                    if _resetDb:
-                        if diffStamp<-60: #some tasks can be skipped (in report only!) due to unsaved seconds in 'file' db
-                            print('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(iT))
-                        else:
-                            maybeOld+= 1
+                    if _resetDb: #show verbose only at start/reconfiguring, otherwise 'new' message is enough
+                        print('TypeTodo: \'' +cDb.name +'\' DB is old at ' +str(iT))
                     
                     self.todoA[iT].setSaved(SAVE_STATES.FORCE, dbN)
 
@@ -378,15 +374,8 @@ class TodoDb():
                     print('TypeTodo: \'' +cDb.name +'\' DB is missing at ' +str(iT))
                     self.todoA[iT].setSaved(SAVE_STATES.FORCE, dbN)
 
-            #'apparently new' mean that stamp difference is less than 60s. It is likely a subject, when comparing with 'file' DB with seconds truncated. In this case 'file' is treated as little older and is replaced. As 'file' is anyway replaced at each flush, it doesn't make any difference to normal behavior and is messaged just in case.
-            if _resetDb:
-                if maybeNew>0:
-                    print('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeNew) +' tasks apparently new')
-                if maybeOld>0:
-                    print('TypeTodo: \'' +cDb.name +'\' DB have ' +str(maybeOld) +' tasks apparently old')
+            self.todoAInited= True
 
 
         if self.callbackFetch:
             sublime.set_timeout(self.callbackFetch, 0)
-
-        return success

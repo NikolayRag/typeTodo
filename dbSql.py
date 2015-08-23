@@ -123,15 +123,18 @@ class TodoDbSql():
 
     settings= None
     parentDB= False
+    dbId= None
 
     cPid= None
     cUid= None
 
     tablesPassed= False
 
-    def __init__(self, _parentDB, _settings):
+
+    def __init__(self, _parentDB, _settings, _dbId):
         self.settings= _settings
         self.parentDB= _parentDB
+        self.dbId= _dbId
 
 
     def sqExecute(self, _connA, _cur, _stmt, _args=False):
@@ -240,7 +243,7 @@ class TodoDbSql():
 #public#
 
 
-    def flush(self, _dbN):
+    def flush(self):
         dbConn= [self.reconnect()]
         if not dbConn[0]:
             return False
@@ -249,10 +252,10 @@ class TodoDbSql():
 
         for iT in self.parentDB.todoA:
             curTodo= self.parentDB.todoA[iT]
-            if not curTodo.savePending(_dbN):
+            if not curTodo.savePending(self.dbId):
                 continue
 
-            curTodo.setSaved(SAVE_STATES.HOLD, _dbN) #poke out from saving elsewhere
+            curTodo.setSaved(SAVE_STATES.HOLD, self.dbId) #poke out from saving elsewhere
 
             if not self.sqExecute(dbConn, cur,
                 "INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
@@ -305,8 +308,8 @@ class TodoDbSql():
                 tagOrder+= 1
 
 
-            if curTodo.saveProgress(_dbN): #edited-while-save todo will not become idle here
-                curTodo.setSaved(SAVE_STATES.IDLE, _dbN)
+            if curTodo.saveProgress(self.dbId): #edited-while-save todo will not become idle here
+                curTodo.setSaved(SAVE_STATES.IDLE, self.dbId)
 
         cur.close()
 
@@ -348,7 +351,7 @@ class TodoDbSql():
 
 
 
-    def releaseId(self):
+    def releaseId(self, _atExit=False):
         dbConn= [self.reconnect()]
         if not dbConn[0]:
             return False
@@ -382,8 +385,8 @@ class TodoDbSql():
         ):
             return False
 
-        if _id == self.lastId:
-            self.lastId= None
+#        if _id == self.lastId:
+        self.lastId= None
 
         return True
 

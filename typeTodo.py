@@ -1,9 +1,9 @@
 # coding= utf-8
 
-#todo 1 (interaction, feature) -1: multiline TODO
-#todo 11 (interaction, unsure) -10: make more TODO formats available
+#todo 1 (interaction, feature) +1: multiline TODO
+#todo 11 (interaction, unsure) +0: make more TODO formats available (convert from external db's?)
 
-#todo 232 (feature) +0: introduce sub-todo's that are part of other
+#todo 232 (feature) +1: introduce sub-todo's that are part of other
 #todo 1910 (feature) +0: left mouseclick context actions
 
 
@@ -43,7 +43,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #   React on switching project in window.
 
     def on_deactivated(self, _view):
-#todo 1783 (cleanup) +0: switching project in window not clearly fixed, need review
+#todo 1783 (cleanup, uncertain) -1: switching project in window not clearly fixed, need review
         sublime.set_timeout(lambda: self.on_activated(_view), 200) #spike to catch switching project in existing window
 
         sublime.set_timeout(WCache().exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit

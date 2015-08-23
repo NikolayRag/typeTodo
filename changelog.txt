@@ -1,3 +1,10 @@
+v1.8.11
+
+new:
+- seconds are stored in 'File', thus making 'apparently new/old' message obsolete
+- 'File' stores reserved Id, so its now ok to have File-only database for collaborative use
+
+
 v1.8.10
 
 fix:

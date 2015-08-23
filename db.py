@@ -115,8 +115,8 @@ class TodoDb():
                 cEngClass= TodoDbSql
             elif cSetting.engine=='http':
                 cEngClass= TodoDbHttp
-            elif cSetting.engine=='redmine':
-                cEngClass= TodoDbRedmine
+#            elif cSetting.engine=='redmine':
+#                cEngClass= TodoDbRedmine
             else:
                 continue
 

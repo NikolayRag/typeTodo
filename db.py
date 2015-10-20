@@ -22,8 +22,9 @@ else:
 
 #todo 89 (db, feature, unsure) +1: save context (+-2 strings of code) with task
 
-#=todo 1965 (db, feature) +1: add redmine engine
+#=todo 1965 (db, feature, uncertain) +1: add redmine engine
 
+#todo 2045 (db, fix) +0: New Id sync warning when having 2 http noticed
 #
 #   Manages .todoA[] task collection within .dbA[] databases.
 #   Uses supplied .config to locate '.do' config file.

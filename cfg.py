@@ -237,7 +237,7 @@ class Config():
 
         #request new random public repository
         if httpInitFlag:
-            req = urllib2.Request('http://' +self.defaultHttpApi +'/?=newrep')
+            req = urllib2.Request('http://' +self.defaultHttpApi +'/?=new_rep_public')
             try:
                 cRep= bytes.decode( urllib2.urlopen(req).read() )
 

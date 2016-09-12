@@ -8,7 +8,7 @@ class SAVE_STATES:
 	READY= 2
 	FORCE= 3 #same as READY but without shadow compairing
 	HOLD= 4
-
+# =todo 2074 (feature, interaction, ux) +0: split Open state to Pending('') and Open('-')
 STATE_LIST= {
     '': 'Open',
     '=': 'Progress',

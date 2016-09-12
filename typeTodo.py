@@ -3,8 +3,8 @@
 #todo 1 (interaction, feature) +1: multiline TODO
 #todo 11 (interaction, unsure) +0: make more TODO formats available (convert from external db's?)
 
-#todo 232 (feature) +1: introduce sub-todo's that are part of other
-#todo 1910 (feature) +0: left mouseclick context actions
+#=todo 232 (feature) +1: introduce sub-todo's that are part of other
+
 
 
 import sublime, sublime_plugin
@@ -81,7 +81,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 
-#   Set readonly for results, maintain and colorize
+#   Set readonly for results; maintain and colorize
 
     def on_load_activate(self, _view):
         if WCache().checkResultsView(_view.buffer_id()):

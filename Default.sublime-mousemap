@@ -1,3 +1,4 @@
 [
-	{"button": "button1", "count": 2, "press_command": "typetodo_jump_mouse", "press_args": {"by": "words"}}
+	{"button": "button1", "count": 2, "press_command": "typetodo_jump_mouse", "press_args": {"by": "words"}},
+	{"button": "button2", "count": 1, "press_command": "typetodo_context_mouse", "press_args": {}}
 ]

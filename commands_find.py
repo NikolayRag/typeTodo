@@ -210,7 +210,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                     if os.path.getsize(fn)>SKIP_SEARCH_SIZE:
                         continue
 
-                    self.matchAdd(_oldMatchA, self.findTodoInFile(cFile, RE_TODO_EXISTING, _id))
+                    self.matchAdd(_oldMatchA, self.findTodoInFile(fn, RE_TODO_EXISTING, _id))
 
 
     #exclude add match to existing list

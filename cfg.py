@@ -32,7 +32,7 @@ class Config():
     cWnd= None
     defaultHttpApi= 'typetodo.com'
 
-    defaultHeader= "# Uncomment and configure. ALL matched lines matters:\n"\
+    defaultHeader= "# Uncomment and configure.\n"\
         +"# file [absolute_path/]filename.ext\n"\
         +"# mysql 127.0.0.1 username password scheme\n"\
         +"# http typetodo.com repository [username password]\n"
@@ -204,6 +204,26 @@ class Config():
 
 
 
+    def initNewHTTP(self):
+        req = urllib2.Request('http://' +self.defaultHttpApi +'/?=new_rep_public')
+        try:
+            cRep= bytes.decode( urllib2.urlopen(req).read() )
+        except:
+            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
+
+            return False
+
+        print("New TypeTodo repository: " +cRep)
+        sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
+
+        cSetting= Setting()
+        cSetting.engine= 'http'
+        cSetting.addr= self.defaultHttpApi
+        cSetting.base= cRep
+        cSetting.login= cSetting.passwh= ''
+
+        return cSetting
+
 
 
     def initGlobalDo(self, _force=False):
@@ -225,31 +245,18 @@ class Config():
         headerCollect= self.defaultHeader
 
 
-        httpInitFlag= sublime.ok_cancel_dialog('TypeTodo init:\n\n\tStart with new public HTTP storage?')
+#        httpInitFlag= sublime.ok_cancel_dialog('TypeTodo init:\n\n\tStart with new public HTTP storage?')
 
         #request new random public repository
-        if httpInitFlag:
-            req = urllib2.Request('http://' +self.defaultHttpApi +'/?=new_rep_public')
-            try:
-                cRep= bytes.decode( urllib2.urlopen(req).read() )
-
-                print("New TypeTodo repository: " +cRep)
-                sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
-
-                cSetting= Setting()
-                cSettings.append(cSetting)
-
-                cSetting.engine= 'http'
-                cSetting.addr= self.defaultHttpApi
-                cSetting.base= cRep
-                cSetting.login= cSetting.passwh= ''
-
-                headerCollect+= cSetting.engine +" " +cSetting.addr +" " +cSetting.base +"\n"
+#        if httpInitFlag:
 
 
-            except:
-                sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tcannot init new HTTP repository,\n\tdefault storage mode will be `file`'), 1000)
+        httpCfg= self.initNewHTTP()
+        if (httpCfg)
+            headerCollect+= httpCfg.engine +" " +httpCfg.addr +" " +httpCfg.base +"\n"
+            doSetting.head= headerCollect
 
+            cSettings.append(httpCfg)
 
 
         try:
@@ -259,8 +266,6 @@ class Config():
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tglobal config cannot be created'), 1000)
             return
 
-
-        doSetting.head= headerCollect
 
         return cSettings
 

@@ -304,13 +304,6 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         todoStr= self.view.substr( self.view.line(self.view.sel()[0]) )
 
-        #jump from .do to code
-        todoIndo= RE_TODO_STORED.match(todoStr)
-        if todoIndo:
-            self.findNamed(todoIndo.group('id'))
-            return
-
-
         #jump by doplet's id - to .do or from Search results
         todoIncode= RE_TODO_EXISTING.match(todoStr)
         if todoIncode:
@@ -345,6 +338,14 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             return
 
 
+
+        searchInitial= ''
+
+        #init search with .do id
+        todoIndo= RE_TODO_STORED.match(todoStr)
+        if todoIndo:
+            searchInitial= todoIndo.group('id')
+
         #search by string
-        sublime.active_window().show_input_panel('TypeTodo search for:', '', self.findNamed, None, None)
+        sublime.active_window().show_input_panel('TypeTodo search for:', searchInitial, self.findNamed, None, None)
 # =todo 2081 (find) +0: speed up

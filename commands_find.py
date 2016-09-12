@@ -34,12 +34,27 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-    def listTodos(self, _for, _matches):
+    def foundTodoShow(self, _for, _matches=False):
         resView= WCache().getResultsView()
 
-        textAppend= 'Search doplets for "' +_for +'"\n' +str(len(_matches)) +' matches found:\n\n'
+        textAppend= 'Search doplets for "' +_for +'"\n'
 
-        firstLine= 0
+        firstLine= resView.rowcol(resView.size())
+        self.focusView(resView, firstLine[0], 0)
+
+        resView.set_read_only(False)
+        resView.run_command('typetodo_reg_replace', {'_regStart': resView.size(), '_regEnd': resView.size(), '_replaceWith': textAppend})
+        resView.set_read_only(True)
+
+        if _matches:
+            self.foundTodoAdd(_matches)
+
+
+    def foundTodoAdd(self, _matches):
+        resView= WCache().getResultsView()
+
+        textAppend= ''
+
         lastFilename= ''
         for cMatch in _matches:
             fName= ''
@@ -49,16 +64,22 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 lastFilename= fName
                 textAppend+= '\n' +fName +'\n'
 
-            if firstLine==0:
-                firstLine= resView.rowcol(resView.size())
             lNum= str(cMatch[1]+1)
             textAppend+= ' '*(6-len(lNum)) +lNum +': ' +cMatch[3][len(cMatch[4].group('prefix')):] +'\n'
 
         resView.set_read_only(False)
-        resView.run_command('typetodo_reg_replace', {'_regStart': resView.size(), '_regEnd': resView.size(), '_replaceWith': textAppend +'\n\n'})
+        resView.run_command('typetodo_reg_replace', {'_regStart': resView.size(), '_regEnd': resView.size(), '_replaceWith': textAppend})
         resView.set_read_only(True)
 
-        self.focusView(resView, firstLine[0]+4, 0)
+
+    def foundTodoFinish(self, _count):
+        resView= WCache().getResultsView()
+
+        textAppend= '\n' +str(_count) +' matches found\n\n\n'
+
+        resView.set_read_only(False)
+        resView.run_command('typetodo_reg_replace', {'_regStart': resView.size(), '_regEnd': resView.size(), '_replaceWith': textAppend})
+        resView.set_read_only(True)
 
 
 
@@ -119,15 +140,10 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         return matches
 
 
-    def findTodoInViews(self, _id, _view=False):
-        if _view:
-            return self.findTodoInView(_id, _view)
-
-        matches= []
+    def findTodoInViews(self, _id, _oldMatchA):
         for cView in sublime.active_window().views():
-            matches+= self.findTodoInView(_id, cView)
+            self.matchAdd(_oldMatchA, self.findTodoInView(_id, cView))
 
-        return matches
 
 
 
@@ -154,14 +170,13 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-    def findTodoInProject(self, _id):
+    def findTodoInProject(self, _id, _oldMatchA):
         skipDirs= SKIP_SEARCH_DIR +self.view.settings().get('folder_exclude_patterns')
         skipFiles= (SKIP_SEARCH_FILES
             +self.view.settings().get('file_exclude_patterns')
             +self.view.settings().get('binary_file_patterns')
         )
 
-        matches= []
         for cFolder in sublime.active_window().folders():
             skipFolder= ''
             for cWalk in os.walk(cFolder):
@@ -181,9 +196,21 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                     if os.path.getsize(fn)>SKIP_SEARCH_SIZE:
                         continue
 
-                    matches.extend(self.findTodoInFile(cFile, RE_TODO_EXISTING, _id))
+                    self.matchAdd(_oldMatchA, self.findTodoInFile(cFile, RE_TODO_EXISTING, _id))
 
-        return matches
+
+    #exclude add match to existing list
+    def matchAdd (self, _oldMatchA, _newMatchA):
+        for cMatch in _newMatchA:
+            matchDup= False
+            for testMatch in _oldMatchA:
+                if (testMatch[5] == cMatch[5]) and (testMatch[3] == cMatch[3]):
+                    matchDup= True
+                    break
+            
+            if not matchDup:
+                _oldMatchA.append(cMatch)
+
 
 
 
@@ -229,35 +256,14 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             self.currentViewList()
             return
 
-        matches= self.findTodoInViews(_text.lower())
+        matches= []
+        self.findTodoInViews(_text.lower(), matches)
+
+        self.foundTodoShow(_text, matches)
         
-        matchesFiles= self.findTodoInProject(_text.lower())
+        self.findTodoInProject(_text.lower(), matches)
 
-        #exclude duplicated filenames from file matches
-        for cMatch in matchesFiles:
-            matchDup= False
-            for testMatch in matches:
-                if testMatch[5] == cMatch[5]:
-                    matchDup= True
-                    break
-            
-            if not matchDup:
-                matches.append(cMatch)
-
-
-
-        isId= re.match('^\d+$', _text)
-        if not len(matches):
-            markName= '#' +_text
-            if not isId: 
-                markName= 'tagged "' +_text +'"'
-            
-            sublime.message_dialog('TypeTodo error:\n\n\tDoplet ' +markName +' was not found in source')
-            return
-
-
-        self.listTodos(_text, matches)
-
+        self.foundTodoFinish(len(matches))
 
 
 

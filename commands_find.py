@@ -58,14 +58,14 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         lastFilename= ''
         for cMatch in _matches:
             fName= ''
-            if cMatch[5]:
-                fName= cMatch[5]
+            if cMatch['file']:
+                fName= cMatch['file']
             if lastFilename != fName:
                 lastFilename= fName
                 textAppend+= '\n' +fName +'\n'
 
-            lNum= str(cMatch[1]+1)
-            textAppend+= ' '*(6-len(lNum)) +lNum +': ' +cMatch[3][len(cMatch[4].group('prefix')):] +'\n'
+            lNum= str(cMatch['row']+1)
+            textAppend+= ' '*(6-len(lNum)) +lNum +': ' +cMatch['line'][len(cMatch['regexp'].group('prefix')):] +'\n'
 
         resView.set_read_only(False)
         resView.run_command('typetodo_reg_replace', {'_regStart': resView.size(), '_regEnd': resView.size(), '_replaceWith': textAppend})
@@ -135,7 +135,13 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             lNum+= 1
             foundRe= RE_TODO_EXISTING.match(ln)
             if foundRe and self.findTodoLine(foundRe, _id):
-                matches.append((_view, lNum-1, foundRe.end('prefix'), ln, foundRe, cName))
+                matches.append({
+                    'row': lNum-1,
+                    'col': foundRe.end('prefix'),
+                    'line': ln,
+                    'regexp': foundRe,
+                    'file': cName
+                })
 
         return matches
 
@@ -159,7 +165,13 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                     lNum+= 1
                     foundRe= _test.match(ln)
                     if foundRe and self.findTodoLine(foundRe, _id):
-                        matches.append((None, lNum-1, foundRe.end('prefix'), ln, foundRe, _fn))
+                        matches.append({
+                            'row': lNum-1,
+                            'col': foundRe.end('prefix'),
+                            'line': ln,
+                            'regexp': foundRe,
+                            'file': _fn
+                        })
 
  
         except Exception as e:
@@ -204,7 +216,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         for cMatch in _newMatchA:
             matchDup= False
             for testMatch in _oldMatchA:
-                if (testMatch[5] == cMatch[5]) and (testMatch[3] == cMatch[3]):
+                if (testMatch['file']==cMatch['file']) and (testMatch['row']==cMatch['row']):
                     matchDup= True
                     break
             
@@ -219,15 +231,14 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
     def jumpFromList (self, _idx):
         if _idx!=-1:
-            self.focusView(self.view, self.jumpList[_idx][1], self.jumpList[_idx][2])
-
+            self.focusView(self.view, self.jumpList[_idx]['row'], self.jumpList[_idx]['col'])
 
     def currentViewList (self):
         matches= self.findTodoInView('', self.view)
 
         #one found
         if len(matches) == 1:
-            self.focusView(self.view, matches[0][1], matches[0][2])
+            self.focusView(self.view, matches[0]['row'], matches[0]['col'])
 
         #many found, list
         if len(matches)>1:
@@ -238,11 +249,11 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             for cMatch in matches:
                 self.jumpList.append(cMatch)
                 
-                cId= ' '*(7-len(cMatch[4].group('id'))) +cMatch[4].group('id')
+                cId= ' '*(7-len(cMatch['regexp'].group('id'))) +cMatch['regexp'].group('id')
                 cEnding= ''
-                if len(cMatch[4].group('postfix'))>65:
+                if len(cMatch['regexp'].group('postfix'))>65:
                     cEnding= '...'
-                viewTodoList.append(cId +':' +cMatch[4].group('postfix')[0:65] +cEnding)
+                viewTodoList.append(cId +':' +cMatch['regexp'].group('postfix')[0:65] +cEnding)
             self.view.window().show_quick_panel(viewTodoList, self.jumpFromList, sublime.MONOSPACE_FONT)
 
 
@@ -318,8 +329,8 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
             matches= self.findTodoInFile(fn, RE_TODO_STORED, todoIncode.group('id'))
             if matches:
-                cView= sublime.active_window().open_file(matches[0][5], sublime.TRANSIENT)
-                self.focusView(cView, matches[0][1], matches[0][2]) #dont want do deal with multi-matches here, use first
+                cView= sublime.active_window().open_file(matches[0]['file'], sublime.TRANSIENT)
+                self.focusView(cView, matches[0]['row'], matches[0]['col']) #dont want do deal with multi-matches here, use first
 
             else:
                 sublime.message_dialog('TypeTodo error:\n\n\tDoplet #' +todoIncode.group('id') +' not found in project\'s .do')

@@ -8,21 +8,17 @@ if sys.version < '3':
     from dbFile import *
     from dbSql import *
     from dbHttp import *
-    from dbRedmine import *
     from task import *
 else:
     from .cfg import *
     from .dbFile import *
     from .dbSql import *
     from .dbHttp import *
-    from .dbRedmine import *
     from .task import *
 
 #todo 44 (config, db, feature, unsolved) -1: handle saving project - existing and blank; transfer db for involved files
 
 #todo 89 (db, feature, unsure) +1: save context (+-2 strings of code) with task
-
-#=todo 1965 (db, feature, uncertain) +1: add redmine engine
 
 #todo 2045 (db, fix) +0: New Id sync warning when having 2 http noticed
 #
@@ -116,8 +112,6 @@ class TodoDb():
                 cEngClass= TodoDbSql
             elif cSetting.engine=='http':
                 cEngClass= TodoDbHttp
-#            elif cSetting.engine=='redmine':
-#                cEngClass= TodoDbRedmine
             else:
                 continue
 

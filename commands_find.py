@@ -153,13 +153,6 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-    def isKnownFile(self, _fn, _masksA):
-        fName= os.path.basename(_fn)
-
-        for cMask in _masksA:
-            if fnmatch.fnmatch(fName, cMask):
-                return True
-
 
     def findTodoInProject(self, _id):
         skipDirs= SKIP_SEARCH_DIR +self.view.settings().get('folder_exclude_patterns')
@@ -172,24 +165,23 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         for cFolder in sublime.active_window().folders():
             skipFolder= ''
             for cWalk in os.walk(cFolder):
-                #skip entire branch
-                if skipFolder!='' and os.path.relpath(cWalk[0], skipFolder).split('\\')[0]!='..':
+                #skip dirs
+                if set(cWalk[0].split('\\')).intersection(skipDirs)!=set([]):
                     continue
 
-                if self.isKnownFile(cWalk[0], skipDirs):
-                    skipFolder= cWalk[0]
-                    continue
+                skipF= []
+                for cMask in skipFiles:
+                    for cFile in fnmatch.filter(cWalk[2], cMask):
+                        skipF.append(cFile)
 
-                for cFile in cWalk[2]:
-                    if self.isKnownFile(cFile, skipFiles):
-                        continue
+                for cFile in set(cWalk[2])-set(skipF):
 
                     fn= os.path.join(cWalk[0], cFile)
-
+                        
                     if os.path.getsize(fn)>SKIP_SEARCH_SIZE:
                         continue
 
-                    matches.extend(self.findTodoInFile(fn, RE_TODO_EXISTING, _id))
+                    matches.extend(self.findTodoInFile(cFile, RE_TODO_EXISTING, _id))
 
         return matches
 
@@ -348,4 +340,3 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
         #search by string
         sublime.active_window().show_input_panel('TypeTodo search for:', searchInitial, self.findNamed, None, None)
-# =todo 2081 (find) +0: speed up

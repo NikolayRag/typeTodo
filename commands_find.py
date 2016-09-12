@@ -256,16 +256,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             return
 
 
-        #many found or tag search
-        if not isId or len(matches)>1:
-            self.listTodos(_text, matches)
-            return
-
-        #one found, jump instantly
-        cView= matches[0][0]
-        if not cView:
-            cView= sublime.active_window().open_file(matches[0][5], sublime.TRANSIENT)
-        self.focusView(cView, matches[0][1], matches[0][2])
+        self.listTodos(_text, matches)
 
 
 

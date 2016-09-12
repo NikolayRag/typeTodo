@@ -215,6 +215,8 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
     #exclude add match to existing list
     def matchAdd (self, _oldMatchA, _newMatchA):
+        passedMatchs= []
+
         for cMatch in _newMatchA:
             matchDup= False
             for testMatch in _oldMatchA:
@@ -223,8 +225,11 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                     break
             
             if not matchDup:
-                _oldMatchA.append(cMatch)
+                passedMatchs.append(cMatch)
 
+        _oldMatchA.extend(passedMatchs)
+
+        self.foundTodoAdd(passedMatchs)
 
 
 
@@ -265,11 +270,10 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             self.currentViewList()
             return
 
+        self.foundTodoShow(_text)
+
         matches= []
         self.findTodoInViews(_text.lower(), matches)
-
-        self.foundTodoShow(_text, matches)
-        
         self.findTodoInProject(_text.lower(), matches)
 
         self.foundTodoFinish(len(matches))

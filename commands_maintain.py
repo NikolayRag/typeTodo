@@ -49,9 +49,10 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         regionsInconsistentPre= []
         regionsInconsistent= []
 
-        for cTodo in RE_TODO_OLD.finditer(content):
-            regionTodo= sublime.Region(cTodo.end('prefix'), cTodo.end('comment'))
-            regionsInconsistent.append(regionTodo)
+# todo 2080 (interaction, ui) +0: re-enable old inconsistent doplets hilited
+#        for cTodo in RE_TODO_INCONSISTENT.finditer(content):
+#            regionTodo= sublime.Region(cTodo.end('prefix'), cTodo.end('comment'))
+#            regionsInconsistent.append(regionTodo)
 
         for cTodo in RE_TODO_EXISTING.finditer(content):
             regionMark= sublime.Region(cTodo.end('prefix'), cTodo.start('state'))
@@ -141,7 +142,7 @@ class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
                 self.view.replace(_edit, sublime.Region(cTodo.end('state'), cTodo.start('id')), '     ')
 
 
-
+# =todo 2073 (fix, consistency) +0: unneeded colorize in ordinary search
     def todoValidate(self, _id, _state, _tags, _priority, _comment):
         db= WCache().getDB()
         if db and (int(_id) in db.todoA):

@@ -1,5 +1,35 @@
 # Changes
 
+## 0.7.2
+
+Release date: 2016-02-24
+
+* Fix misuse of `max_allowed_packet` parameter. (#426, #407 and #397)
+* Add %(name)s plceholder support to `Cursor.executemany()`. (#427, thanks to
+  @WorldException)
+
+## 0.7.1
+
+Release date: 2016-01-14
+
+* Fix auth fail with MySQL 5.1
+* Fix escaping unicode fails on Python 2
+
+## 0.7
+
+Release date: 2016-01-10
+
+* Faster binary escaping
+* Add `"_binary" prefix` to string literal for binary types.
+  binary types are: `bytearray` on Python 2, `bytes` and `bytearray` on Python 3.
+  This is because recent MySQL show warnings when string literal is invalid for
+  connection encoding.
+* `pymysql.Binary()` returns `bytearray` on Python 2.  This is required to distinguish
+  binary and string.
+* Auth plugin support.
+* no_delay option is ignored.  It will be removed in PyMySQL 0.8.
+
+
 ## 0.6.7
 
 Release date: 2015-09-30

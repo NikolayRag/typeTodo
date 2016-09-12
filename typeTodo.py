@@ -3,8 +3,8 @@
 #todo 1 (interaction, feature) +1: multiline TODO
 #todo 11 (interaction, unsure) +0: make more TODO formats available (convert from external db's?)
 
-#todo 232 (feature) +1: introduce sub-todo's that are part of other
-#todo 1910 (feature) +0: left mouseclick context actions
+#=todo 232 (feature) +1: introduce sub-todo's that are part of other
+
 
 
 import sublime, sublime_plugin
@@ -81,7 +81,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 
-#   Set readonly for results, maintain and colorize
+#   Set readonly for results; maintain and colorize
 
     def on_load_activate(self, _view):
         if WCache().checkResultsView(_view.buffer_id()):
@@ -288,7 +288,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
     def substNew(self, _prefx, _postfx, _region):
         todoId= self.cfgStore(0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 
-        todoComment= _prefx + 'todo ' +str(todoId) +' (${1:' +self.lastCat[0] +'}) ${2:' +self.lastLvl +'}: ${0:}' +_postfx +''
+        todoComment= _prefx + ' todo ' +str(todoId) +' (${1:' +self.lastCat[0] +'}) ${2:' +self.lastLvl +'}: ${0:}' +_postfx +''
         self.view.run_command('typetodo_reg_replace', {'_regStart': _region.a, '_regEnd': _region.b})
         self.view.run_command("insert_snippet", {"contents": todoComment})
 

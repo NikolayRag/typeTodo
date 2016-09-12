@@ -12,7 +12,7 @@ from . import err
 #: Regular expression for :meth:`Cursor.executemany`.
 #: executemany only suports simple bulk insert.
 #: You can use it to load large dataset.
-RE_INSERT_VALUES = re.compile(r"""(INSERT\s.+\sVALUES\s+)(\(\s*%s\s*(?:,\s*%s\s*)*\))(\s*(?:ON DUPLICATE.*)?)\Z""",
+RE_INSERT_VALUES = re.compile(r"""(INSERT\s.+\sVALUES\s+)(\(\s*(?:%s|%\(.+\)s)\s*(?:,\s*(?:%s|%\(.+\)s)\s*)*\))(\s*(?:ON DUPLICATE.*)?)\Z""",
                               re.IGNORECASE | re.DOTALL)
 
 
@@ -117,7 +117,7 @@ class Cursor(object):
             # If it's not a dictionary let's try escaping it anyways.
             # Worst case it will throw a Value error
             if PY2:
-                ensure_bytes(args)
+                args = ensure_bytes(args)
             return conn.escape(args)
 
     def mogrify(self, query, args=None):
@@ -137,7 +137,19 @@ class Cursor(object):
         return query
 
     def execute(self, query, args=None):
-        '''Execute a query'''
+        """Execute a query
+
+        :param str query: Query to execute.
+
+        :param args: arameters used with query. (optional)
+        :type args: tuple, list or dict
+
+        :return: Number of affected rows
+        :rtype: int
+
+        If args is a list or tuple, %s can be used as a placeholder in the query.
+        If args is a dict, %(name)s can be used as a placeholder in the query.
+        """
         while self.nextset():
             pass
 

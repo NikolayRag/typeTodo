@@ -186,14 +186,6 @@ class Config():
                 cSetting.base=      curCfg['baseh']
 
 
-            if curCfg['engineredmine']:
-                cSetting.engine=    'redmine'
-                cSetting.addr=      curCfg['addrr']
-                cSetting.login=     curCfg['loginr']
-                cSetting.passw=     curCfg['passwr']
-                cSetting.base=      curCfg['baser']
-
-
             if cSetting:
                 cSettings.append(cSetting)
 

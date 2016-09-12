@@ -14,23 +14,6 @@ else:
 
 
 
-class TypetodoJumpMouseCommand(sublime_plugin.TextCommand):
-    if sys.version < '3':
-        def run_(self, args):
-            self.run23(args)
-    else:
-        def run_(self, view, args):
-            self.run23(args)
-
-
-    def run23(self, args):
-        if WCache().checkResultsView(self.view.buffer_id()):
-            self.view.run_command('typetodo_jump')
-        else:
-            self.view.run_command('drag_select', args)
-
-
-
 
 class TypetodoJumpPointCommand(sublime_plugin.TextCommand):
     def run(self, _edit, _line, _col):
@@ -295,37 +278,49 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
+    def findSearchWnd(self, _todoStr):
+        jumpLine= re.match('\s*(\d+):', _todoStr)
+        if not jumpLine:
+            return
+        jumpLine= int(jumpLine.groups()[0])
+
+        tryLine= self.view.rowcol(self.view.sel()[0].a)[0] -1
+        while tryLine>0:
+            jumpFile= self.view.substr(self.view.line(self.view.text_point(tryLine, 0)))
+            if re.match('[^\s].*[^\s]$', jumpFile):
+                break
+
+            tryLine-= 1
+
+        if not tryLine:
+            return
+
+        cView= sublime.active_window().open_file(jumpFile, sublime.TRANSIENT)
+        self.focusView(cView, jumpLine-1, 0)
+#todo 1978 (command, find, fix) +0: use explicit view search if no file found
+
+
 
     def run(self, _edit):
-        todoRegion = self.view.line(self.view.sel()[0])
+        todoStr= self.view.substr( self.view.line(self.view.sel()[0]) )
+
+        #jump from .do to code
+        todoIndo= RE_TODO_STORED.match(todoStr)
+        if todoIndo:
+            self.findNamed(todoIndo.group('id'))
+            return
+
 
         #jump by doplet's id - to .do or from Search results
-        todoIncode= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
+        todoIncode= RE_TODO_EXISTING.match(todoStr)
         if todoIncode:
 
-            # jump from Search results
+            # jump directly from Search results
             foundView= WCache().getResultsView(False)
             if foundView and foundView.buffer_id()==self.view.buffer_id():
-                jumpLine= re.match('\s*(\d+):', self.view.substr(todoRegion))
-                if not jumpLine:
-                    return
-                jumpLine= int(jumpLine.groups()[0])
-
-                tryLine= self.view.rowcol(self.view.sel()[0].a)[0] -1
-                while tryLine>0:
-                    jumpFile= self.view.substr(self.view.line(self.view.text_point(tryLine, 0)))
-                    if re.match('[^\s].*[^\s]$', jumpFile):
-                        break
-
-                    tryLine-= 1
-
-                if not tryLine:
-                    return
-
-                cView= sublime.active_window().open_file(jumpFile, sublime.TRANSIENT)
-                self.focusView(cView, jumpLine-1, 0)
-#todo 1978 (command, find, fix) +0: use explicit view search if no file found
+                self.findSearchWnd(todoStr)
                 return
+
 
             # jump from code to .do
             cDb= WCache().getDB()
@@ -350,11 +345,6 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             return
 
 
-        #jump from .do to code
-        todoIndo= RE_TODO_STORED.match(self.view.substr(todoRegion))
-        if todoIndo:
-            self.findNamed(todoIndo.group('id'))
-            return
-
         #search by string
         sublime.active_window().show_input_panel('TypeTodo search for:', '', self.findNamed, None, None)
+# =todo 2081 (find) +0: speed up

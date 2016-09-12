@@ -1,0 +1,8 @@
+[
+    { "caption": "-", "id": "typetodo" },
+{
+	"caption": "typeTodo", "children": [
+            { "caption": "Show inconsistency", "command": "typetodo_revivify" },
+	]
+}
+]

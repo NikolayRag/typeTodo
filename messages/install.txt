@@ -1,26 +1,21 @@
-TypeTodo important notice:
 
-WARNING: Number of external DB that is allowed at the moment is one (1), also it is issue to remove that limitation some day (low priority, but all code is prepaired).
-
-
-Default database is configured to be HTTP with http://typetodo.com server AND is always duplicated in .do file itself.
-New HTTP public repository is created and will be used within all upcoming projects.
-Existing project's configs will remain unchanged.
-HTTP repository is accessable at http://typetodo.com/repname, where repname is same as in .do config (e.g. /~eif9t7kgahvk)
-
-You can locate and reset TypeTodo's configs using provided Sublime commands that are named "TypeTodo:...".
-
-WARNING: If you loose public repository key, there can be NO WAY to get it back. Instead, register at typetodo.com and use your own named repository.
+Start by typing comment "//todo:" (or use other comment symbols).
+It should expand to snippet and then store do database at any change.
 
 
-All specified DB's including .do itself are synchronized at ST start and other flush points.
+By default TypeTodo is configured to store tasks both in .do files located in projects root folder and in HTTP repository at http://typetodo.com/.
+
+TypeTodo's configs are accessible by Sublime commands that are named "TypeTodo:..." in Command Palette.
+
+
+HTTP repository is accessible by 'TypeTodo: Browse TypeTodo's repository' command.
+Its better to register at typetodo.com and use your own named repository.
 
 
 
-Documentation is available at:
-TypeTodo home,
-	http://typetodo.com/sublime
+
+Related links:
 Github,
 	https://github.com/NikolayRag/typeTodo
-Package Control,
-	https://sublime.wbond.net/packages/TypeTodo
+TypeTodo home,
+	http://typetodo.com/sublime

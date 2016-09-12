@@ -236,25 +236,18 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
     def currentViewList (self):
         matches= self.findTodoInView('', self.view)
 
-        #one found
-        if len(matches) == 1:
-            self.focusView(self.view, matches[0]['row'], matches[0]['col'])
+        self.jumpList= []
+        viewTodoList= []
 
-        #many found, list
-        if len(matches)>1:
-
-            self.jumpList= []
-            viewTodoList= []
-
-            for cMatch in matches:
-                self.jumpList.append(cMatch)
-                
-                cId= ' '*(7-len(cMatch['regexp'].group('id'))) +cMatch['regexp'].group('id')
-                cEnding= ''
-                if len(cMatch['regexp'].group('postfix'))>65:
-                    cEnding= '...'
-                viewTodoList.append(cId +':' +cMatch['regexp'].group('postfix')[0:65] +cEnding)
-            self.view.window().show_quick_panel(viewTodoList, self.jumpFromList, sublime.MONOSPACE_FONT)
+        for cMatch in matches:
+            self.jumpList.append(cMatch)
+            
+            cId= ' '*(7-len(cMatch['regexp'].group('id'))) +cMatch['regexp'].group('id')
+            cEnding= ''
+            if len(cMatch['regexp'].group('postfix'))>65:
+                cEnding= '...'
+            viewTodoList.append(cId +':' +cMatch['regexp'].group('postfix')[0:65] +cEnding)
+        self.view.window().show_quick_panel(viewTodoList, self.jumpFromList, sublime.MONOSPACE_FONT)
 
 
 

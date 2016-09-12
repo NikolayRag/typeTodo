@@ -2,7 +2,7 @@
     { "caption": "-", "id": "typetodo" },
 {
 	"caption": "typeTodo", "children": [
-            { "caption": "Documentation", "command": "open_url" },
+            { "caption": "Show inconsistency", "command": "typetodo_revivify" },
 	]
 }
 ]

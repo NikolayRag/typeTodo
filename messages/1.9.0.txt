@@ -1,0 +1,16 @@
+v1.9.0
+
+fix:
+- test template for redmine caused error in dozen setups. That was a regrettable fault caused with no need. Complete package review is going to be made.
+
+new:
+- mouse context menu added
+- more todo comment prefixes added. Full list is:
+  //    C, Javascript
+  #     Unix shell, Python, Ruby
+  %     Prolog, Erlang
+  '     Vbasic
+  ;     Lisp, Asm
+  !     Fortran
+  <!--  HTML
+  --    SQL, Ada, Haskell

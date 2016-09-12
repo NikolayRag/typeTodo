@@ -1,19 +1,19 @@
 TypeTodo important notice:
 
-WARNING: Number of external DB that is allowed at the moment is one (1), also it is issue to remove that limitation some day (low priority, but all code is prepaired).
 
+By default, you should be prompted to setup HTTP database right after install.
+If accept so, new HTTP public repository is created at http://typetodo.com and will be used within all upcoming projects until reconfigured.
 
-Default database is configured to be HTTP with http://typetodo.com server AND is always duplicated in .do file itself.
-New HTTP public repository is created and will be used within all upcoming projects.
-Existing project's configs will remain unchanged.
 HTTP repository is accessable at http://typetodo.com/repname, where repname is same as in .do config (e.g. /~eif9t7kgahvk)
 
-You can locate and reset TypeTodo's configs using provided Sublime commands that are named "TypeTodo:...".
-
-WARNING: If you loose public repository key, there can be NO WAY to get it back. Instead, register at typetodo.com and use your own named repository.
+You can locate and reset TypeTodo's configs using provided Sublime commands that are named "TypeTodo:..." in Command Palette.
 
 
-All specified DB's including .do itself are synchronized at ST start and other flush points.
+No matter you accept HTTP or not, database is always stored in .do file itself.
+
+
+WARNING: If you loose public repository key, there can be no way to get it back. Instead, register at typetodo.com and use your own named repository.
+
 
 
 

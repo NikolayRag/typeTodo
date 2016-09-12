@@ -252,7 +252,7 @@ class Config():
 
 
         httpCfg= self.initNewHTTP()
-        if (httpCfg)
+        if httpCfg:
             headerCollect+= httpCfg.engine +" " +httpCfg.addr +" " +httpCfg.base +"\n"
             doSetting.head= headerCollect
 

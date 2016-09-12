@@ -296,8 +296,9 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             return
 
         cView= sublime.active_window().open_file(jumpFile, sublime.TRANSIENT)
-        self.focusView(cView, jumpLine-1, 0)
-#todo 1978 (command, find, fix) +0: use explicit view search if no file found
+        if cView:
+            self.focusView(cView, jumpLine-1, 0)
+
 
 
 

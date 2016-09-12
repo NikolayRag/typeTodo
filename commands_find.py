@@ -247,8 +247,11 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             if len(cMatch['regexp'].group('postfix'))>65:
                 cEnding= '...'
             viewTodoList.append(cId +':' +cMatch['regexp'].group('postfix')[0:65] +cEnding)
-        self.view.window().show_quick_panel(viewTodoList, self.jumpFromList, sublime.MONOSPACE_FONT)
 
+        try:
+            self.view.window().show_quick_panel(viewTodoList, self.jumpFromList, sublime.MONOSPACE_FONT)
+        except:
+            None
 
 
     def findNamed(self, _text= ''):

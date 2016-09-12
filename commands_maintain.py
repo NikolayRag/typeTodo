@@ -142,7 +142,6 @@ class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
                 self.view.replace(_edit, sublime.Region(cTodo.end('state'), cTodo.start('id')), '     ')
 
 
-# =todo 2073 (fix, consistency) +0: unneeded colorize in ordinary search
     def todoValidate(self, _id, _state, _tags, _priority, _comment):
         db= WCache().getDB()
         if db and (int(_id) in db.todoA):

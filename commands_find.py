@@ -183,10 +183,12 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
     def findTodoInProject(self, _id, _oldMatchA):
-        skipDirs= SKIP_SEARCH_DIR +self.view.settings().get('folder_exclude_patterns')
+        skipDirs= (SKIP_SEARCH_DIR
+            +(self.view.settings().get('folder_exclude_patterns') or [])
+        )
         skipFiles= (SKIP_SEARCH_FILES
-            +self.view.settings().get('file_exclude_patterns')
-            +self.view.settings().get('binary_file_patterns')
+            +(self.view.settings().get('file_exclude_patterns') or [])
+            +(self.view.settings().get('binary_file_patterns') or [])
         )
 
         for cFolder in sublime.active_window().folders():

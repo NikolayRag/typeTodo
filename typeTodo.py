@@ -57,7 +57,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #    handlers, but this handler is main and is used for TodoDb() creation.
 
     def on_activated(self, _view):
-        constCorrect() #coz settings are delayed at load
+        constCorrect(_view) #coz settings are delayed at load
 
         cDb= WCache().getDB(True, dbMaintainance) #really applies only once
 

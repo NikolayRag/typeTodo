@@ -37,18 +37,16 @@ SKIP_SEARCH_SIZE= 640000 #should be enough for everyone
 
 # todo 2092 (fix) +0: read settings more correctly
 constCorrectFlag= False
-def constCorrect():
+def constCorrect(_view):
+    global constCorrectFlag
     if constCorrectFlag:
         return;
-
-    global constCorrectFlag
     constCorrectFlag= True
 
 
-    cSettings= sublime.active_window().active_view().settings()
+    cSettings= _view.settings()
 
     SKIP_SEARCH_DIR.extend(cSettings.get('folder_exclude_patterns'))
 
     SKIP_SEARCH_FILES.extend(cSettings.get('file_exclude_patterns'))
     SKIP_SEARCH_FILES.extend(cSettings.get('binary_file_patterns'))
-

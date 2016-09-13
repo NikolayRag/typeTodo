@@ -75,6 +75,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
     def foundTodoFinish(self, _count):
         resView= WCache().getResultsView()
+        sublime.active_window().focus_view(resView)
 
         textAppend= '\n' +str(_count) +' matches found\n\n\n'
 

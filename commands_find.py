@@ -272,19 +272,19 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
     def findNamed(self, _text= ''):
-        if self.searchMutex:
-            sublime.message_dialog('TypeTodo search is in progress...')
-            return
-
-        self.searchMutex= True
-
-
         if _text=='*':
             _text='.*'
 
         if _text=='':
             self.currentViewList()
             return
+
+
+        if self.searchMutex:
+            sublime.message_dialog('TypeTodo search is in progress...')
+            return
+        self.searchMutex= True
+
 
         self.foundViewShow(_text)
 

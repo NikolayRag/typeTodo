@@ -289,7 +289,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-    def findSearchWnd(self, _todoStr):
+    def jumpFromSearch(self, _todoStr):
         jumpLine= re.match('\s*(\d+):', _todoStr)
         if not jumpLine:
             return
@@ -323,7 +323,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             # jump directly from Search results
             foundView= WCache().getResultsView(False)
             if foundView and foundView.buffer_id()==self.view.buffer_id():
-                self.findSearchWnd(todoStr)
+                self.jumpFromSearch(todoStr)
                 return
 
 

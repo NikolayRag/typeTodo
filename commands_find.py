@@ -29,9 +29,10 @@ class TypetodoJumpPointCommand(sublime_plugin.TextCommand):
 
 #todo 1859 (command, find, fix, uncertain) -1: sometimes 'search' dont show results if view is previously closed
 class TypetodoJumpCommand(sublime_plugin.TextCommand):
-    def focusView(self, _view, _line, _col):
+    def focusView(self, _view, _line=-1, _col=-1):
         sublime.active_window().focus_view(_view)
-        sublime.set_timeout(lambda: _view.run_command('typetodo_jump_point', {'_line': _line, '_col': _col}), 100)
+        if _line!=-1:
+            sublime.set_timeout(lambda: _view.run_command('typetodo_jump_point', {'_line': _line, '_col': _col}), 100)
 
 
 
@@ -75,7 +76,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
     def foundTodoFinish(self, _count):
         resView= WCache().getResultsView()
-        sublime.active_window().focus_view(resView)
+        self.focusView(resView)
 
         textAppend= '\n' +str(_count) +' matches found\n\n\n'
 

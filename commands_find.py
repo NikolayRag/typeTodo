@@ -336,7 +336,7 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
         if not tryLine:
             return
 
-        cView= sublime.active_window().open_file(jumpFile, sublime.TRANSIENT)
+        cView= sublime.active_window().open_file(jumpFile)
         if cView:
             self.focusView(cView, jumpLine-1, 0)
 

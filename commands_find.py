@@ -150,6 +150,8 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
     def findTodoInViews(self, _id, _oldMatchA):
+        sublime.status_message('search in views')
+
         for cView in sublime.active_window().views():
             self.matchAdd(_oldMatchA, self.findTodoInView(_id, cView))
 
@@ -200,6 +202,9 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
                 #skip dirs
                 if set(cWalk[0].split('\\')).intersection(skipDirs)!=set([]):
                     continue
+
+                sublime.status_message('search in '+cWalk[0])
+
 
                 skipF= []
                 for cMask in skipFiles:

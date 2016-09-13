@@ -35,9 +35,10 @@ class TypetodoJumpViewCommand(sublime_plugin.TextCommand):
 
 
 class TypetodoFindCommand(sublime_plugin.TextCommand):
+    def foundViewShow(self, _header):
         resView= WCache().getResultsView()
 
-        textAppend= 'Search doplets for "' +_for +'"\n'
+        textAppend= 'Search doplets for "' +_header +'"\n'
 
         firstLine= resView.rowcol(resView.size())
 

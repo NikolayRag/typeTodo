@@ -264,6 +264,8 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
     #search is performed in thread for st3
+    searchMutex= False
+
     def findTimer(self, _text):
         if sys.version < '3':
             self.findNamed(_text)
@@ -272,9 +274,15 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
     def findNamed(self, _text= ''):
+        if self.searchMutex:
+            sublime.message_dialog('TypeTodo search is in progress...')
+            return
+
+        self.searchMutex= True
+
+
         if _text=='*':
             _text='.*'
-
 
         if _text=='':
             self.currentViewList()
@@ -287,6 +295,9 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         self.findTodoInProject(_text.lower(), matches)
 
         self.foundTodoFinish(len(matches))
+
+
+        self.searchMutex= False
 
 
     def jumpToDo(self, _todoRegexp):

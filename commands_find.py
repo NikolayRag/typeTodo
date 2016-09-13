@@ -16,8 +16,10 @@ else:
 
 
 
-class TypetodoJumpPointCommand(sublime_plugin.TextCommand):
-    def run(self, _edit, _line, _col):
+#focus view, place and show cursor
+#
+class TypetodoJumpViewCommand(sublime_plugin.TextCommand):
+    def showLinecol(self, _line, _col):
         focusBegin= self.view.text_point(_line, _col)
         focusLine= sublime.Region(focusBegin, self.view.line(focusBegin).b)
 
@@ -25,30 +27,26 @@ class TypetodoJumpPointCommand(sublime_plugin.TextCommand):
         self.view.sel().add(sublime.Region(focusBegin, focusBegin))
         self.view.show(focusLine)
 
+    def run(self, _edit, _line=-1, _col=0):
+        sublime.active_window().focus_view(self.view)
+        if _line!=-1:
+            sublime.set_timeout(lambda: self.showLinecol(_line,_col), 100)
+
 
 
 class TypetodoFindCommand(sublime_plugin.TextCommand):
-    def focusView(self, _view, _line=-1, _col=-1):
-        sublime.active_window().focus_view(_view)
-        if _line!=-1:
-            sublime.set_timeout(lambda: _view.run_command('typetodo_jump_point', {'_line': _line, '_col': _col}), 100)
-
-
-
-    def foundViewShow(self, _for, _matches=False):
         resView= WCache().getResultsView()
 
         textAppend= 'Search doplets for "' +_for +'"\n'
 
         firstLine= resView.rowcol(resView.size())
-        self.focusView(resView, firstLine[0], 0)
 
         resView.set_read_only(False)
         resView.run_command('typetodo_reg_replace', {'_regStart': resView.size(), '_regEnd': resView.size(), '_replaceWith': textAppend})
         resView.set_read_only(True)
 
-        if _matches:
-            self.foundViewAdd(_matches)
+        resView.run_command('typetodo_jump_view', {'_line': firstLine[0]})
+
 
 
     def foundViewAdd(self, _matches):
@@ -75,7 +73,6 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
 
     def foundViewFinish(self, _count):
         resView= WCache().getResultsView()
-        self.focusView(resView)
 
         textAppend= '\n' +str(_count) +' matches found\n\n\n'
 
@@ -83,6 +80,8 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
         resView.run_command('typetodo_reg_replace', {'_regStart': resView.size(), '_regEnd': resView.size(), '_replaceWith': textAppend})
         resView.set_read_only(True)
 
+
+        resView.run_command('typetodo_jump_view')
 
 
 
@@ -237,7 +236,7 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
 
     def jumpFromList (self, _idx):
         if _idx!=-1:
-            self.focusView(self.view, self.jumpList[_idx]['row'], self.jumpList[_idx]['col'])
+            self.view.run_command('typetodo_jump_view', {'_line': self.jumpList[_idx]['row'], '_col': self.jumpList[_idx]['col']})
 
     def currentViewList (self):
         matches= self.findTodoInView('', self.view)
@@ -312,7 +311,7 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
         matches= self.findTodoInFile(fn, RE_TODO_STORED, _todoRegexp.group('id'))
         if matches:
             cView= sublime.active_window().open_file(matches[0]['file'], sublime.TRANSIENT)
-            self.focusView(cView, matches[0]['row'], matches[0]['col']) #dont want do deal with multi-matches here, use first
+            cView.run_command('typetodo_jump_view', {'_line': matches[0]['row'], '_col': matches[0]['col']})
 
         else:
             sublime.message_dialog('TypeTodo error:\n\n\tDoplet #' +_todoRegexp.group('id') +' not found in project\'s .do')
@@ -338,7 +337,7 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
 
         cView= sublime.active_window().open_file(jumpFile)
         if cView:
-            self.focusView(cView, jumpLine-1, 0)
+            cView.run_command('typetodo_jump_view', {'_line': jumpLine-1})
 
 
 

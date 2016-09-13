@@ -13,13 +13,35 @@ else:
     from .c import *
 
 
+##+service commands
+
 
 #command is used to keep python flow unruined
+#
 class TypetodoRegReplaceCommand(sublime_plugin.TextCommand):
     def run(self, _edit, _regStart= False, _regEnd= False, _replaceWith=''):
         self.view.set_read_only(False) #will reset instantly
         self.view.replace(_edit, sublime.Region(int(_regStart), int(_regEnd)), _replaceWith)
  
+
+
+#focus view, place and show cursor
+#
+class TypetodoJumpViewCommand(sublime_plugin.TextCommand):
+    def showLinecol(self, _line, _col):
+        focusBegin= self.view.text_point(_line, _col)
+        focusLine= sublime.Region(focusBegin, self.view.line(focusBegin).b)
+
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(focusBegin, focusBegin))
+        self.view.show(focusLine)
+
+    def run(self, _edit, _line=-1, _col=0):
+        sublime.active_window().focus_view(self.view)
+        if _line!=-1:
+            sublime.set_timeout(lambda: self.showLinecol(_line,_col), 100)
+
+##-service commands
 
 class TypetodoSetStateCommand(sublime_plugin.TextCommand):
     setStateChars= []

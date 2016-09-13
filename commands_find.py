@@ -16,23 +16,6 @@ else:
 
 
 
-#focus view, place and show cursor
-#
-class TypetodoJumpViewCommand(sublime_plugin.TextCommand):
-    def showLinecol(self, _line, _col):
-        focusBegin= self.view.text_point(_line, _col)
-        focusLine= sublime.Region(focusBegin, self.view.line(focusBegin).b)
-
-        self.view.sel().clear()
-        self.view.sel().add(sublime.Region(focusBegin, focusBegin))
-        self.view.show(focusLine)
-
-    def run(self, _edit, _line=-1, _col=0):
-        sublime.active_window().focus_view(self.view)
-        if _line!=-1:
-            sublime.set_timeout(lambda: self.showLinecol(_line,_col), 100)
-
-
 
 class TypetodoFindCommand(sublime_plugin.TextCommand):
     def foundViewShow(self, _header):

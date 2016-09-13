@@ -288,6 +288,27 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         self.foundTodoFinish(len(matches))
 
 
+    def jumpToDo(self, _todoRegexp):
+        cDb= WCache().getDB()
+        fn= ''
+        for cSetting in cDb.config.settings:
+            if cSetting.engine=='file':
+                fn= cSetting.file
+                break
+
+        if not os.path.isfile(fn):
+            sublime.message_dialog('TypeTodo error:\n\n\tCannot find projects .do file')
+            return
+
+        matches= self.findTodoInFile(fn, RE_TODO_STORED, _todoRegexp.group('id'))
+        if matches:
+            cView= sublime.active_window().open_file(matches[0]['file'], sublime.TRANSIENT)
+            self.focusView(cView, matches[0]['row'], matches[0]['col']) #dont want do deal with multi-matches here, use first
+
+        else:
+            sublime.message_dialog('TypeTodo error:\n\n\tDoplet #' +_todoRegexp.group('id') +' not found in project\'s .do')
+
+
 
     def jumpFromSearch(self, _todoStr):
         jumpLine= re.match('\s*(\d+):', _todoStr)
@@ -317,8 +338,8 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         todoStr= self.view.substr( self.view.line(self.view.sel()[0]) )
 
         #jump by doplet's id - to .do or from Search results
-        todoIncode= RE_TODO_EXISTING.match(todoStr)
-        if todoIncode:
+        todoRegexp= RE_TODO_EXISTING.match(todoStr)
+        if todoRegexp:
 
             # jump directly from Search results
             foundView= WCache().getResultsView(False)
@@ -328,25 +349,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
             # jump from code to .do
-            cDb= WCache().getDB()
-            fn= ''
-            for cSetting in cDb.config.settings:
-                if cSetting.engine=='file':
-                    fn= cSetting.file
-                    break
-
-            if not os.path.isfile(fn):
-                sublime.message_dialog('TypeTodo error:\n\n\tCannot find projects .do file')
-                return
-
-            matches= self.findTodoInFile(fn, RE_TODO_STORED, todoIncode.group('id'))
-            if matches:
-                cView= sublime.active_window().open_file(matches[0]['file'], sublime.TRANSIENT)
-                self.focusView(cView, matches[0]['row'], matches[0]['col']) #dont want do deal with multi-matches here, use first
-
-            else:
-                sublime.message_dialog('TypeTodo error:\n\n\tDoplet #' +todoIncode.group('id') +' not found in project\'s .do')
-
+            self.jumpToDo(todoRegexp)
             return
 
 

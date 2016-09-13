@@ -15,7 +15,8 @@ else:
 
 
 #open context menu only for st3+
-class TypetodoContextMouseCommand(sublime_plugin.TextCommand):
+class TypetodoMouseContextCommand(sublime_plugin.TextCommand):
+
     if sys.version < '3':
         def run_(self, args):
             self.view.run_command('context_menu', args)
@@ -73,7 +74,7 @@ class TypetodoContextMouseCommand(sublime_plugin.TextCommand):
 
 #doubleclick handler for typetodo search results
 #
-class TypetodoJumpMouseCommand(sublime_plugin.TextCommand):
+class TypetodoMouseDoubleCommand(sublime_plugin.TextCommand):
     if sys.version < '3':
         def run_(self, args):
             self.run23(args)
@@ -84,6 +85,6 @@ class TypetodoJumpMouseCommand(sublime_plugin.TextCommand):
 
     def run23(self, args):
         if WCache().checkResultsView(self.view.buffer_id()):
-            self.view.run_command('typetodo_find', {'_query':False})
+            self.view.run_command('typetodo_jump')
         else:
             self.view.run_command('drag_select', args)

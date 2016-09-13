@@ -36,7 +36,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-    def foundTodoShow(self, _for, _matches=False):
+    def foundViewShow(self, _for, _matches=False):
         resView= WCache().getResultsView()
 
         textAppend= 'Search doplets for "' +_for +'"\n'
@@ -49,10 +49,10 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         resView.set_read_only(True)
 
         if _matches:
-            self.foundTodoAdd(_matches)
+            self.foundViewAdd(_matches)
 
 
-    def foundTodoAdd(self, _matches):
+    def foundViewAdd(self, _matches):
         resView= WCache().getResultsView()
 
         textAppend= ''
@@ -74,7 +74,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         resView.set_read_only(True)
 
 
-    def foundTodoFinish(self, _count):
+    def foundViewFinish(self, _count):
         resView= WCache().getResultsView()
         self.focusView(resView)
 
@@ -232,7 +232,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
         _oldMatchA.extend(passedMatchs)
 
-        self.foundTodoAdd(passedMatchs)
+        self.foundViewAdd(passedMatchs)
 
 
 
@@ -289,13 +289,13 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             self.currentViewList()
             return
 
-        self.foundTodoShow(_text)
+        self.foundViewShow(_text)
 
         matches= []
         self.findTodoInViews(_text.lower(), matches)
         self.findTodoInProject(_text.lower(), matches)
 
-        self.foundTodoFinish(len(matches))
+        self.foundViewFinish(len(matches))
 
 
         self.searchMutex= False

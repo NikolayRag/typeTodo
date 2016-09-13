@@ -30,7 +30,7 @@ class TypetodoContextMouseCommand(sublime_plugin.TextCommand):
                 fnsA= []
 
                 itemsA.append('Search todo')
-                fnsA.append(lambda: self.view.run_command('typetodo_jump'))
+                fnsA.append(lambda: self.view.run_command('typetodo_find'))
 
                 itemsA.append('Update inconsistency')
                 fnsA.append(lambda: self.view.run_command('typetodo_revivify'))
@@ -84,6 +84,6 @@ class TypetodoJumpMouseCommand(sublime_plugin.TextCommand):
 
     def run23(self, args):
         if WCache().checkResultsView(self.view.buffer_id()):
-            self.view.run_command('typetodo_jump')
+            self.view.run_command('typetodo_find', {'_query':False})
         else:
             self.view.run_command('drag_select', args)

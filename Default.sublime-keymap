@@ -2,7 +2,7 @@
 { "keys": ["shift+keypad_plus"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoUp"}] },
 { "keys": ["shift+keypad_minus"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoDown"}] },
 { "keys": ["alt+d"], "command": "typetodo_set_state", "args": {}},
-{ "keys": ["alt+shift+d"], "command": "typetodo_jump", "args": {} },
+{ "keys": ["alt+shift+d"], "command": "typetodo_find", "args": {} },
 
 { "keys": ["alt+shift+keypad_plus"], "command": "typetodo_set_state", "args": {"_replaceWith": "+"}},
 { "keys": ["alt+shift+keypad_minus"], "command": "typetodo_set_state", "args": {"_replaceWith": ""}},

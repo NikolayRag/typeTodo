@@ -27,8 +27,7 @@ class TypetodoJumpPointCommand(sublime_plugin.TextCommand):
 
 
 
-#todo 1859 (command, find, fix, uncertain) -1: sometimes 'search' dont show results if view is previously closed
-class TypetodoJumpCommand(sublime_plugin.TextCommand):
+class TypetodoFindCommand(sublime_plugin.TextCommand):
     def focusView(self, _view, _line=-1, _col=-1):
         sublime.active_window().focus_view(_view)
         if _line!=-1:
@@ -344,7 +343,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
 
-    def run(self, _edit):
+    def run(self, _edit, _query=True):
         todoStr= self.view.substr( self.view.line(self.view.sel()[0]) )
 
         #jump by doplet's id - to .do or from Search results
@@ -362,6 +361,9 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             self.jumpToDo(todoRegexp)
             return
 
+
+        if not _query:
+            return
 
 
         searchInitial= ''

@@ -2,6 +2,7 @@
 
 import sublime, sublime_plugin
 import sys, os, fnmatch
+from threading import Timer
 
 if sys.version < '3':
     from db import *
@@ -261,6 +262,14 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             None
 
 
+    #search is performed in thread for st3
+    def findTimer(self, _text):
+        if sys.version < '3':
+            self.findNamed(_text)
+        else:
+            Timer(0, lambda: self.findNamed(_text)).start()
+
+
     def findNamed(self, _text= ''):
         if _text=='*':
             _text='.*'
@@ -350,4 +359,5 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
             searchInitial= todoIndo.group('id')
 
         #search by string
-        sublime.active_window().show_input_panel('TypeTodo search for:', searchInitial, self.findNamed, None, None)
+        sublime.active_window().show_input_panel('TypeTodo search for:', searchInitial, self.findTimer, None, None)
+

@@ -21,23 +21,6 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 
     def run(self, _edit, _delayed=True):
-        if sublime.load_settings('typetodo.sublime-settings').get('typetodo_nocolorize'):
-            self.view.erase_regions('dopletOpenPre')
-            self.view.erase_regions('dopletOpen')
-
-            self.view.erase_regions('dopletProgressPre')
-            self.view.erase_regions('dopletProgress')
-
-            self.view.erase_regions('dopletInconsistentPre')
-            self.view.erase_regions('dopletInconsistent')
-
-        else:
-            self.colorize(_edit, _delayed)
-
-
-
-
-    def colorize(self, _edit, _delayed=True):
         _region= sublime.Region(0,self.view.size())
         content= self.view.substr(_region)
 

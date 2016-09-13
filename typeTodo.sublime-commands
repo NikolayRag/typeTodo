@@ -30,11 +30,6 @@
     },
 
     {
-        "caption": "TypeTodo: Toggle Colorize",
-        "command": "typetodo_toggle_colorize"
-    },
-
-    {
         "caption": "TypeTodo: Show inconsistency",
         "command": "typetodo_revivify"
     }

@@ -85,6 +85,6 @@ class TypetodoMouseDoubleCommand(sublime_plugin.TextCommand):
 
     def run23(self, args):
         if WCache().checkResultsView(self.view.buffer_id()):
-            self.view.run_command('typetodo_jump')
+            self.view.run_command('typetodo_find')
         else:
             self.view.run_command('drag_select', args)

@@ -87,20 +87,6 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 
 
-class TypetodoToggleColorizeCommand(sublime_plugin.TextCommand):
-    def run(self, _edit):
-        cSettings= sublime.load_settings('typetodo.sublime-settings')
-        cSettings.set('typetodo_nocolorize', not cSettings.get('typetodo_nocolorize'))
-        sublime.save_settings('typetodo.sublime-settings')
-
-        sublime.set_timeout(lambda: self.view.run_command('typetodo_maintain', {}), 0)
-
-
-
-
-
-
-
 
 #todo 1554 (command, fix) +0: should adjust cursor position
 class TypetodoRevivifyCommand(sublime_plugin.TextCommand):

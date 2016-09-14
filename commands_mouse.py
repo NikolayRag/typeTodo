@@ -44,19 +44,19 @@ class TypetodoMouseContextCommand(sublime_plugin.TextCommand):
                 itemsA.append('Jump to .do')
                 fnsA.append(lambda: self.view.run_command('typetodo_jump'))
 
-                itemsA.append('Update inconsistency')
+                itemsA.append('Check inconsistency')
                 fnsA.append(lambda: self.view.run_command('typetodo_revivify'))
 
                 itemsA.append('')
                 fnsA.append(None)
 
-                itemsA.append('Search todo')
+                itemsA.append('Find todo')
                 fnsA.append(lambda: self.view.run_command('typetodo_find'))
 
                 itemsA.append('Open config')
                 fnsA.append(lambda: self.view.run_command('typetodo_cfg_open'))
 
-                itemsA.append('Open http base')
+                itemsA.append('HTTP repository')
                 fnsA.append(lambda: self.view.run_command('typetodo_www'))
 
 

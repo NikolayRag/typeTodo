@@ -329,7 +329,6 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
         fn= os.path.join(cFolder, _todoRegexp.group('context'))
 
         matches= self.findTodoInFile(fn, RE_TODO_EXISTING, _todoRegexp.group('id'))
-        print(_todoRegexp.group('id'))
         if matches:
             cView= sublime.active_window().open_file(matches[0]['file'])
             cView.run_command('typetodo_jump_view', {'_line': matches[0]['row'], '_col': matches[0]['col']})

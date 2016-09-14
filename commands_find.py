@@ -280,6 +280,55 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
         self.searchMutex= False
 
 
+
+    #search by regex query
+    #
+    def run(self, _edit):
+        sublime.active_window().show_input_panel('TypeTodo search for:', '', self.findTimer, None, None)
+
+
+
+
+
+
+
+
+
+
+
+class TypetodoJumpCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        todoStr= self.view.substr( self.view.line(self.view.sel()[0]) )
+
+        todoRegexp= RE_TODO_EXISTING.match(todoStr)
+        if todoRegexp:
+            # jump directly from Search results
+            foundView= WCache().getResultsView(False)
+
+            if foundView and foundView.buffer_id()==self.view.buffer_id():
+                self.jumpFromSearch(todoStr)
+                return
+
+            # jump from code to .do
+            self.jumpToDo(todoRegexp)
+            return
+
+
+
+        # jump from .do
+        todoIndo= RE_TODO_STORED.match(todoStr)
+        if todoIndo:
+            self.jumpFromDo(todoIndo)
+
+
+
+
+# todo 2095 (feature, command) +0: jump from .do
+    def jumpFromDo(self, _todoRegexp):
+
+        return
+
+
     def jumpToDo(self, _todoRegexp):
         cDb= WCache().getDB()
         fn= ''
@@ -303,11 +352,14 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
 
 
     def jumpFromSearch(self, _todoStr):
+        #search line number in text
         jumpLine= re.match('\s*(\d+):', _todoStr)
         if not jumpLine:
             return
         jumpLine= int(jumpLine.groups()[0])
 
+
+        #search filename backwards
         tryLine= self.view.rowcol(self.view.sel()[0].a)[0] -1
         while tryLine>0:
             jumpFile= self.view.substr(self.view.line(self.view.text_point(tryLine, 0)))
@@ -319,6 +371,7 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
         if not tryLine:
             return
 
+
         cView= sublime.active_window().open_file(jumpFile)
         if cView:
             cView.run_command('typetodo_jump_view', {'_line': jumpLine-1})
@@ -326,36 +379,62 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
 
 
 
-    def run(self, _edit, _query=True):
-        todoStr= self.view.substr( self.view.line(self.view.sel()[0]) )
-
-        #jump by doplet's id - to .do or from Search results
-        todoRegexp= RE_TODO_EXISTING.match(todoStr)
-        if todoRegexp:
-
-            # jump directly from Search results
-            foundView= WCache().getResultsView(False)
-            if foundView and foundView.buffer_id()==self.view.buffer_id():
-                self.jumpFromSearch(todoStr)
-                return
 
 
-            # jump from code to .do
-            self.jumpToDo(todoRegexp)
-            return
+    def findTodoLine(self, _reg, _id):
+        isId= re.match('^\d+$', _id)
+
+        isExclude= False
+
+        if len(_id) and _id[0]=='-':
+            isExclude= True
+            _id= _id[1:]
 
 
-        if not _query:
-            return
+        if isId:
+            if _reg.group('id')==_id:
+                return True
+        else:
+            tagFound= False
+            for cTag in _reg.group('tags').lower().split(','):
+                for cId in _id.split(','):
+                    try:
+                        if re.search(cId.strip(), cTag.strip()):
+                            tagFound= True
+                            break
+                    except:
+                        None
+
+                if tagFound:
+                    break
+
+            if tagFound!=isExclude: #invert result by exclusion
+                return True
 
 
-        searchInitial= ''
 
-        #init search with .do id
-        todoIndo= RE_TODO_STORED.match(todoStr)
-        if todoIndo:
-            searchInitial= todoIndo.group('id')
+    def findTodoInFile(self, _fn, _test, _id):
+        matches= []
 
-        #search by string
-        sublime.active_window().show_input_panel('TypeTodo search for:', searchInitial, self.findTimer, None, None)
+        foundRe= None
+        lNum= 0
+        try:
+            with codecs.open(_fn, 'r', 'UTF-8') as f:
+                for ln in f:
+                    ln= ln.strip()
+                    lNum+= 1
+                    foundRe= _test.match(ln)
+                    if foundRe and self.findTodoLine(foundRe, _id):
+                        matches.append({
+                            'row': lNum-1,
+                            'col': foundRe.end('prefix'),
+                            'line': ln,
+                            'regexp': foundRe,
+                            'file': _fn
+                        })
 
+ 
+        except Exception as e:
+            None
+
+        return matches

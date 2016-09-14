@@ -1,6 +1,6 @@
 [
     {
-        "caption": "TypeTodo: Browse project's repository",
+        "caption": "TypeTodo: Browse HTTP repository",
         "command": "typetodo_www"
     },
 

@@ -52,7 +52,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 
-#   React on swintching into view, initializing DB fetch-synchronize-save.
+#   React on switching into view, initializing DB fetch-synchronize-save.
 #   Switching into view actually duplicated number of times with several
 #    handlers, but this handler is main and is used for TodoDb() creation.
 
@@ -103,7 +103,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 #   Both on_modified and on_selection_modified deal with cursor position,
-#    saving current inside-doplet context to be user later,
+#    saving current inside-doplet context to be used later,
 #    on_modified also reacts on doplet editing.
 
     def on_selection_modified(self, _view):
@@ -114,7 +114,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
             self.view= _view
-            sublime.set_timeout(self.matchTodo, 0) #negative effects at undo if no timeout
+            sublime.set_timeout(self.matchTodo, 0) #negative undo effects if no timeout
             self.mutexUnlocked= 1
 
 

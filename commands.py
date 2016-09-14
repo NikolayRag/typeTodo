@@ -81,24 +81,13 @@ class TypetodoSetCommand(sublime_plugin.TextCommand):
             return
 
 
+        #display to chose state
         self.stateChars= []
         menuItems= []
 
-        currentState= matchRegexp.group('state')
-        defaultState= ''
-        if currentState=='':
-            defaultState= '='
-        elif currentState=='=':
-            defaultState= '+'
-
-        self.stateChars.append(defaultState)
-        menuItems.append('\'' +defaultState +'\': ' +str(STATE_LIST[defaultState]))
-
-        for state in STATE_LIST: #collect menu list, excluding current and default state
-            if state==currentState or state==defaultState:
-                continue
+        for state in STATE_LIST: #collect menu list
             self.stateChars.append(state)
-            menuItems.append('\'' +state +'\': ' +str(STATE_LIST[state]))
+            menuItems.append((4-len(state))*' ' +state +'   : ' +str(STATE_LIST[state]))
 
 
         self.view.window().show_quick_panel(menuItems, self.setState, sublime.MONOSPACE_FONT)

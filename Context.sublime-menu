@@ -2,10 +2,10 @@
     { "caption": "-", "id": "typetodo" },
 {
 	"caption": "typeTodo", "children": [
-            { "keys": ["alt+i"], "caption": "Show inconsistency", "command": "typetodo_revivify" },
-            { "keys": ["alt+f"], "caption": "Find Todo", "command": "typetodo_find" },
-            { "keys": ["alt+c"], "caption": "Open config", "command": "typetodo_cfg_open" },
-            { "keys": ["alt+h"], "caption": "HTTP repository", "command": "typetodo_www" },
+            { "mnemonic": "i", "caption": "Inconsistency", "command": "typetodo_revivify" },
+            { "mnemonic": "f", "caption": "Find Todo", "command": "typetodo_find" },
+            { "mnemonic": "c", "caption": "Config", "command": "typetodo_cfg_open" },
+            { "mnemonic": "h", "caption": "HTTP repository", "command": "typetodo_www" },
 	]
 }
 ]

@@ -30,16 +30,6 @@ class TypetodoMouseContextCommand(sublime_plugin.TextCommand):
                 itemsA= []
                 fnsA= []
 
-                itemsA.append('Search todo')
-                fnsA.append(lambda: self.view.run_command('typetodo_find'))
-
-                itemsA.append('Update inconsistency')
-                fnsA.append(lambda: self.view.run_command('typetodo_revivify'))
-
-                itemsA.append('')
-                fnsA.append(None)
-
-
                 def makeSetState(_cState):
                     return lambda: self.view.run_command("typetodo_set_state", {"_replaceWith": _cState})
 
@@ -51,11 +41,23 @@ class TypetodoMouseContextCommand(sublime_plugin.TextCommand):
                 itemsA.append('')
                 fnsA.append(None)
 
-                itemsA.append('Open http base')
-                fnsA.append(lambda: self.view.run_command('typetodo_www'))
+                itemsA.append('Jump to .do')
+                fnsA.append(lambda: self.view.run_command('typetodo_jump'))
+
+                itemsA.append('Update inconsistency')
+                fnsA.append(lambda: self.view.run_command('typetodo_revivify'))
+
+                itemsA.append('')
+                fnsA.append(None)
+
+                itemsA.append('Search todo')
+                fnsA.append(lambda: self.view.run_command('typetodo_find'))
 
                 itemsA.append('Open config')
                 fnsA.append(lambda: self.view.run_command('typetodo_cfg_open'))
+
+                itemsA.append('Open http base')
+                fnsA.append(lambda: self.view.run_command('typetodo_www'))
 
 
 
@@ -84,7 +86,11 @@ class TypetodoMouseDoubleCommand(sublime_plugin.TextCommand):
 
 
     def run23(self, args):
-        if WCache().checkResultsView(self.view.buffer_id()):
-            self.view.run_command('typetodo_find')
+        #init search with .do id
+        todoStr= self.view.substr( self.view.line(self.view.sel()[0]) )
+
+        todoIndo= RE_TODO_STORED.match(todoStr)
+        if todoIndo or WCache().checkResultsView(self.view.buffer_id()):
+            self.view.run_command('typetodo_jump')
         else:
             self.view.run_command('drag_select', args)

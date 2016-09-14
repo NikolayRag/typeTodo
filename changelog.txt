@@ -6,7 +6,7 @@ add:
 
 change:
 - force init HTTP at first run
-- all key bindings moved to [alt-d, alt-key]:
+- all key bindings moved to [alt-d, alt-<key>]:
     alt+d - Set new todo state
     alt+f - Find todo by id or tag command
     alt+j - Jump to/from todo

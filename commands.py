@@ -43,56 +43,66 @@ class TypetodoJumpViewCommand(sublime_plugin.TextCommand):
 
 ##-service commands
 
+
 class TypetodoSetCommand(sublime_plugin.TextCommand):
-    setStateChars= []
-    setStateRegion= []
+    stateChars= []
+    stateRegion= []
 
-    def setChar(self, _idx):
+
+    def setState(self, _idx):
         if _idx>=0:
-            self.view.run_command('typetodo_reg_replace', {'_regStart': self.setStateRegion[0], '_regEnd': self.setStateRegion[1], '_replaceWith': self.setStateChars[_idx]})
+            self.view.run_command('typetodo_reg_replace', {'_regStart': self.stateRegion[0], '_regEnd': self.stateRegion[1], '_replaceWith': self.stateChars[_idx]})
 
-    def run(self, _edit, _state=False):
+
+    def run(self, _edit, _state=False, _priority=False):
         #prevented while in 'Search todo' results
         foundView= WCache().getResultsView(False)
         if foundView and foundView.buffer_id()==self.view.buffer_id():
             return
 
         todoRegion = self.view.line(self.view.sel()[0])
-        _mod= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
-        if not _mod:
+        matchRegexp= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
+        if not matchRegexp:
             sublime.status_message('Nothing Todo here')
             return
 
-        self.setStateRegion= (_mod.span('state')[0] +todoRegion.a, _mod.span('state')[1] +todoRegion.a)
+        self.stateRegion= (matchRegexp.span('state')[0] +todoRegion.a, matchRegexp.span('state')[1] +todoRegion.a)
 
 
+        #explicit state
         if _state!=False:
-            self.setStateChars= [_state]
-            self.setChar(0)
+            self.stateChars= [_state]
+            self.setState(0)
             return
 
 
-        self.setStateChars= []
+        #explicit priority
+        if _priority!=False:
+            return
+
+
+        self.stateChars= []
         menuItems= []
 
-        currentState= _mod.group('state')
+        currentState= matchRegexp.group('state')
         defaultState= ''
         if currentState=='':
             defaultState= '='
         elif currentState=='=':
             defaultState= '+'
 
-        self.setStateChars.append(defaultState)
+        self.stateChars.append(defaultState)
         menuItems.append('\'' +defaultState +'\': ' +str(STATE_LIST[defaultState]))
 
         for state in STATE_LIST: #collect menu list, excluding current and default state
             if state==currentState or state==defaultState:
                 continue
-            self.setStateChars.append(state)
+            self.stateChars.append(state)
             menuItems.append('\'' +state +'\': ' +str(STATE_LIST[state]))
 
 
-        self.view.window().show_quick_panel(menuItems, self.setChar, sublime.MONOSPACE_FONT)
+        self.view.window().show_quick_panel(menuItems, self.setState, sublime.MONOSPACE_FONT)
+
 
 
 

@@ -16,7 +16,8 @@ else:
 ##+service commands
 
 
-#command is used to keep python flow unruined
+#Replace view region.
+#Command is used to keep python flow unruined
 #
 class TypetodoRegReplaceCommand(sublime_plugin.TextCommand):
     def run(self, _edit, _regStart= False, _regEnd= False, _replaceWith=''):
@@ -25,7 +26,7 @@ class TypetodoRegReplaceCommand(sublime_plugin.TextCommand):
  
 
 
-#focus view, place and show cursor
+#Focus view, place and show cursor
 #
 class TypetodoJumpViewCommand(sublime_plugin.TextCommand):
     def showLinecol(self, _line, _col):

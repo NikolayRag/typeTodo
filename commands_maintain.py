@@ -13,6 +13,8 @@ else:
     from .c import *
 
 
+#Implicitly called command for validating visible doplets and colorizing
+#
 class TypetodoMaintainCommand(sublime_plugin.TextCommand):
     if sys.version < '3':
         codeColor= sublime.DRAW_OUTLINED
@@ -89,6 +91,8 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 
 #todo 1554 (command, fix) +0: should adjust cursor position
+#Double all inconsistent doplets with actual version
+#
 class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         _region= sublime.Region(0,self.view.size())

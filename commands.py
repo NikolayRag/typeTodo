@@ -43,7 +43,7 @@ class TypetodoJumpViewCommand(sublime_plugin.TextCommand):
 
 ##-service commands
 
-class TypetodoSetStateCommand(sublime_plugin.TextCommand):
+class TypetodoSetCommand(sublime_plugin.TextCommand):
     setStateChars= []
     setStateRegion= []
 
@@ -51,7 +51,7 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
         if _idx>=0:
             self.view.run_command('typetodo_reg_replace', {'_regStart': self.setStateRegion[0], '_regEnd': self.setStateRegion[1], '_replaceWith': self.setStateChars[_idx]})
 
-    def run(self, _edit, _replaceWith=False):
+    def run(self, _edit, _state=False):
         #prevented while in 'Search todo' results
         foundView= WCache().getResultsView(False)
         if foundView and foundView.buffer_id()==self.view.buffer_id():
@@ -66,8 +66,8 @@ class TypetodoSetStateCommand(sublime_plugin.TextCommand):
         self.setStateRegion= (_mod.span('state')[0] +todoRegion.a, _mod.span('state')[1] +todoRegion.a)
 
 
-        if _replaceWith!=False:
-            self.setStateChars= [_replaceWith]
+        if _state!=False:
+            self.setStateChars= [_state]
             self.setChar(0)
             return
 

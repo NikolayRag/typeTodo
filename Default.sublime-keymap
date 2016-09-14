@@ -1,13 +1,13 @@
 [
 { "keys": ["alt+d","alt+up"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoUp"}] },
 { "keys": ["alt+d","alt+down"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoDown"}] },
-{ "keys": ["alt+d","alt+d"], "command": "typetodo_set_state", "args": {}},
-{ "keys": ["alt+d","alt+f"], "command": "typetodo_find", "args": {} },
-{ "keys": ["alt+d","alt+j"], "command": "typetodo_jump", "args": {} },
+{ "keys": ["alt+d","alt+d"], "command": "typetodo_set"},
+{ "keys": ["alt+d","alt+f"], "command": "typetodo_find"},
+{ "keys": ["alt+d","alt+j"], "command": "typetodo_jump"},
 
-{ "keys": ["alt+d","alt+keypad_plus"], "command": "typetodo_set_state", "args": {"_replaceWith": "+"}},
-{ "keys": ["alt+d","alt+keypad_minus"], "command": "typetodo_set_state", "args": {"_replaceWith": ""}},
-{ "keys": ["alt+d","alt+backspace"], "command": "typetodo_set_state", "args": {"_replaceWith": "!"}},
-{ "keys": ["alt+d","alt+="], "command": "typetodo_set_state", "args": {"_replaceWith": "="}}
+{ "keys": ["alt+d","alt+keypad_plus"], "command": "typetodo_set", "args": {"_state": "+"}},
+{ "keys": ["alt+d","alt+keypad_minus"], "command": "typetodo_set", "args": {"_state": ""}},
+{ "keys": ["alt+d","alt+backspace"], "command": "typetodo_set", "args": {"_state": "!"}},
+{ "keys": ["alt+d","alt+="], "command": "typetodo_set", "args": {"_state": "="}}
 
 ]

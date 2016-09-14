@@ -1,11 +1,11 @@
 [
     { "caption": "-", "id": "typetodo" },
-{
-	"caption": "typeTodo", "children": [
-            { "mnemonic": "i", "caption": "Inconsistency", "command": "typetodo_revivify" },
-            { "mnemonic": "f", "caption": "Find Todo", "command": "typetodo_find" },
-            { "mnemonic": "c", "caption": "Config", "command": "typetodo_cfg_open" },
-            { "mnemonic": "h", "caption": "HTTP repository", "command": "typetodo_www" },
-	]
-}
+	{
+		"caption": "typeTodo", "children": [
+	            { "mnemonic": "I", "caption": "Inconsistency", "command": "typetodo_revivify" },
+	            { "mnemonic": "f", "caption": "Find Todo", "command": "typetodo_find" },
+	            { "mnemonic": "c", "caption": "Config", "command": "typetodo_cfg_open" },
+	            { "mnemonic": "h", "caption": "HTTP repository", "command": "typetodo_www" }
+		]
+	}
 ]

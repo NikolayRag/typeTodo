@@ -86,8 +86,8 @@ class TypetodoSetCommand(sublime_plugin.TextCommand):
         menuItems= []
 
         for state in STATE_LIST: #collect menu list
-            self.stateChars.append(state)
-            menuItems.append((4-len(state))*' ' +state +'   : ' +str(STATE_LIST[state]))
+            self.stateChars.append(state[0])
+            menuItems.append((4-len(state[0]))*' ' +state[0] +'   : ' +state[1])
 
 
         self.view.window().show_quick_panel(menuItems, self.setState, sublime.MONOSPACE_FONT)

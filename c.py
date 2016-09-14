@@ -9,12 +9,13 @@ class SAVE_STATES:
 	FORCE= 3 #same as READY but without shadow compairing
 	HOLD= 4
 # =todo 2074 (feature, interaction, ux) +0: split Open state to Pending('') and Open('-')
-STATE_LIST= {
-    '': 'Open',
-    '=': 'Progress',
-    '+': 'Close',
-    '!': 'Cancel'
-}
+STATE_LIST= [
+    ['', 'Open'],
+    ['=', 'Progress'],
+    ['+', 'Close'],
+    ['!', 'Cancel']
+]
+STATE_LIST_NAMED= {}
 
 re_prefixes= ('<!--', '//', '#', '%', '\'', '!', ';', '--')
 RE_TODO_NEW= re.compile('(?P<prefix>.*?(?:' +'|'.join(re_prefixes) +'))todo(?P<trigger>:)?[ \t]*(?P<comment>.*)')
@@ -42,6 +43,10 @@ def constCorrect(_view):
     if constCorrectFlag:
         return;
     constCorrectFlag= True
+
+
+    for cState in STATE_LIST:
+        STATE_LIST_NAMED[cState[0]]= cState[1]
 
 
     cSettings= _view.settings()

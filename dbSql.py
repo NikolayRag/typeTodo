@@ -259,7 +259,7 @@ class TodoDbSql():
 
             if not self.sqExecute(dbConn, cur,
                 "INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-                STATE_LIST[curTodo.state]
+                STATE_LIST_NAMED[curTodo.state]
             ):
                 return False
             db_stateId= dbConn[0].insert_id()
@@ -427,7 +427,7 @@ class TodoDbSql():
 
             stateIdx= ''
             for cState in STATE_LIST:
-                if STATE_LIST[cState]==fetchedStateName:
+                if cState[1]==fetchedStateName:
                     stateIdx= cState
                     break
 

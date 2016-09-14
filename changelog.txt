@@ -1,3 +1,30 @@
+add:
+- search is non-blocking for st3
+- jump command to jump:
+  from .do and from search to code
+  from code to .do
+
+change:
+- force init HTTP at first run
+- all key bindings moved to [alt-d, alt-key]:
+    alt+d - Set new todo state
+    alt+f - Find todo by id or tag command
+    alt+j - Jump to/from todo
+    alt+i - Show inconsistent todos
+    alt+h - Open HTTP repository
+
+    alt+up - Raise priority
+    alt+down - Lower priority
+
+    alt+keypad_plus   - Set state to '+', 'Closed'
+    alt+keypad_minus  - Set state to '-', 'Opened'
+    alt+backspace     - Set state to '!', 'Canceled'
+    alt+=             - Set state to '=', 'Progress'
+
+- todo find simplified
+- README is split
+
+
 v1.9.0
 
 fix:

@@ -429,13 +429,11 @@ class TodoDbSql():
 
             fetchedStateName= task[sqn['namestate']]
 
-            stateIdx= ''
             for cState in STATE_LIST:
-                if cState[1]==fetchedStateName:
-                    stateIdx= cState
+                if cState and cState[1]==fetchedStateName:
                     break
 
-            todoA[__id].set(stateIdx, [task[sqn['namecat']]], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
+            todoA[__id].set((cState or STATE_DEFAULT)[0], [task[sqn['namecat']]], task[sqn['priority']], task[sqn['namefile']], task[sqn['comment']], task[sqn['nameuser']], int(task[sqn['ustamp']]) )
 
 
         for taskId in todoA: #read multitags over

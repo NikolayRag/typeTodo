@@ -225,10 +225,10 @@ class TodoDbHttp():
                 fetchedStateName= task['namestate']
 
                 for cState in STATE_LIST:
-                    if cState[1]==fetchedStateName:
+                    if cState and cState[1]==fetchedStateName:
                         break
 
                 tags= task['nametag'].split(',')
-                todoA[__id].set(cState and cState[0] or '', tags, task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
+                todoA[__id].set((cState or STATE_DEFAULT)[0], tags, task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
 
         return todoA

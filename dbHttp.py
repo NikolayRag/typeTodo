@@ -80,8 +80,12 @@ class TodoDbHttp():
 
             curTodo.setSaved(SAVE_STATES.HOLD, self.dbId) #poke out from saving elsewhere
 
+            for cState in STATE_LIST:
+                if cState and cState[0]==curTodo.state:
+                    break
+
             postList.append(str(curTodo.id))
-            postTodoA['state' +str(curTodo.id)]= STATE_LIST_NAMED[curTodo.state]
+            postTodoA['state' +str(curTodo.id)]= (cState or STATE_DEFAULT)[1]
             postTodoA['file' +str(curTodo.id)]= curTodo.fileName
             postTodoA['tags' +str(curTodo.id)]= ','.join(curTodo.tagsA)
             postTodoA['lvl' +str(curTodo.id)]= curTodo.lvl
@@ -220,13 +224,11 @@ class TodoDbHttp():
 
                 fetchedStateName= task['namestate']
 
-                stateIdx= ''
                 for cState in STATE_LIST:
                     if cState[1]==fetchedStateName:
-                        stateIdx= cState
                         break
 
                 tags= task['nametag'].split(',')
-                todoA[__id].set(stateIdx, tags, task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
+                todoA[__id].set(cState and cState[0] or '', tags, task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
 
         return todoA

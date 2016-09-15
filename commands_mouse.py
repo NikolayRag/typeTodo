@@ -34,8 +34,9 @@ class TypetodoMouseContextCommand(sublime_plugin.TextCommand):
                     return lambda: self.view.run_command("typetodo_set", {"_state": _cState})
 
                 for cState in STATE_LIST:
-                    itemsA.append(cState[0]+' : '+cState[1])
-                    fnsA.append(makeSetState(cState[0]))
+                    if cState:
+                        itemsA.append(cState[0]+' : '+cState[1])
+                        fnsA.append(makeSetState(cState[0]))
 
 
                 itemsA.append('')

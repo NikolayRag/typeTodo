@@ -13,9 +13,10 @@ STATE_LIST= [
     ['', 'Open'],
     ['=', 'Progress'],
     ['+', 'Close'],
-    ['!', 'Cancel']
+    ['!', 'Cancel'],
+    False
 ]
-STATE_LIST_NAMED= {}
+STATE_DEFAULT= ['', 'Open']
 
 re_prefixes= ('<!--', '//', '#', '%', '\'', '!', ';', '--')
 RE_TODO_NEW= re.compile('(?P<prefix>.*?(?:' +'|'.join(re_prefixes) +'))todo(?P<trigger>:)?[ \t]*(?P<comment>.*)')
@@ -43,10 +44,6 @@ def constCorrect(_view):
     if constCorrectFlag:
         return;
     constCorrectFlag= True
-
-
-    for cState in STATE_LIST:
-        STATE_LIST_NAMED[cState[0]]= cState[1]
 
 
     cSettings= _view.settings()

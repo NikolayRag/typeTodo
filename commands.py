@@ -87,8 +87,9 @@ class TypetodoSetCommand(sublime_plugin.TextCommand):
         menuItems= []
 
         for state in STATE_LIST: #collect menu list
-            self.stateChars.append(state[0])
-            menuItems.append((4-len(state[0]))*' ' +state[0] +'   : ' +state[1])
+            if state:
+                self.stateChars.append(state[0])
+                menuItems.append((4-len(state[0]))*' ' +state[0] +'   : ' +state[1])
 
 
         self.view.window().show_quick_panel(menuItems, self.setState, sublime.MONOSPACE_FONT)
@@ -151,3 +152,4 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
             return
 
         self.cDb= TodoDb(self.resetCB, Config())
+

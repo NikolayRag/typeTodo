@@ -257,9 +257,13 @@ class TodoDbSql():
 
             curTodo.setSaved(SAVE_STATES.HOLD, self.dbId) #poke out from saving elsewhere
 
+            for cState in STATE_LIST:
+                if cState and cState[0]==curTodo.state:
+                    break
+
             if not self.sqExecute(dbConn, cur,
                 "INSERT INTO states (name) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)",
-                STATE_LIST_NAMED[curTodo.state]
+                (cState or STATE_DEFAULT)[1]
             ):
                 return False
             db_stateId= dbConn[0].insert_id()

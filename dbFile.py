@@ -165,6 +165,7 @@ class TodoDbFile():
                         continue
 
                     if ctxTodo:
+# todo 2097 (cleanup, spike) +0: remove '-' to '' convert after while
                         __state= ctxTodo.group('prefix')
                         if __state=='-': __state= ''
                         matchComment= RE_TODO_STORED_COMMENT.match(ln)

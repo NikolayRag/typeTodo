@@ -134,36 +134,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
         return self.autoList
 
 
-#   Handler to react on keyboard shortcuts
-
-    def on_query_context(self, _view, _key, _op, _val, _match):
-
-        if self.todoCursorPlace!=False:
-            todoRegion = _view.line(_view.sel()[0])
-
-
-            if _key=='typetodoUp':
-                addValue= 1
-
-            elif _key=='typetodoDown':
-                addValue= -1
-
-            else:
-                return
-
-            newPriority= int(self.todoMatch.group('priority')) +addValue
-            newPriPfx= ''
-            if newPriority>=0:
-                newPriPfx= '+'
-            newPriority= newPriPfx +str(newPriority)
-            
-            _view.set_read_only(False)
-            _view.run_command('typetodo_reg_replace', {
-                '_regStart': todoRegion.a+self.todoMatch.start('priority'),
-                '_regEnd': todoRegion.a+self.todoMatch.end('priority'),
-                '_replaceWith': newPriority
-            })
-            return True
 
 
 
@@ -238,7 +208,8 @@ class TypetodoEvent(sublime_plugin.EventListener):
                 selStart= selEnd
                 selEnd= tmp
 
-            self.todoCursorPlace= 'todoString'
+            #store doplet field name under cursor
+            self.todoCursorPlace= 'preTodo'
             if selStart>=todoModMatch.end('prefix') and selEnd<=todoModMatch.end('postfix'):
                 self.todoCursorPlace= 'todo'
                 for rangeName in ('prefix', 'state', 'tags', 'priority', 'postfix'):
@@ -246,6 +217,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
                         self.todoCursorPlace= rangeName
                         break
 
+            #protect fields
             self.view.set_read_only(self.todoCursorPlace=='todo')
 
 #todo 1239 (interaction, unsolved) +0: get rid of snippets for tags autocomplete
@@ -335,7 +307,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
     def substUpdate(self, _state, _id, _tags, _lvl, _comment, _prefix, _region, _wipe=False):
         updVals= {'_view':self.view, '_state':_state, '_id':_id, '_tags':_tags, '_lvl':_lvl, '_comment':_comment, '_prefix':_prefix, '_region':_region, '_wipe':_wipe}
 
-# todo 2099 (ux) +0: ask for reason BEFORE set
+# =todo 2099 (ux) +0: ask for reason BEFORE set
         if _state=='!' and _comment!='':
             self.view.window().show_input_panel('Reason of canceling:', '', self.substDoUpdate(updVals), None, self.substDoUpdate(updVals))
         else:

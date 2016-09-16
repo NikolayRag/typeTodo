@@ -45,6 +45,29 @@ class TypetodoJumpViewCommand(sublime_plugin.TextCommand):
 ##-service commands
 
 
+class TypetodoPriorityCommand(sublime_plugin.TextCommand):
+    def run(self, _edit, _dir):
+        todoRegion = self.view.line(self.view.sel()[0])
+        matchRegexp= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
+        if not matchRegexp:
+            sublime.status_message('Nothing Todo here')
+            return
+
+        newPriority= int(matchRegexp.group('priority')) +_dir
+        newPriPfx= ''
+        if newPriority>=0:
+            newPriPfx= '+'
+        newPriority= newPriPfx +str(newPriority)
+        
+        self.view.run_command('typetodo_reg_replace', {
+            '_regStart': todoRegion.a+matchRegexp.start('priority'),
+            '_regEnd': todoRegion.a+matchRegexp.end('priority'),
+            '_replaceWith': newPriority
+        })
+
+
+
+
 class TypetodoSetCommand(sublime_plugin.TextCommand):
     stateChars= []
     stateRegion= []

@@ -34,10 +34,9 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         regionsInconsistentPre= []
         regionsInconsistent= []
 
-# todo 2080 (interaction, ui) +0: re-enable old inconsistent doplets hilited
-#        for cTodo in RE_TODO_INCONSISTENT.finditer(content):
-#            regionTodo= sublime.Region(cTodo.end('prefix'), cTodo.end('comment'))
-#            regionsInconsistent.append(regionTodo)
+        for cTodo in RE_TODO_INCONSISTENT.finditer(content):
+            regionTodo= sublime.Region(cTodo.end('prefix'), cTodo.end('comment'))
+            regionsInconsistent.append(regionTodo)
 
         for cTodo in RE_TODO_EXISTING.finditer(content):
             regionMark= sublime.Region(cTodo.end('prefix'), cTodo.start('state'))
@@ -90,7 +89,6 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 
 
-#todo 1554 (command, fix) +0: should adjust cursor position
 #Double all inconsistent doplets with actual version
 #
 class TypetodoRevivifyCommand(sublime_plugin.TextCommand):

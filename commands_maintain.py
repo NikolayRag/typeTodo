@@ -24,7 +24,14 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
     def run(self, _edit, _delayed=True):
         _region= sublime.Region(0,self.view.size())
-        content= self.view.substr(_region)
+        contentA= []
+        for cLine in self.view.substr(_region).split('\n'):
+            if len(cLine)>SKIP_SEARCH_LINESIZE:
+                cLine= ''
+            contentA.append(cLine)
+
+        content= '\n'.join(contentA)
+
 
         todos= []
         regionsOpenPre= []
@@ -34,7 +41,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         regionsInconsistentPre= []
         regionsInconsistent= []
 
-# =todo 2106 (fix) +0: limit line lenghts prior to finditer(), here and everywhere
+
         for cTodo in RE_TODO_INCONSISTENT.finditer(content):
             regionTodo= sublime.Region(cTodo.end('prefix'), cTodo.end('comment'))
             regionsInconsistent.append(regionTodo)

@@ -69,6 +69,13 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
 
 
 
+
+#Check if doplet within _reg matches _id
+#_id can be:
+#   Int for ID
+#   String for TAG, ',' separated
+#   String with '-' sign for excluded TAG
+#
     def findTodoLine(self, _reg, _id):
         isId= re.match('^\d+$', _id)
 

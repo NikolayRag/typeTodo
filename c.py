@@ -36,7 +36,8 @@ RE_CFG= re.compile("^\s*(?:" +re_mysql_str +"|" +re_http_str +"|" +re_file_str +
 
 SKIP_SEARCH_DIR= ['tmp', 'temp']
 SKIP_SEARCH_FILES= ['*.', '*.sublime-workspace', '*.gz', '*.mov', '*.avi', '*.qt']
-SKIP_SEARCH_SIZE= 640000 #should be enough for everyone
+SKIP_SEARCH_FILESIZE= 640000 #should be enough for everyone
+SKIP_SEARCH_LINESIZE= 1000
 
 
 # todo 2092 (fix) +0: read settings more correctly

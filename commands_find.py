@@ -141,30 +141,33 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
 
 
     def findTodoInFile(self, _fn, _test, _id):
-        matches= []
-
-# =todo 2107 (fix) +0: limit lines and try finditer(), same as 2106
-        foundRe= None
-        lNum= 0
+        fContent= []
         try:
             with codecs.open(_fn, 'r', 'UTF-8') as f:
                 for ln in f:
-                    ln= ln.strip()
-                    lNum+= 1
-                    foundRe= _test.match(ln)
-                    if foundRe and self.findTodoLine(foundRe, _id):
-                        matches.append({
-                            'row': lNum-1,
-                            'col': foundRe.end('prefix'),
-                            'line': ln,
-                            'regexp': foundRe,
-                            'file': _fn
-                        })
-
- 
+                    if len(ln)>SKIP_SEARCH_LINESIZE:
+                        ln= ''
+                    fContent.append(ln.strip('\n\r'))
         except Exception as e:
-            None
+            return []
 
+
+        matches= []
+        foundRe= None
+        lNum= 0
+
+        for ln in fContent:
+            lNum+= 1
+            foundRe= _test.match(ln)
+            if foundRe and self.findTodoLine(foundRe, _id):
+                matches.append({
+                    'row': lNum-1,
+                    'col': foundRe.end('prefix'),
+                    'line': ln,
+                    'regexp': foundRe,
+                    'file': _fn
+                })
+ 
         return matches
 
 
@@ -190,7 +193,7 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
                 for cFile in okFiles:
                     fn= os.path.join(cWalk[0], cFile)
                         
-                    if os.path.getsize(fn)>SKIP_SEARCH_SIZE:
+                    if os.path.getsize(fn)>SKIP_SEARCH_FILESIZE:
                         continue
 
                     matches= self.findTodoInFile(fn, RE_TODO_EXISTING, _id)
@@ -424,27 +427,31 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
     def findTodoInFile(self, _fn, _test, _id):
-        matches= []
-
-        foundRe= None
-        lNum= 0
+        fContent= []
         try:
             with codecs.open(_fn, 'r', 'UTF-8') as f:
                 for ln in f:
-                    ln= ln.strip()
-                    lNum+= 1
-                    foundRe= _test.match(ln)
-                    if foundRe and self.findTodoLine(foundRe, _id):
-                        matches.append({
-                            'row': lNum-1,
-                            'col': foundRe.end('prefix'),
-                            'line': ln,
-                            'regexp': foundRe,
-                            'file': _fn
-                        })
-
- 
+                    if len(ln)>SKIP_SEARCH_LINESIZE:
+                        ln= ''
+                    fContent.append(ln.strip('\n\r'))
         except Exception as e:
-            None
+            return []
 
+
+        matches= []
+        foundRe= None
+        lNum= 0
+
+        for ln in fContent:
+            lNum+= 1
+            foundRe= _test.match(ln)
+            if foundRe and self.findTodoLine(foundRe, _id):
+                matches.append({
+                    'row': lNum-1,
+                    'col': foundRe.end('prefix'),
+                    'line': ln,
+                    'regexp': foundRe,
+                    'file': _fn
+                })
+ 
         return matches

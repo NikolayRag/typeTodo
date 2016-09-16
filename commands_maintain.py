@@ -89,6 +89,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 
 
+# todo 2098 (consistency) +0: check only one doplet if cursor stands on it
 #Double all inconsistent doplets with actual version
 #
 class TypetodoRevivifyCommand(sublime_plugin.TextCommand):

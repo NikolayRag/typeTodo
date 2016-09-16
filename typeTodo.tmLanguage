@@ -43,9 +43,9 @@
 
 	    	<dict>
 				<key>begin</key>
-				<string>^-(.*) (\d+): (?:(\+0)|(-\d+)|(\+\d+)) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d(:\d\d)?)$</string>
+				<string>^=(.*) (\d+): (?:(\+0)|(-\d+)|(\+\d+)) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d(:\d\d)?)$</string>
 				<key>name</key>
-				<string>entity.typetodo</string>
+				<string>constant.language.typetodo</string>
 				<key>beginCaptures</key>
 				<dict>
 					<key>0</key>
@@ -105,9 +105,9 @@
 
 	    	<dict>
 				<key>begin</key>
-				<string>^=(.*) (\d+): (?:(\+0)|(-\d+)|(\+\d+)) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d(:\d\d)?)$</string>
+				<string>^-?(.*) (\d+): (?:(\+0)|(-\d+)|(\+\d+)) \"(.*)\" (.+) (\d\d/\d\d/\d\d \d\d:\d\d(:\d\d)?)$</string>
 				<key>name</key>
-				<string>constant.language.typetodo</string>
+				<string>entity.typetodo</string>
 				<key>beginCaptures</key>
 				<dict>
 					<key>0</key>

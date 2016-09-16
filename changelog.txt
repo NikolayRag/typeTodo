@@ -1,4 +1,5 @@
 add:
+- 'Pending' default state with '' prefix
 - search is non-blocking for st3
 - jump command to jump:
   from .do and from search to code
@@ -6,6 +7,7 @@ add:
 
 
 change:
+- 'Opened' state got '-' prefix
 - force init HTTP at first run
 - all key bindings moved to [alt-d, alt-<key>]:
     alt+d - Set new todo state
@@ -17,11 +19,12 @@ change:
     alt+up - Raise priority
     alt+down - Lower priority
 
-    alt+plus      - Set state to '+', 'Closed'
+    alt+space     - Set state to '', 'Pending'
     alt+minus     - Set state to '-', 'Opened'
+    alt+plus      - Set state to '+', 'Closed'
+    alt+=         - Set state to '=', 'Progress'
     alt+backspace
     alt+del       - Set state to '!', 'Canceled'
-    alt+=         - Set state to '=', 'Progress'
 
 - todo find simplified
 - README is split

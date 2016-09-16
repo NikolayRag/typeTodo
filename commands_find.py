@@ -186,14 +186,17 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
                     for cFile in fnmatch.filter(cWalk[2], cMask):
                         skipF.append(cFile)
 
-                for cFile in set(cWalk[2])-set(skipF):
-
+                okFiles= set(cWalk[2])-set(skipF)
+                for cFile in okFiles:
                     fn= os.path.join(cWalk[0], cFile)
                         
                     if os.path.getsize(fn)>SKIP_SEARCH_SIZE:
                         continue
 
-                    self.matchAdd(_oldMatchA, self.findTodoInFile(fn, RE_TODO_EXISTING, _id))
+                    matches= self.findTodoInFile(fn, RE_TODO_EXISTING, _id)
+                    if matches:
+                        self.matchAdd(_oldMatchA, matches)
+
 
 
     #exclude add match to existing list

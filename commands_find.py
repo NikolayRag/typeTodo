@@ -143,6 +143,7 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
     def findTodoInFile(self, _fn, _test, _id):
         matches= []
 
+# =todo 2107 (fix) +0: limit lines and try finditer(), same as 2106
         foundRe= None
         lNum= 0
         try:

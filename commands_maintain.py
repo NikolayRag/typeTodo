@@ -34,6 +34,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         regionsInconsistentPre= []
         regionsInconsistent= []
 
+# =todo 2106 (fix) +0: limit line lenghts prior to finditer(), here and everywhere
         for cTodo in RE_TODO_INCONSISTENT.finditer(content):
             regionTodo= sublime.Region(cTodo.end('prefix'), cTodo.end('comment'))
             regionsInconsistent.append(regionTodo)
@@ -89,7 +90,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 
 
-# todo 2098 (consistency) +0: check only one doplet if cursor stands on it
+# todo 2098 (feature, consistency) +0: check only one doplet if cursor stands on it
 #Double all inconsistent doplets with actual version
 #
 class TypetodoRevivifyCommand(sublime_plugin.TextCommand):

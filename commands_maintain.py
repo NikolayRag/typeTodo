@@ -95,6 +95,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 
 
+# todo 2112 (command) +0: allow changing one line, inline; use in substRestore()
 #Double all inconsistent doplets with actual version
 #
 class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
@@ -106,13 +107,11 @@ class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
             contentA.append(cTodo)
 
         for cTodo in reversed(contentA):
-            regionTodo= sublime.Region(cTodo.end('prefix'), cTodo.end('comment'))
-
             cId= cTodo.group('id')
+
             if not self.todoValidate(cId, cTodo.group('state'), cTodo.group('tags'), cTodo.group('priority'), cTodo.group('comment')):
                 storedTask= WCache().getDB().todoA[int(cId)]
                 commentType= self.view.substr(sublime.Region(cTodo.end('prefix'), cTodo.start('state')))
-
                 replaceTodo= commentType +storedTask.state +'todo ' +cId +' (' +', '.join(storedTask.tagsA) +') +' +str(storedTask.lvl) +': ' +storedTask.comment
 
                 self.view.replace(_edit, sublime.Region(cTodo.end('comment')+1, cTodo.end('comment')+1), replaceTodo+'\n')

@@ -160,6 +160,10 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
     def tagsAutoCollect(self):
         cDb= WCache().getDB()
+        if not cDb:
+            return
+
+
         tagsA= []
 
         if cDb:

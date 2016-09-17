@@ -20,7 +20,7 @@ else:
 
 #todo 89 (db, feature, unsure) +1: save context (+-2 strings of code) with task
 
-#todo 2045 (db, fix) +0: New Id sync warning when having 2 http noticed
+#todo 2045 (db, issue, fix) +0: New Id sync warning when having 2 http noticed
 #
 #   Manages .todoA[] task collection within .dbA[] databases.
 #   Uses supplied .config to locate '.do' config file.
@@ -193,7 +193,7 @@ class TodoDb():
 #   Release database's unused reserved ID
 #   Called at the Sublime's exit and config reset.
 
-#todo 1984 (db, issue) +0: some db's are skipped at exit if *some* dbs configured (tested 3 other than File)
+#todo 1984 (db, issue, fix) +0: some db's are skipped at exit if *some* dbs configured (tested 3 other than File)
     def releaseId(self, _atExit=False):
         self.reservedId-= 1 #used to continue id when all db's changed at once
         for db in self.dbA:

@@ -1,7 +1,6 @@
 # coding= utf-8
 
 #todo 1 (interaction, feature) +1: multiline TODO
-#todo 11 (interaction, unsure) +0: make more TODO formats available (convert from external db's?)
 
 #=todo 232 (feature) +1: introduce sub-todo's that are part of other
 

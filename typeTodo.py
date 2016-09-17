@@ -300,15 +300,36 @@ class TypetodoEvent(sublime_plugin.EventListener):
         return func
 
 
+
+#Cancel deleting todo
+#
+    def substRestore(self, _updVals):
+        def func(_txt=False):
+            cDb= WCache().getDB()
+            if not cDb:
+                return
+
+            #restore todo string
+            cString= self.view.substr(_updVals['_region'])
+            cTodo= RE_TODO_EXISTING.match(cString)
+            storedTask= cDb.todoA[int(_updVals['_id'])]
+
+            replaceTodo= storedTask.state +'todo ' +str(storedTask.id) +' (' +', '.join(storedTask.tagsA) +') +' +str(storedTask.lvl) +': ' +storedTask.comment
+
+            self.view.run_command('typetodo_reg_replace', {'_regStart': _updVals['_region'].a+cTodo.start('state'), '_regEnd': _updVals['_region'].a+cTodo.end('comment'), '_replaceWith': replaceTodo})
+
+        return func
+
+
+
 #   Update existing task.
 #   Ask for 'reason' for 'cancel' state.
 
     def substUpdate(self, _state, _id, _tags, _lvl, _comment, _prefix, _region, _wipe=False):
         updVals= {'_view':self.view, '_state':_state, '_id':_id, '_tags':_tags, '_lvl':_lvl, '_comment':_comment, '_prefix':_prefix, '_region':_region, '_wipe':_wipe}
 
-# =todo 2099 (ux) +0: ask for reason BEFORE set
         if _state=='!' and _comment!='':
-            self.view.window().show_input_panel('Reason of canceling:', '', self.substDoUpdate(updVals), None, self.substDoUpdate(updVals))
+            self.view.window().show_input_panel('Reason of canceling:', '', self.substDoUpdate(updVals), None, self.substRestore(updVals))
         else:
             self.substDoUpdate(updVals)()
 

@@ -84,7 +84,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
             for cTag in _tags.split(','):
                 tagsA.append(cTag.strip())
 
-            if storedTask.state!=(_state or ' ') or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
+            if storedTask.state!=(_state or STATE_DEFAULT[0]) or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
                 return False
 
         return True
@@ -112,7 +112,7 @@ class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
             if not self.todoValidate(cId, cTodo.group('state'), cTodo.group('tags'), cTodo.group('priority'), cTodo.group('comment')):
                 storedTask= WCache().getDB().todoA[int(cId)]
                 commentType= self.view.substr(sublime.Region(cTodo.end('prefix'), cTodo.start('state')))
-                if commentType[-1]!=' ':
+                if commentType[-1]!=' ':#expand
                     commentType+= ' '
                 replaceTodo= commentType +storedTask.state +'todo ' +cId +' (' +', '.join(storedTask.tagsA) +') +' +str(storedTask.lvl) +': ' +storedTask.comment
 
@@ -128,7 +128,7 @@ class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
             for cTag in _tags.split(','):
                 tagsA.append(cTag.strip())
 
-            if storedTask.state!=(_state or ' ') or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
+            if storedTask.state!=(_state or STATE_DEFAULT[0]) or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
                 return False
 
         return True

@@ -265,7 +265,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
     def substNew(self, _prefx, _postfx, _region):
         todoId= self.cfgStore(0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 
-        todoComment= _prefx + ' todo ' +str(todoId) +' (${1:' +self.lastCat[0] +'}) ${2:' +self.lastLvl +'}: ${0:}' +_postfx +''
+        todoComment= _prefx + ' ' +STATE_DEFAULT[0] +'todo ' +str(todoId) +' (${1:' +self.lastCat[0] +'}) ${2:' +self.lastLvl +'}: ${0:}' +_postfx +''
         self.view.run_command('typetodo_reg_replace', {'_regStart': _region.a, '_regEnd': _region.b})
         self.view.run_command("insert_snippet", {"contents": todoComment})
 

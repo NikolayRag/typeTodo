@@ -10,7 +10,7 @@
 
 
 
-{ "keys": ["alt+d","alt+space"], "command": "typetodo_set", "args": {"_state": ""}},
+{ "keys": ["alt+d","alt+space"], "command": "typetodo_set", "args": {"_state": " "}},
 
 { "keys": ["alt+d","alt+keypad_minus"], "command": "typetodo_set", "args": {"_state": "-"}},
 { "keys": ["alt+d","alt+-"], "command": "typetodo_set", "args": {"_state": "-"}},

@@ -112,6 +112,8 @@ class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
             if not self.todoValidate(cId, cTodo.group('state'), cTodo.group('tags'), cTodo.group('priority'), cTodo.group('comment')):
                 storedTask= WCache().getDB().todoA[int(cId)]
                 commentType= self.view.substr(sublime.Region(cTodo.end('prefix'), cTodo.start('state')))
+                if commentType[-1]!=' ':
+                    commentType+= ' '
                 replaceTodo= commentType +storedTask.state +'todo ' +cId +' (' +', '.join(storedTask.tagsA) +') +' +str(storedTask.lvl) +': ' +storedTask.comment
 
                 self.view.replace(_edit, sublime.Region(cTodo.end('comment')+1, cTodo.end('comment')+1), replaceTodo+'\n')

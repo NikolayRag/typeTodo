@@ -84,7 +84,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
             for cTag in _tags.split(','):
                 tagsA.append(cTag.strip())
 
-            if storedTask.state!=_state or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
+            if storedTask.state!=(_state or ' ') or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
                 return False
 
         return True
@@ -128,7 +128,7 @@ class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
             for cTag in _tags.split(','):
                 tagsA.append(cTag.strip())
 
-            if storedTask.state!=_state or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
+            if storedTask.state!=(_state or ' ') or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
                 return False
 
         return True

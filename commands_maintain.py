@@ -95,7 +95,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 
 
-# todo 2112 (command) +0: allow changing one line, inline; use in substRestore()
+#  todo 2112 (command) +0: allow changing one line, inline; use in substRestore()
 #Double all inconsistent doplets with actual version
 #
 class TypetodoRevivifyCommand(sublime_plugin.TextCommand):

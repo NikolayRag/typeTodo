@@ -16,9 +16,9 @@ else:
     from .dbHttp import *
     from .task import *
 
-#todo 44 (config, db, feature, unsolved) -1: handle saving project - existing and blank; transfer db for involved files
+#  todo 44 (config, db, feature, unsolved) -1: handle saving project - existing and blank; transfer db for involved files
 
-#todo 89 (db, feature, unsure) +1: save context (+-2 strings of code) with task
+#  todo 89 (db, feature, unsure) +1: save context (+-2 strings of code) with task
 
 #todo 2045 (db, issue, fix) +0: New Id sync warning when having 2 http noticed
 #

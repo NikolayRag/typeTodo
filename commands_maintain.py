@@ -114,7 +114,13 @@ class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
                 commentType= self.view.substr(sublime.Region(cTodo.end('prefix'), cTodo.start('state')))
                 if commentType[-1]!=' ':#expand
                     commentType+= ' '
-                replaceTodo= commentType +storedTask.state +'todo ' +cId +' (' +', '.join(storedTask.tagsA) +') +' +str(storedTask.lvl) +': ' +storedTask.comment
+
+                newPriority= int(storedTask.lvl)
+                if newPriority>=0:
+                    newPriority= '+' +str(newPriority)
+                newPriority= str(newPriority)
+                        
+                replaceTodo= commentType +storedTask.state +'todo ' +cId +' (' +', '.join(storedTask.tagsA) +') ' +newPriority +': ' +storedTask.comment
 
                 self.view.replace(_edit, sublime.Region(cTodo.end('comment')+1, cTodo.end('comment')+1), replaceTodo+'\n')
                 self.view.replace(_edit, sublime.Region(cTodo.end('state'), cTodo.start('id')), '     ')

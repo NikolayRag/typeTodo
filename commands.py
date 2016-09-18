@@ -57,10 +57,9 @@ class TypetodoPriorityCommand(sublime_plugin.TextCommand):
             return
 
         newPriority= int(matchRegexp.group('priority')) +_delta
-        newPriPfx= ''
         if newPriority>=0:
-            newPriPfx= '+'
-        newPriority= newPriPfx +str(newPriority)
+            newPriority= '+' +str(newPriority)
+        newPriority= str(newPriority)
         
         self.view.run_command('typetodo_reg_replace', {
             '_regStart': todoRegion.a+matchRegexp.start('priority'),

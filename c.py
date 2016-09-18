@@ -9,21 +9,21 @@ class SAVE_STATES:
 	FORCE= 3 #same as READY but without shadow compairing
 	HOLD= 4
 
-# =todo 2074 (feature, interaction, ux) +0: split Open state to Pending('') and Open('-')
 STATE_LIST= [
-    ['', 'Open'],
+    [' ', 'Pending'],
+    ['-', 'Open'],
     ['=', 'Progress'],
     ['+', 'Close'],
     ['!', 'Cancel'],
     False
 ]
-STATE_DEFAULT= ['', 'Open']
+STATE_DEFAULT= [' ', 'Pending']
 
 re_prefixes= ('<!--', '//', '#', '%', '\'', '!', ';', '--')
 RE_TODO_NEW= re.compile('(?P<prefix>.*?(?:' +'|'.join(re_prefixes) +'))todo(?P<trigger>:)?[ \t]*(?P<comment>.*)')
-RE_TODO_EXISTING= re.compile('(?P<prefix>.*?)(?:' +'|'.join(re_prefixes) +')\s*(?P<state>[\+\=\!]?)todo\s+(?P<id>\d+)(?:\s+\((?P<tags>.*)\))?(?:\s+(?P<priority>[\+\-]\d+))?\s*:(?P<postfix>[ \t]*(?P<comment>.*)[ \t]*)')
-RE_TODO_INCONSISTENT= re.compile('(?P<prefix>.*?)(?:' +'|'.join(re_prefixes) +')\s*(?P<state>[\+\=\!]?)    \s+(?P<id>\d+)(?:\s+\((?P<tags>.*)\))?(?:\s+(?P<priority>[\+\-]\d+))?\s*:(?P<postfix>[ \t]*(?P<comment>.*)[ \t]*)')
-RE_TODO_STORED= re.compile('^(?P<prefix>[\+\-\!\=])?(?P<tags>.*) (?P<id>\d+): (?P<priority>[\+\-]\d+) (.+ \d\d/\d\d/\d\d \d\d:\d\d )?\"(?P<context>.*)\" (?P<editor>.+) (?P<editdate>\d\d/\d\d/\d\d) (?P<edittime>\d\d:\d\d)(?P<editsecs>:\d\d)?(?P<comment>)$')
+RE_TODO_EXISTING= re.compile('(?P<prefix>.*?)(?:' +'|'.join(re_prefixes) +') ??(?P<state>[ \+\-\=\!]?)todo\s+(?P<id>\d+)(?:\s+\((?P<tags>.*)\))?(?:\s+(?P<priority>[\+\-]\d+))?\s*:(?P<postfix>[ \t]*(?P<comment>.*)[ \t]*)')
+RE_TODO_INCONSISTENT= re.compile('(?P<prefix>.*?)(?:' +'|'.join(re_prefixes) +') ??(?P<state>[ \+\-\=\!]?)    \s+(?P<id>\d+)(?:\s+\((?P<tags>.*)\))?(?:\s+(?P<priority>[\+\-]\d+))?\s*:(?P<postfix>[ \t]*(?P<comment>.*)[ \t]*)')
+RE_TODO_STORED= re.compile('^ ??(?P<prefix>[ \+\-\!\=]?)(?P<tags>.*) (?P<id>\d+): (?P<priority>[\+\-]\d+) (.+ \d\d/\d\d/\d\d \d\d:\d\d )?\"(?P<context>.*)\" (?P<editor>.+) (?P<editdate>\d\d/\d\d/\d\d) (?P<edittime>\d\d:\d\d)(?P<editsecs>:\d\d)?(?P<comment>)$')
 RE_TODO_STORED_COMMENT= re.compile('^\t?(?P<comment>.*)$')
 RE_TODO_FILE_MAXID= re.compile('^(?P<prefix>Reserved: )(?P<maxid>\d*)$')
 
@@ -35,7 +35,8 @@ RE_CFG= re.compile("^\s*(?:" +re_mysql_str +"|" +re_http_str +"|" +re_file_str +
 
 SKIP_SEARCH_DIR= ['tmp', 'temp']
 SKIP_SEARCH_FILES= ['*.', '*.sublime-workspace', '*.gz', '*.mov', '*.avi', '*.qt']
-SKIP_SEARCH_SIZE= 640000 #should be enough for everyone
+SKIP_SEARCH_FILESIZE= 640000 #should be enough for everyone
+SKIP_SEARCH_LINESIZE= 1000
 
 
 # todo 2092 (fix) +0: read settings more correctly

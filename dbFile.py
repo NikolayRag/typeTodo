@@ -165,11 +165,8 @@ class TodoDbFile():
                         continue
 
                     if ctxTodo:
-# todo 2097 (cleanup, spike) +0: remove '-' to '' convert after while
-                        __state= ctxTodo.group('prefix')
-                        if __state=='-': __state= ''
                         matchComment= RE_TODO_STORED_COMMENT.match(ln)
-                        todoA[int(ctxTodo.group('id'))].set(__state, ctxTodo.group('tags').split(','), int(ctxTodo.group('priority')), ctxTodo.group('context'), matchComment.group('comment'), ctxTodo.group('editor'), gmtTime)
+                        todoA[int(ctxTodo.group('id'))].set(ctxTodo.group('prefix'), ctxTodo.group('tags').split(','), int(ctxTodo.group('priority')), ctxTodo.group('context'), matchComment.group('comment'), ctxTodo.group('editor'), gmtTime)
                         ctxTodo= None
                         continue
 

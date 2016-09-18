@@ -5,15 +5,15 @@
 { "keys": ["alt+d","alt+i"], "command": "typetodo_revivify"},
 { "keys": ["alt+d","alt+h"], "command": "typetodo_www"},
 
-{ "keys": ["alt+d","alt+up"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoUp"}] },
-{ "keys": ["alt+d","alt+down"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoDown"}] },
+{ "keys": ["alt+d","alt+up"], "command": "typetodo_priority", "args": {"_delta":1} },
+{ "keys": ["alt+d","alt+down"], "command": "typetodo_priority", "args": {"_delta":-1} },
 
 
 
-{ "keys": ["alt+d","alt+space"], "command": "typetodo_set", "args": {"_state": ""}},
+{ "keys": ["alt+d","alt+space"], "command": "typetodo_set", "args": {"_state": " "}},
 
-{ "keys": ["alt+d","alt+keypad_minus"], "command": "typetodo_set", "args": {"_state": ""}},
-{ "keys": ["alt+d","alt+-"], "command": "typetodo_set", "args": {"_state": ""}},
+{ "keys": ["alt+d","alt+keypad_minus"], "command": "typetodo_set", "args": {"_state": "-"}},
+{ "keys": ["alt+d","alt+-"], "command": "typetodo_set", "args": {"_state": "-"}},
 
 { "keys": ["alt+d","alt+keypad_plus"], "command": "typetodo_set", "args": {"_state": "+"}},
 { "keys": ["alt+d","alt++"], "command": "typetodo_set", "args": {"_state": "+"}},

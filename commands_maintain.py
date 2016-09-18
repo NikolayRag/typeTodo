@@ -24,7 +24,14 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
     def run(self, _edit, _delayed=True):
         _region= sublime.Region(0,self.view.size())
-        content= self.view.substr(_region)
+        contentA= []
+        for cLine in self.view.substr(_region).split('\n'):
+            if len(cLine)>SKIP_SEARCH_LINESIZE:
+                cLine= ''
+            contentA.append(cLine)
+
+        content= '\n'.join(contentA)
+
 
         todos= []
         regionsOpenPre= []
@@ -33,6 +40,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
         regionsProgress= []
         regionsInconsistentPre= []
         regionsInconsistent= []
+
 
         for cTodo in RE_TODO_INCONSISTENT.finditer(content):
             regionTodo= sublime.Region(cTodo.end('prefix'), cTodo.end('comment'))
@@ -76,7 +84,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
             for cTag in _tags.split(','):
                 tagsA.append(cTag.strip())
 
-            if storedTask.state!=_state or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
+            if storedTask.state!=(_state or STATE_DEFAULT[0]) or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
                 return False
 
         return True
@@ -87,9 +95,7 @@ class TypetodoMaintainCommand(sublime_plugin.TextCommand):
 
 
 
-
-
-# todo 2098 (consistency) +0: check only one doplet if cursor stands on it
+#  todo 2112 (command) +0: allow changing one line, inline; use in substRestore()
 #Double all inconsistent doplets with actual version
 #
 class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
@@ -101,14 +107,20 @@ class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
             contentA.append(cTodo)
 
         for cTodo in reversed(contentA):
-            regionTodo= sublime.Region(cTodo.end('prefix'), cTodo.end('comment'))
-
             cId= cTodo.group('id')
+
             if not self.todoValidate(cId, cTodo.group('state'), cTodo.group('tags'), cTodo.group('priority'), cTodo.group('comment')):
                 storedTask= WCache().getDB().todoA[int(cId)]
                 commentType= self.view.substr(sublime.Region(cTodo.end('prefix'), cTodo.start('state')))
+                if commentType[-1]!=' ':#expand
+                    commentType+= ' '
 
-                replaceTodo= commentType +storedTask.state +'todo ' +cId +' (' +', '.join(storedTask.tagsA) +') +' +str(storedTask.lvl) +': ' +storedTask.comment
+                newPriority= int(storedTask.lvl)
+                if newPriority>=0:
+                    newPriority= '+' +str(newPriority)
+                newPriority= str(newPriority)
+                        
+                replaceTodo= commentType +storedTask.state +'todo ' +cId +' (' +', '.join(storedTask.tagsA) +') ' +newPriority +': ' +storedTask.comment
 
                 self.view.replace(_edit, sublime.Region(cTodo.end('comment')+1, cTodo.end('comment')+1), replaceTodo+'\n')
                 self.view.replace(_edit, sublime.Region(cTodo.end('state'), cTodo.start('id')), '     ')
@@ -122,7 +134,7 @@ class TypetodoRevivifyCommand(sublime_plugin.TextCommand):
             for cTag in _tags.split(','):
                 tagsA.append(cTag.strip())
 
-            if storedTask.state!=_state or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
+            if storedTask.state!=(_state or STATE_DEFAULT[0]) or sorted(storedTask.tagsA)!=sorted(tagsA) or storedTask.lvl!=int(_priority) or storedTask.comment!=_comment:
                 return False
 
         return True

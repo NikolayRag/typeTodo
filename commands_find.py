@@ -69,6 +69,13 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
 
 
 
+
+#Check if doplet within _reg matches _id
+#_id can be:
+#   Int for ID
+#   String for TAG, ',' separated
+#   String with '-' sign for excluded TAG
+#
     def findTodoLine(self, _reg, _id):
         isId= re.match('^\d+$', _id)
 
@@ -141,29 +148,33 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
 
 
     def findTodoInFile(self, _fn, _test, _id):
-        matches= []
-
-        foundRe= None
-        lNum= 0
+        fContent= []
         try:
             with codecs.open(_fn, 'r', 'UTF-8') as f:
                 for ln in f:
-                    ln= ln.strip()
-                    lNum+= 1
-                    foundRe= _test.match(ln)
-                    if foundRe and self.findTodoLine(foundRe, _id):
-                        matches.append({
-                            'row': lNum-1,
-                            'col': foundRe.end('prefix'),
-                            'line': ln,
-                            'regexp': foundRe,
-                            'file': _fn
-                        })
-
- 
+                    if len(ln)>SKIP_SEARCH_LINESIZE:
+                        ln= ''
+                    fContent.append(ln.strip('\n\r'))
         except Exception as e:
-            None
+            return []
 
+
+        matches= []
+        foundRe= None
+        lNum= 0
+
+        for ln in fContent:
+            lNum+= 1
+            foundRe= _test.match(ln)
+            if foundRe and self.findTodoLine(foundRe, _id):
+                matches.append({
+                    'row': lNum-1,
+                    'col': foundRe.end('prefix'),
+                    'line': ln,
+                    'regexp': foundRe,
+                    'file': _fn
+                })
+ 
         return matches
 
 
@@ -185,14 +196,17 @@ class TypetodoFindCommand(sublime_plugin.TextCommand):
                     for cFile in fnmatch.filter(cWalk[2], cMask):
                         skipF.append(cFile)
 
-                for cFile in set(cWalk[2])-set(skipF):
-
+                okFiles= set(cWalk[2])-set(skipF)
+                for cFile in okFiles:
                     fn= os.path.join(cWalk[0], cFile)
                         
-                    if os.path.getsize(fn)>SKIP_SEARCH_SIZE:
+                    if os.path.getsize(fn)>SKIP_SEARCH_FILESIZE:
                         continue
 
-                    self.matchAdd(_oldMatchA, self.findTodoInFile(fn, RE_TODO_EXISTING, _id))
+                    matches= self.findTodoInFile(fn, RE_TODO_EXISTING, _id)
+                    if matches:
+                        self.matchAdd(_oldMatchA, matches)
+
 
 
     #exclude add match to existing list
@@ -420,27 +434,31 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
 
     def findTodoInFile(self, _fn, _test, _id):
-        matches= []
-
-        foundRe= None
-        lNum= 0
+        fContent= []
         try:
             with codecs.open(_fn, 'r', 'UTF-8') as f:
                 for ln in f:
-                    ln= ln.strip()
-                    lNum+= 1
-                    foundRe= _test.match(ln)
-                    if foundRe and self.findTodoLine(foundRe, _id):
-                        matches.append({
-                            'row': lNum-1,
-                            'col': foundRe.end('prefix'),
-                            'line': ln,
-                            'regexp': foundRe,
-                            'file': _fn
-                        })
-
- 
+                    if len(ln)>SKIP_SEARCH_LINESIZE:
+                        ln= ''
+                    fContent.append(ln.strip('\n\r'))
         except Exception as e:
-            None
+            return []
 
+
+        matches= []
+        foundRe= None
+        lNum= 0
+
+        for ln in fContent:
+            lNum+= 1
+            foundRe= _test.match(ln)
+            if foundRe and self.findTodoLine(foundRe, _id):
+                matches.append({
+                    'row': lNum-1,
+                    'col': foundRe.end('prefix'),
+                    'line': ln,
+                    'regexp': foundRe,
+                    'file': _fn
+                })
+ 
         return matches

@@ -16,7 +16,7 @@ else:
 ##+service commands
 
 
-#Replace view region.
+#Replace view region content.
 #Command is used to keep python flow unruined
 #
 class TypetodoRegReplaceCommand(sublime_plugin.TextCommand):
@@ -45,6 +45,32 @@ class TypetodoJumpViewCommand(sublime_plugin.TextCommand):
 ##-service commands
 
 
+
+#Change todo priority
+#
+class TypetodoPriorityCommand(sublime_plugin.TextCommand):
+    def run(self, _edit, _delta):
+        todoRegion = self.view.line(self.view.sel()[0])
+        matchRegexp= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
+        if not matchRegexp:
+            sublime.status_message('Nothing Todo here')
+            return
+
+        newPriority= int(matchRegexp.group('priority')) +_delta
+        if newPriority>=0:
+            newPriority= '+' +str(newPriority)
+        newPriority= str(newPriority)
+        
+        self.view.run_command('typetodo_reg_replace', {
+            '_regStart': todoRegion.a+matchRegexp.start('priority'),
+            '_regEnd': todoRegion.a+matchRegexp.end('priority'),
+            '_replaceWith': newPriority
+        })
+
+
+
+#Set todo state by supplying it or by calling menu
+#
 class TypetodoSetCommand(sublime_plugin.TextCommand):
     stateChars= []
     stateRegion= []
@@ -55,7 +81,7 @@ class TypetodoSetCommand(sublime_plugin.TextCommand):
             self.view.run_command('typetodo_reg_replace', {'_regStart': self.stateRegion[0], '_regEnd': self.stateRegion[1], '_replaceWith': self.stateChars[_idx]})
 
 
-    def run(self, _edit, _state=False, _priority=False):
+    def run(self, _edit, _state=False):
         #prevented while in 'Search todo' results
         foundView= WCache().getResultsView(False)
         if foundView and foundView.buffer_id()==self.view.buffer_id():
@@ -67,18 +93,13 @@ class TypetodoSetCommand(sublime_plugin.TextCommand):
             sublime.status_message('Nothing Todo here')
             return
 
-        self.stateRegion= (matchRegexp.span('state')[0] +todoRegion.a, matchRegexp.span('state')[1] +todoRegion.a)
 
+        self.stateRegion= (matchRegexp.span('state')[0] +todoRegion.a, matchRegexp.span('state')[1] +todoRegion.a)
 
         #explicit state
         if _state!=False:
             self.stateChars= [_state]
             self.setState(0)
-            return
-
-
-        #explicit priority
-        if _priority!=False:
             return
 
 
@@ -97,17 +118,21 @@ class TypetodoSetCommand(sublime_plugin.TextCommand):
 
 
 
+#open HTTP repository in browser
+#
 class TypetodoWwwCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= WCache().getDB()
         for cCfg in cDb.config.settings:
-            if cCfg.engine=='http' and cCfg.addr!='' and cCfg.base!='':
-                webbrowser.open_new_tab('http://' +cCfg.addr +'/' +cCfg.base +'/' +cDb.config.projectName)
+            if (cCfg.engine=='http' or cCfg.engine=='https') and cCfg.addr!='' and cCfg.base!='':
+                webbrowser.open_new_tab(cCfg.engine +'://' +cCfg.addr +'/' +cCfg.base +'/' +cDb.config.projectName)
                 return
         sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
 
 
 
+#Open project's .do
+#
 class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         fn= WCache().getDB().config.settings[0].file
@@ -118,6 +143,8 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
 
 
 
+#Open global .do
+#
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         fn= Config().settings[0].file
@@ -128,6 +155,10 @@ class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
 
 
 
+
+
+#Reset global config
+#
 class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
     cDb= None
 

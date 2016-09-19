@@ -18,7 +18,7 @@ else:
 
 #  todo 44 (config, db, feature, unsolved) -1: handle saving project - existing and blank; transfer db for involved files
 
-#  todo 89 (db, feature, unsure) +1: save context (+-2 strings of code) with task
+# -todo 89 (db, feature) +1: save context (+-2 strings of code) with task
 
 #todo 2045 (db, issue, fix) +0: New Id sync warning when having 2 http noticed
 #
@@ -327,13 +327,13 @@ class TodoDb():
             for iT in self.todoA: #reset all existing unsaved, coz states got loose from db's
                 self.todoA[iT].savedReset()
 
-        for dbN in self.dbA:
+        for dbN in self.dbA: #oved dbs
             cDb= self.dbA[dbN]
             todoA= cDb.fetch()
             if todoA==False:
                 continue
 
-            for iT in todoA:
+            for iT in todoA: #over tasks
                 task= todoA[iT]
 
                 isNew= iT not in self.todoA

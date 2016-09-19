@@ -39,7 +39,6 @@ SKIP_SEARCH_FILESIZE= 640000 #should be enough for everyone
 SKIP_SEARCH_LINESIZE= 1000
 
 
-# todo 2092 (fix) +0: read settings more correctly
 constCorrectFlag= False
 def constCorrect(_view):
     global constCorrectFlag

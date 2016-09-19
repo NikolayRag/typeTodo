@@ -1,0 +1,32 @@
+v1.9.1
+
+add:
+- 'Pending' default state with ' ' prefix
+- todo search is non-blocking for st3
+- jump command to jump:
+  to code from .do file and from search results
+  to .do file from code
+
+change:
+- canceling todo can be interrupted by ESC leaving todo intact
+- 'Opened' state got '-' prefix
+- force init HTTP at first run
+- all key bindings moved to [alt+d, alt+<key>]:
+    alt+d - Set new todo state
+    alt+f - Find todo by id or tag command
+    alt+j - Jump to/from todo
+    alt+i - Show inconsistent todos
+    alt+h - Open HTTP repository
+
+    alt+up - Raise priority
+    alt+down - Lower priority
+
+    alt+space     - Set state to '', 'Pending'
+    alt+minus     - Set state to '-', 'Opened'
+    alt+plus      - Set state to '+', 'Closed'
+    alt+=         - Set state to '=', 'Progress'
+    alt+backspace
+    alt+del       - Set state to '!', 'Canceled'
+
+- todo find simplified
+- README is split

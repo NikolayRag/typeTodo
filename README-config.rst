@@ -35,11 +35,12 @@ If no explicit **FILE** database is defined, then *[projectName].do* is used as 
 File used for this mode (*[projectName].do* itself or external) holds tasks using following format:
        
     ``[ |-|+|=|!]tags XXXX: [+|-N] filename editorName editionStamp``
+    
     ``comment``
 
 where fields are:
 
-* [ |-|+|=|!]
+* \[ |-|+|=|!]
        TODO state: `` `` indicates pending task, ``-`` - opened, ``+`` - closed, ``=`` - in-progress, and ``!`` - canceled.
 * tags
        comma-separated tag list

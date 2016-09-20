@@ -4,7 +4,7 @@
 Configuring TypeTodo
 ====================
 
-TypeTodo is configured with *[projectName].do* files, which are used both as configuration and default database storage.
+TypeTodo is configured using first lines in *[projectName].do* file, which is used both as configuration and default database storage.
 
     *[projectName].do* is automatically created in the first project's folder if none found:
     if first folder included in project is ``/myProject``, then ``/myProject/myProject.do`` file will be used as config.
@@ -29,12 +29,12 @@ Acceptable configurations are **FILE**, **MYSQL** and **HTTP**
 Specified by ``file <path/filename.ext>`` line.
 Path can be absolute or relative to *[projectName].do* itself.
 
-If no explicit **FILE** database is defined, then *[projectName].do* is used as database stoprage.
+If no explicit **FILE** database is defined, then *[projectName].do* is used as database storage.
 
 
 File used for this mode (*[projectName].do* itself or external) holds tasks using following format:
        
-    ``[ |-|+|=|!]tags XXXX: [+|-N] filename editorName editionStamp``
+    ``[ |-|+|=|!]tags XXXX: [+|-]N filename editorName editionStamp``
     
     ``comment``
 
@@ -46,7 +46,7 @@ where fields are:
        comma-separated tag list
 * XXXX
        task integer ID, unique within project (and within *.do* file)
-* +|-N
+* [+|-]N
        priority, arbitrary signed integer number
 * filename
        file at which task was created. If ``.sublime-project`` is found, relative path is stored.

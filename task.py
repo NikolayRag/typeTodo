@@ -55,7 +55,7 @@ class TodoTask():
     def set(self, _state, _tagsA, _lvl, _fileName, _comment, _editor, _stamp):
         self.setSaved(SAVE_STATES.READY)
 
-        self.state= _state
+        self.state= _state or STATE_DEFAULT[0]
         self.setTags(_tagsA)
         self.lvl= int(_lvl) or 0
         self.fileName= _fileName or ''

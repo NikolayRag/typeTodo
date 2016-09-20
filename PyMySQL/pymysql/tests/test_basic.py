@@ -1,14 +1,15 @@
-import pymysql.cursors
-
-from pymysql.tests import base
-from pymysql import util
-from pymysql.err import ProgrammingError
-
-import time
+# coding: utf-8
 import datetime
+import json
+import time
 import warnings
 
 from unittest2 import SkipTest
+
+from pymysql import util
+import pymysql.cursors
+from pymysql.tests import base
+from pymysql.err import ProgrammingError
 
 
 __all__ = ["TestConversion", "TestCursor", "TestBulkInserts"]
@@ -42,11 +43,15 @@ class TestConversion(base.PyMySQLTestCase):
 
             c.execute("delete from test_datatypes")
 
-            # check sequence type
-            c.execute("insert into test_datatypes (i, l) values (2,4), (6,8), (10,12)")
-            c.execute("select l from test_datatypes where i in %s order by i", ((2,6),))
-            r = c.fetchall()
-            self.assertEqual(((4,),(8,)), r)
+            # check sequences type
+            for seq_type in (tuple, list, set, frozenset):
+                c.execute("insert into test_datatypes (i, l) values (2,4), (6,8), (10,12)")
+                seq = seq_type([2,6])
+                c.execute("select l from test_datatypes where i in %s order by i", (seq,))
+                r = c.fetchall()
+                self.assertEqual(((4,),(8,)), r)
+                c.execute("delete from test_datatypes")
+
         finally:
             c.execute("drop table test_datatypes")
 
@@ -234,6 +239,31 @@ class TestCursor(base.PyMySQLTestCase):
         self.assertEqual([(1,)], list(c.fetchall()))
         c.close()
 
+    def test_json(self):
+        args = self.databases[0].copy()
+        args["charset"] = "utf8mb4"
+        conn = pymysql.connect(**args)
+        if not self.mysql_server_is(conn, (5, 7, 0)):
+            raise SkipTest("JSON type is not supported on MySQL <= 5.6")
+
+        self.safe_create_table(conn, "test_json", """\
+create table test_json (
+    id int not null,
+    json JSON not null,
+    primary key (id)
+);""")
+        cur = conn.cursor()
+
+        json_str = u'{"hello": "こんにちは"}'
+        cur.execute("INSERT INTO test_json (id, `json`) values (42, %s)", (json_str,))
+        cur.execute("SELECT `json` from `test_json` WHERE `id`=42")
+        res = cur.fetchone()[0]
+        self.assertEqual(json.loads(res), json.loads(json_str))
+
+        cur.execute("SELECT CAST(%s AS JSON) AS x", (json_str,))
+        res = cur.fetchone()[0]
+        self.assertEqual(json.loads(res), json.loads(json_str))
+
 
 class TestBulkInserts(base.PyMySQLTestCase):
 
@@ -345,4 +375,5 @@ age = values(age)"""))
             cur.execute("drop table if exists no_exists_table")
         self.assertEqual(len(ws), 1)
         self.assertEqual(ws[0].category, pymysql.Warning)
-        self.assertTrue(u"no_exists_table" in str(ws[0].message))
+        if u"no_exists_table" not in str(ws[0].message):
+            self.fail("'no_exists_table' not in %s" % (str(ws[0].message),))

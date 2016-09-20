@@ -13,78 +13,126 @@ else:
     from .c import *
 
 
+##+service commands
 
-#command is used to keep python flow unruined
+
+#Replace view region content.
+#Command is used to keep python flow unruined
+#
 class TypetodoRegReplaceCommand(sublime_plugin.TextCommand):
     def run(self, _edit, _regStart= False, _regEnd= False, _replaceWith=''):
         self.view.set_read_only(False) #will reset instantly
         self.view.replace(_edit, sublime.Region(int(_regStart), int(_regEnd)), _replaceWith)
  
 
-class TypetodoSetStateCommand(sublime_plugin.TextCommand):
-    setStateChars= []
-    setStateRegion= []
 
-    def setChar(self, _idx):
+#Focus view, place and show cursor
+#
+class TypetodoJumpViewCommand(sublime_plugin.TextCommand):
+    def showLinecol(self, _line, _col):
+        focusBegin= self.view.text_point(_line, _col)
+        focusLine= sublime.Region(focusBegin, self.view.line(focusBegin).b)
+
+        self.view.sel().clear()
+        self.view.sel().add(sublime.Region(focusBegin, focusBegin))
+        self.view.show(focusLine)
+
+    def run(self, _edit, _line=-1, _col=0):
+        sublime.active_window().focus_view(self.view)
+        if _line!=-1:
+            sublime.set_timeout(lambda: self.showLinecol(_line,_col), 100)
+
+##-service commands
+
+
+
+#Change todo priority
+#
+class TypetodoPriorityCommand(sublime_plugin.TextCommand):
+    def run(self, _edit, _delta):
+        todoRegion = self.view.line(self.view.sel()[0])
+        matchRegexp= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
+        if not matchRegexp:
+            sublime.status_message('Nothing Todo here')
+            return
+
+        newPriority= int(matchRegexp.group('priority')) +_delta
+        if newPriority>=0:
+            newPriority= '+' +str(newPriority)
+        newPriority= str(newPriority)
+        
+        self.view.run_command('typetodo_reg_replace', {
+            '_regStart': todoRegion.a+matchRegexp.start('priority'),
+            '_regEnd': todoRegion.a+matchRegexp.end('priority'),
+            '_replaceWith': newPriority
+        })
+
+
+
+#Set todo state by supplying it or by calling menu
+#
+class TypetodoSetCommand(sublime_plugin.TextCommand):
+    stateChars= []
+    stateRegion= []
+
+
+    def setState(self, _idx):
         if _idx>=0:
-            self.view.run_command('typetodo_reg_replace', {'_regStart': self.setStateRegion[0], '_regEnd': self.setStateRegion[1], '_replaceWith': self.setStateChars[_idx]})
+            self.view.run_command('typetodo_reg_replace', {'_regStart': self.stateRegion[0], '_regEnd': self.stateRegion[1], '_replaceWith': self.stateChars[_idx]})
 
-    def run(self, _edit, _replaceWith=False):
+
+    def run(self, _edit, _state=False):
         #prevented while in 'Search todo' results
         foundView= WCache().getResultsView(False)
         if foundView and foundView.buffer_id()==self.view.buffer_id():
             return
 
         todoRegion = self.view.line(self.view.sel()[0])
-        _mod= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
-        if not _mod:
+        matchRegexp= RE_TODO_EXISTING.match(self.view.substr(todoRegion))
+        if not matchRegexp:
             sublime.status_message('Nothing Todo here')
             return
 
-        self.setStateRegion= (_mod.span('state')[0] +todoRegion.a, _mod.span('state')[1] +todoRegion.a)
 
+        self.stateRegion= (matchRegexp.span('state')[0] +todoRegion.a, matchRegexp.span('state')[1] +todoRegion.a)
 
-        if _replaceWith!=False:
-            self.setStateChars= [_replaceWith]
-            self.setChar(0)
+        #explicit state
+        if _state!=False:
+            self.stateChars= [_state]
+            self.setState(0)
             return
 
 
-        self.setStateChars= []
+        #display to chose state
+        self.stateChars= []
         menuItems= []
 
-        currentState= _mod.group('state')
-        defaultState= ''
-        if currentState=='':
-            defaultState= '='
-        elif currentState=='=':
-            defaultState= '+'
-
-        self.setStateChars.append(defaultState)
-        menuItems.append('\'' +defaultState +'\': ' +str(STATE_LIST[defaultState]))
-
-        for state in STATE_LIST: #collect menu list, excluding current and default state
-            if state==currentState or state==defaultState:
-                continue
-            self.setStateChars.append(state)
-            menuItems.append('\'' +state +'\': ' +str(STATE_LIST[state]))
+        for state in STATE_LIST: #collect menu list
+            if state:
+                self.stateChars.append(state[0])
+                menuItems.append((4-len(state[0]))*' ' +state[0] +'   : ' +state[1])
 
 
-        self.view.window().show_quick_panel(menuItems, self.setChar, sublime.MONOSPACE_FONT)
+        self.view.window().show_quick_panel(menuItems, self.setState, sublime.MONOSPACE_FONT)
 
 
 
+
+#open HTTP repository in browser
+#
 class TypetodoWwwCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= WCache().getDB()
         for cCfg in cDb.config.settings:
-            if cCfg.engine=='http' and cCfg.addr!='' and cCfg.base!='':
-                webbrowser.open_new_tab('http://' +cCfg.addr +'/' +cCfg.base +'/' +cDb.config.projectName)
+            if (cCfg.engine=='http' or cCfg.engine=='https') and cCfg.addr!='' and cCfg.base!='':
+                webbrowser.open_new_tab(cCfg.engine +'://' +cCfg.addr +'/' +cCfg.base +'/' +cDb.config.projectName)
                 return
         sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
 
 
 
+#Open project's .do
+#
 class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         fn= WCache().getDB().config.settings[0].file
@@ -95,6 +143,8 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
 
 
 
+#Open global .do
+#
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         fn= Config().settings[0].file
@@ -105,6 +155,10 @@ class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
 
 
 
+
+
+#Reset global config
+#
 class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
     cDb= None
 
@@ -129,3 +183,4 @@ class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
             return
 
         self.cDb= TodoDb(self.resetCB, Config())
+

@@ -15,7 +15,8 @@ else:
 
 
 #open context menu only for st3+
-class TypetodoContextMouseCommand(sublime_plugin.TextCommand):
+class TypetodoMouseContextCommand(sublime_plugin.TextCommand):
+
     if sys.version < '3':
         def run_(self, args):
             self.view.run_command('context_menu', args)
@@ -29,32 +30,35 @@ class TypetodoContextMouseCommand(sublime_plugin.TextCommand):
                 itemsA= []
                 fnsA= []
 
-                itemsA.append('Search todo')
+                def makeSetState(_cState):
+                    return lambda: self.view.run_command("typetodo_set", {"_state": _cState})
+
+                for cState in STATE_LIST:
+                    if cState:
+                        itemsA.append(cState[0]+' : '+cState[1])
+                        fnsA.append(makeSetState(cState[0]))
+
+
+                itemsA.append('')
+                fnsA.append(None)
+
+                itemsA.append('Jump to .do')
                 fnsA.append(lambda: self.view.run_command('typetodo_jump'))
 
-                itemsA.append('Update inconsistency')
+                itemsA.append('Inconsistency')
                 fnsA.append(lambda: self.view.run_command('typetodo_revivify'))
 
                 itemsA.append('')
                 fnsA.append(None)
 
+                itemsA.append('Find todo')
+                fnsA.append(lambda: self.view.run_command('typetodo_find'))
 
-                def makeSetState(_cState):
-                    return lambda: self.view.run_command("typetodo_set_state", {"_replaceWith": _cState})
-
-                for cState in STATE_LIST:
-                    itemsA.append('\''+cState+'\': '+STATE_LIST[cState])
-                    fnsA.append(makeSetState(cState))
-
-
-                itemsA.append('')
-                fnsA.append(None)
-
-                itemsA.append('Open http base')
-                fnsA.append(lambda: self.view.run_command('typetodo_www'))
-
-                itemsA.append('Open config')
+                itemsA.append('Config')
                 fnsA.append(lambda: self.view.run_command('typetodo_cfg_open'))
+
+                itemsA.append('HTTP repository')
+                fnsA.append(lambda: self.view.run_command('typetodo_www'))
 
 
 
@@ -73,7 +77,7 @@ class TypetodoContextMouseCommand(sublime_plugin.TextCommand):
 
 #doubleclick handler for typetodo search results
 #
-class TypetodoJumpMouseCommand(sublime_plugin.TextCommand):
+class TypetodoMouseDoubleCommand(sublime_plugin.TextCommand):
     if sys.version < '3':
         def run_(self, args):
             self.run23(args)
@@ -83,7 +87,11 @@ class TypetodoJumpMouseCommand(sublime_plugin.TextCommand):
 
 
     def run23(self, args):
-        if WCache().checkResultsView(self.view.buffer_id()):
+        #init search with .do id
+        todoStr= self.view.substr( self.view.line(self.view.sel()[0]) )
+
+        todoIndo= RE_TODO_STORED.match(todoStr)
+        if todoIndo or WCache().checkResultsView(self.view.buffer_id()):
             self.view.run_command('typetodo_jump')
         else:
             self.view.run_command('drag_select', args)

@@ -1,5 +1,68 @@
 # Changes
 
+## 0.7.9
+
+Release date: 2016-09-03
+
+* Fix PyMySQL stop reading rows when first column is empty string (#513)
+  Reverts DEPRECATE_EOF introduced in 0.7.7.
+
+## 0.7.8
+
+Release date: 2016-09-01
+
+* Revert error message change in 0.7.7.
+  (SQLAlchemy parses error message, #507)
+
+## 0.7.7
+
+Release date: 2016-08-30
+
+* Add new unicode collation (#498)
+* Fix conv option is not used for encoding objects.
+* Experimental support for DEPRECATE_EOF protocol.
+
+## 0.7.6
+
+Release date: 2016-07-29
+
+* Fix SELECT JSON type cause UnicodeError
+* Avoid float convertion while parsing microseconds
+* Warning has number
+* SSCursor supports warnings
+
+## 0.7.5
+
+Release date: 2016-06-28
+
+* Fix exception raised while importing when getpwuid() fails (#472)
+* SSCursor supports LOAD DATA LOCAL INFILE (#473)
+* Fix encoding error happen for JSON type (#477)
+* Fix test fail on Python 2.7 and MySQL 5.7 (#478)
+
+## 0.7.4
+
+Release date: 2016-05-26
+
+* Fix AttributeError may happen while Connection.__del__ (#463)
+* Fix SyntaxError in test_cursor. (#464)
+* frozenset support for query value. (#461)
+* Start using readthedocs.io
+
+## 0.7.3
+
+Release date: 2016-05-19
+
+* Add read_timeout and write_timeout option.
+* Support serialization customization by `conv` option.
+* Unknown type is converted by `str()`, for MySQLdb compatibility.
+* Support '%%' in `Cursor.executemany()`
+* Support REPLACE statement in `Cursor.executemany()`
+* Fix handling incomplete row caused by 'SHOW SLAVE HOSTS'.
+* Fix decode error when use_unicode=False on PY3
+* Fix port option in my.cnf file is ignored.
+
+
 ## 0.7.2
 
 Release date: 2016-02-24

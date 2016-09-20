@@ -1,12 +1,28 @@
 [
-{ "keys": ["shift+keypad_plus"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoUp"}] },
-{ "keys": ["shift+keypad_minus"], "command": "typetodo_repriority", "args": {}, "context": [{"key": "typetodoDown"}] },
-{ "keys": ["alt+d"], "command": "typetodo_set_state", "args": {}},
-{ "keys": ["alt+shift+d"], "command": "typetodo_jump", "args": {} },
+{ "keys": ["alt+d","alt+d"], "command": "typetodo_set"},
+{ "keys": ["alt+d","alt+f"], "command": "typetodo_find"},
+{ "keys": ["alt+d","alt+j"], "command": "typetodo_jump"},
+{ "keys": ["alt+d","alt+i"], "command": "typetodo_revivify"},
+{ "keys": ["alt+d","alt+h"], "command": "typetodo_www"},
 
-{ "keys": ["alt+shift+keypad_plus"], "command": "typetodo_set_state", "args": {"_replaceWith": "+"}},
-{ "keys": ["alt+shift+keypad_minus"], "command": "typetodo_set_state", "args": {"_replaceWith": ""}},
-{ "keys": ["alt+shift+1"], "command": "typetodo_set_state", "args": {"_replaceWith": "!"}},
-{ "keys": ["alt+shift+="], "command": "typetodo_set_state", "args": {"_replaceWith": "="}}
+{ "keys": ["alt+d","alt+up"], "command": "typetodo_priority", "args": {"_delta":1} },
+{ "keys": ["alt+d","alt+down"], "command": "typetodo_priority", "args": {"_delta":-1} },
 
+
+
+{ "keys": ["alt+d","alt+space"], "command": "typetodo_set", "args": {"_state": " "}},
+
+{ "keys": ["alt+d","alt+keypad_minus"], "command": "typetodo_set", "args": {"_state": "-"}},
+{ "keys": ["alt+d","alt+-"], "command": "typetodo_set", "args": {"_state": "-"}},
+
+{ "keys": ["alt+d","alt+keypad_plus"], "command": "typetodo_set", "args": {"_state": "+"}},
+{ "keys": ["alt+d","alt++"], "command": "typetodo_set", "args": {"_state": "+"}},
+{ "keys": ["alt+d","alt+shift+="], "command": "typetodo_set", "args": {"_state": "+"}},
+
+{ "keys": ["alt+d","alt+="], "command": "typetodo_set", "args": {"_state": "="}},
+
+{ "keys": ["alt+d","alt+backspace"], "command": "typetodo_set", "args": {"_state": "!"}},
+{ "keys": ["alt+d","alt+!"], "command": "typetodo_set", "args": {"_state": "!"}},
+{ "keys": ["alt+d","alt+delete"], "command": "typetodo_set", "args": {"_state": "!"}},
+{}
 ]

@@ -55,16 +55,13 @@ class TodoDbFile():
                         if curTodo.initial:
                             continue
 
-                        stateSign= curTodo.state
-                        if stateSign=='': stateSign='-'
-
                         lvl= curTodo.lvl
                         if curTodo.lvl>=0: lvl= '+' +str(curTodo.lvl)
 
                         #runtime GMT time to local
                         gmtTime= time.localtime(curTodo.stamp)
 
-                        f.write(stateSign +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M:%S', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
+                        f.write(curTodo.state +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M:%S', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
 
                     f.write('\nReserved: %d' % self.maxId)
 
@@ -168,10 +165,8 @@ class TodoDbFile():
                         continue
 
                     if ctxTodo:
-                        __state= ctxTodo.group('prefix')
-                        if ctxTodo.group(1)=='-': __state= ''
                         matchComment= RE_TODO_STORED_COMMENT.match(ln)
-                        todoA[int(ctxTodo.group('id'))].set(__state, ctxTodo.group('tags').split(','), int(ctxTodo.group('priority')), ctxTodo.group('context'), matchComment.group('comment'), ctxTodo.group('editor'), gmtTime)
+                        todoA[int(ctxTodo.group('id'))].set(ctxTodo.group('prefix'), ctxTodo.group('tags').split(','), int(ctxTodo.group('priority')), ctxTodo.group('context'), matchComment.group('comment'), ctxTodo.group('editor'), gmtTime)
                         ctxTodo= None
                         continue
 

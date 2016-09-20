@@ -1,7 +1,6 @@
 # coding= utf-8
 
-#todo 1 (interaction, feature) +1: multiline TODO
-#todo 11 (interaction, unsure) +0: make more TODO formats available (convert from external db's?)
+#-todo 1 (interaction, feature) +1: multiline TODO
 
 #=todo 232 (feature) +1: introduce sub-todo's that are part of other
 
@@ -43,7 +42,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #   React on switching project in window.
 
     def on_deactivated(self, _view):
-#todo 1783 (cleanup, uncertain) -1: switching project in window not clearly fixed, need review
+#  todo 1783 (cleanup, uncertain) -1: switching project in window not clearly fixed, need review
         sublime.set_timeout(lambda: self.on_activated(_view), 200) #spike to catch switching project in existing window
 
         sublime.set_timeout(WCache().exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
@@ -52,11 +51,13 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 
-#   React on swintching into view, initializing DB fetch-synchronize-save.
+#   React on switching into view, initializing DB fetch-synchronize-save.
 #   Switching into view actually duplicated number of times with several
 #    handlers, but this handler is main and is used for TodoDb() creation.
 
     def on_activated(self, _view):
+        constCorrect(_view) #coz settings are delayed at load
+
         cDb= WCache().getDB(True, dbMaintainance) #really applies only once
 
         #set 'file' syntax where it is not right and check consistency
@@ -101,7 +102,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
 
 #   Both on_modified and on_selection_modified deal with cursor position,
-#    saving current inside-doplet context to be user later,
+#    saving current inside-doplet context to be used later,
 #    on_modified also reacts on doplet editing.
 
     def on_selection_modified(self, _view):
@@ -112,7 +113,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
         if self.mutexUnlocked:
             self.mutexUnlocked= 0
             self.view= _view
-            sublime.set_timeout(self.matchTodo, 0) #negative effects at undo if no timeout
+            sublime.set_timeout(self.matchTodo, 0) #negative undo effects if no timeout
             self.mutexUnlocked= 1
 
 
@@ -132,36 +133,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
         return self.autoList
 
 
-#   Handler to react on keyboard shortcuts
-
-    def on_query_context(self, _view, _key, _op, _val, _match):
-
-        if self.todoCursorPlace!=False:
-            todoRegion = _view.line(_view.sel()[0])
-
-
-            if _key=='typetodoUp':
-                addValue= 1
-
-            elif _key=='typetodoDown':
-                addValue= -1
-
-            else:
-                return
-
-            newPriority= int(self.todoMatch.group('priority')) +addValue
-            newPriPfx= ''
-            if newPriority>=0:
-                newPriPfx= '+'
-            newPriority= newPriPfx +str(newPriority)
-            
-            _view.set_read_only(False)
-            _view.run_command('typetodo_reg_replace', {
-                '_regStart': todoRegion.a+self.todoMatch.start('priority'),
-                '_regEnd': todoRegion.a+self.todoMatch.end('priority'),
-                '_replaceWith': newPriority
-            })
-            return True
 
 
 
@@ -189,6 +160,10 @@ class TypetodoEvent(sublime_plugin.EventListener):
 
     def tagsAutoCollect(self):
         cDb= WCache().getDB()
+        if not cDb:
+            return
+
+
         tagsA= []
 
         if cDb:
@@ -236,7 +211,8 @@ class TypetodoEvent(sublime_plugin.EventListener):
                 selStart= selEnd
                 selEnd= tmp
 
-            self.todoCursorPlace= 'todoString'
+            #store doplet field name under cursor
+            self.todoCursorPlace= 'preTodo'
             if selStart>=todoModMatch.end('prefix') and selEnd<=todoModMatch.end('postfix'):
                 self.todoCursorPlace= 'todo'
                 for rangeName in ('prefix', 'state', 'tags', 'priority', 'postfix'):
@@ -244,6 +220,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
                         self.todoCursorPlace= rangeName
                         break
 
+            #protect fields
             self.view.set_read_only(self.todoCursorPlace=='todo')
 
 #todo 1239 (interaction, unsolved) +0: get rid of snippets for tags autocomplete
@@ -288,7 +265,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
     def substNew(self, _prefx, _postfx, _region):
         todoId= self.cfgStore(0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 
-        todoComment= _prefx + ' todo ' +str(todoId) +' (${1:' +self.lastCat[0] +'}) ${2:' +self.lastLvl +'}: ${0:}' +_postfx +''
+        todoComment= _prefx + ' ' +STATE_DEFAULT[0] +'todo ' +str(todoId) +' (${1:' +self.lastCat[0] +'}) ${2:' +self.lastLvl +'}: ${0:}' +_postfx +''
         self.view.run_command('typetodo_reg_replace', {'_regStart': _region.a, '_regEnd': _region.b})
         self.view.run_command("insert_snippet", {"contents": todoComment})
 
@@ -327,6 +304,28 @@ class TypetodoEvent(sublime_plugin.EventListener):
         return func
 
 
+
+#Cancel deleting todo
+#
+    def substRestore(self, _updVals):
+        def func(_txt=False):
+            cDb= WCache().getDB()
+            if not cDb:
+                return
+
+            #restore todo string
+            cString= self.view.substr(_updVals['_region'])
+            cTodo= RE_TODO_EXISTING.match(cString)
+            storedTask= cDb.todoA[int(_updVals['_id'])]
+
+            replaceTodo= storedTask.state +'todo ' +str(storedTask.id) +' (' +', '.join(storedTask.tagsA) +') +' +str(storedTask.lvl) +': ' +storedTask.comment
+
+            self.view.run_command('typetodo_reg_replace', {'_regStart': _updVals['_region'].a+cTodo.start('state'), '_regEnd': _updVals['_region'].a+cTodo.end('comment'), '_replaceWith': replaceTodo})
+
+        return func
+
+
+
 #   Update existing task.
 #   Ask for 'reason' for 'cancel' state.
 
@@ -334,7 +333,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
         updVals= {'_view':self.view, '_state':_state, '_id':_id, '_tags':_tags, '_lvl':_lvl, '_comment':_comment, '_prefix':_prefix, '_region':_region, '_wipe':_wipe}
 
         if _state=='!' and _comment!='':
-            self.view.window().show_input_panel('Reason of canceling:', '', self.substDoUpdate(updVals), None, self.substDoUpdate(updVals))
+            self.view.window().show_input_panel('Reason of canceling:', '', self.substDoUpdate(updVals), None, self.substRestore(updVals))
         else:
             self.substDoUpdate(updVals)()
 

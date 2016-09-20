@@ -1,8 +1,11 @@
 [
     { "caption": "-", "id": "typetodo" },
-{
-	"caption": "typeTodo", "children": [
-            { "caption": "Show inconsistency", "command": "typetodo_revivify" },
-	]
-}
+	{
+		"caption": "typeTodo", "children": [
+	            { "mnemonic": "I", "caption": "Inconsistency", "command": "typetodo_revivify" },
+	            { "mnemonic": "F", "caption": "Find Todo", "command": "typetodo_find" },
+	            { "mnemonic": "C", "caption": "Config", "command": "typetodo_cfg_open" },
+	            { "mnemonic": "H", "caption": "HTTP repository", "command": "typetodo_www" }
+		]
+	}
 ]

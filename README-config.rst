@@ -40,8 +40,8 @@ File used for this mode (*[projectName].do* itself or external) holds tasks usin
 
 where fields are:
 
-* \[ |-|+|=|!]
-       TODO state: `` `` indicates pending task, ``-`` - opened, ``+`` - closed, ``=`` - in-progress, and ``!`` - canceled.
+* [ \|-\|+\|=\|!]
+       TODO state: ``' '`` indicates pending task, ``'-'`` - opened, ``'+'`` - closed, ``'='`` - in-progress, and ``'!'`` - canceled.
 * tags
        comma-separated tag list
 * XXXX
@@ -87,7 +87,7 @@ Specified by ``mysql <host> <user> <pass> <scheme>`` line.
 Following tables will be created if not exists:
 
 * projects
-* categories (for tags)
+* categories (tags)
 * tag2task
 * files
 * users

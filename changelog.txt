@@ -22,7 +22,7 @@ change:
     alt+up - Raise priority
     alt+down - Lower priority
 
-    alt+space     - Set state to '', 'Pending'
+    alt+space     - Set state to ' ', 'Pending'
     alt+minus     - Set state to '-', 'Opened'
     alt+plus      - Set state to '+', 'Closed'
     alt+=         - Set state to '=', 'Progress'
@@ -30,10 +30,12 @@ change:
     alt+del       - Set state to '!', 'Canceled'
 
 - Set State menu shows all states in fixed order
-- todo find simplified
+- Todo Find simplified
+- Todo Find optimised for non-opened files - long lines skipped (>1000 chars)
 - README is split
 - internal command names changed:
   typetodo_set_state to typetodo_set
+
 
 remove:
 - Toggle Colorize command

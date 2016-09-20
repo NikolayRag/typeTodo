@@ -1,26 +1,29 @@
-TypeTodo important notice:
+Manage Todo comments, as they're typed anywhere in project code.
 
 
-By default, you should be prompted to setup HTTP database right after install.
-If accept so, new HTTP public repository is created at http://typetodo.com and will be used within all upcoming projects until reconfigured.
+Blitz:
 
-HTTP repository is accessable at http://typetodo.com/repname, where repname is same as in .do config (e.g. /~eif9t7kgahvk)
-
-You can locate and reset TypeTodo's configs using provided Sublime commands that are named "TypeTodo:..." in Command Palette.
-
-
-No matter you accept HTTP or not, database is always stored in .do file itself.
+- Install TypeTodo,
+- Type `//todo:` comment right in your code, or use other comment prefix,
+- Fill in the snippet appeared,
+- Check for [projectName].do file created in you project's root
+- Run Sublime's `TypeTodo: HTTP repository` command (<Alt+D>, <Alt+H>)
 
 
-WARNING: If you loose public repository key, there can be no way to get it back. Instead, register at typetodo.com and use your own named repository.
+Key features:
+
+- TypeTodo stores and synchronizes todo comments (doplets) into external per-project database.
+       
+- Most interaction is done by ordinary inline source code commenting. Just type and don't look aside.
+
+- Each doplet is assigned an ID, unique within project.
+
+- Database can be FILE (by default), HTTP or MySQL.
 
 
 
-
-Documentation is available at:
-TypeTodo home,
-	http://typetodo.com/sublime
-Github,
+Github:
 	https://github.com/NikolayRag/typeTodo
-Package Control,
-	https://sublime.wbond.net/packages/TypeTodo
+
+TypeTodo:
+	http://typetodo.com/sublime

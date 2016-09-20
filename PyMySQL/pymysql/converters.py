@@ -2,6 +2,7 @@ from ._compat import PY2, text_type, long_type, JYTHON, IRONPYTHON, unichr
 
 import datetime
 from decimal import Decimal
+import re
 import time
 
 from .constants import FIELD_TYPE, FLAG
@@ -109,7 +110,7 @@ def escape_unicode(value, mapping=None):
     return u"'%s'" % _escape_unicode(value)
 
 def escape_str(value, mapping=None):
-    return "'%s'" % escape_string(value, mapping)
+    return "'%s'" % escape_string(str(value), mapping)
 
 def escape_None(value, mapping=None):
     return 'NULL'
@@ -145,6 +146,16 @@ def escape_date(obj, mapping=None):
 def escape_struct_time(obj, mapping=None):
     return escape_datetime(datetime.datetime(*obj[:6]))
 
+def _convert_second_fraction(s):
+    if not s:
+        return 0
+    # Pad zeros to ensure the fraction length in microseconds
+    s = s.ljust(6, '0')
+    return int(s[:6])
+
+DATETIME_RE = re.compile(r"(\d{1,4})-(\d{1,2})-(\d{1,2})[T ](\d{1,2}):(\d{1,2}):(\d{1,2})(?:.(\d{1,6}))?")
+
+
 def convert_datetime(obj):
     """Returns a DATETIME or TIMESTAMP column value as a datetime object:
 
@@ -161,22 +172,21 @@ def convert_datetime(obj):
       True
 
     """
-    if ' ' in obj:
-        sep = ' '
-    elif 'T' in obj:
-        sep = 'T'
-    else:
+    if not PY2 and isinstance(obj, (bytes, bytearray)):
+        obj = obj.decode('ascii')
+
+    m = DATETIME_RE.match(obj)
+    if not m:
         return convert_date(obj)
 
     try:
-        ymd, hms = obj.split(sep, 1)
-        usecs = '0'
-        if '.' in hms:
-            hms, usecs = hms.split('.')
-        usecs = float('0.' + usecs) * 1e6
-        return datetime.datetime(*[ int(x) for x in ymd.split('-')+hms.split(':')+[usecs] ])
+        groups = list(m.groups())
+        groups[-1] = _convert_second_fraction(groups[-1])
+        return datetime.datetime(*[ int(x) for x in groups ])
     except ValueError:
         return convert_date(obj)
+
+TIMEDELTA_RE = re.compile(r"(-)?(\d{1,3}):(\d{1,2}):(\d{1,2})(?:.(\d{1,6}))?")
 
 
 def convert_timedelta(obj):
@@ -196,16 +206,19 @@ def convert_timedelta(obj):
     can accept values as (+|-)DD HH:MM:SS. The latter format will not
     be parsed correctly by this function.
     """
+    if not PY2 and isinstance(obj, (bytes, bytearray)):
+        obj = obj.decode('ascii')
+
+    m = TIMEDELTA_RE.match(obj)
+    if not m:
+        return None
+
     try:
-        microseconds = 0
-        if "." in obj:
-            (obj, tail) = obj.split('.')
-            microseconds = float('0.' + tail) * 1e6
-        hours, minutes, seconds = obj.split(':')
-        negate = 1
-        if hours.startswith("-"):
-            hours = hours[1:]
-            negate = -1
+        groups = list(m.groups())
+        groups[-1] = _convert_second_fraction(groups[-1])
+        negate = -1 if groups[0] else 1
+        hours, minutes, seconds, microseconds = groups[1:]
+
         tdelta = datetime.timedelta(
             hours = int(hours),
             minutes = int(minutes),
@@ -215,6 +228,9 @@ def convert_timedelta(obj):
         return tdelta
     except ValueError:
         return None
+
+TIME_RE = re.compile(r"(\d{1,2}):(\d{1,2}):(\d{1,2})(?:.(\d{1,6}))?")
+
 
 def convert_time(obj):
     """Returns a TIME column as a time object:
@@ -238,16 +254,22 @@ def convert_time(obj):
     to be treated as time-of-day and not a time offset, then you can
     use set this function as the converter for FIELD_TYPE.TIME.
     """
+    if not PY2 and isinstance(obj, (bytes, bytearray)):
+        obj = obj.decode('ascii')
+
+    m = TIME_RE.match(obj)
+    if not m:
+        return None
+
     try:
-        microseconds = 0
-        if "." in obj:
-            (obj, tail) = obj.split('.')
-            microseconds = float('0.' + tail) * 1e6
-        hours, minutes, seconds = obj.split(':')
+        groups = list(m.groups())
+        groups[-1] = _convert_second_fraction(groups[-1])
+        hours, minutes, seconds, microseconds = groups
         return datetime.time(hour=int(hours), minute=int(minutes),
                              second=int(seconds), microsecond=int(microseconds))
     except ValueError:
         return None
+
 
 def convert_date(obj):
     """Returns a DATE column as a date object:
@@ -263,6 +285,8 @@ def convert_date(obj):
       True
 
     """
+    if not PY2 and isinstance(obj, (bytes, bytearray)):
+        obj = obj.decode('ascii')
     try:
         return datetime.date(*[ int(x) for x in obj.split('-', 2) ])
     except ValueError:
@@ -290,6 +314,8 @@ def convert_mysql_timestamp(timestamp):
       True
 
     """
+    if not PY2 and isinstance(timestamp, (bytes, bytearray)):
+        timestamp = timestamp.decode('ascii')
     if timestamp[4] == '-':
         return convert_datetime(timestamp)
     timestamp += "0"*(14-len(timestamp)) # padding
@@ -302,6 +328,8 @@ def convert_mysql_timestamp(timestamp):
         return None
 
 def convert_set(s):
+    if isinstance(s, (bytes, bytearray)):
+        return set(s.split(b","))
     return set(s.split(","))
 
 
@@ -312,7 +340,7 @@ def through(x):
 #def convert_bit(b):
 #    b = "\x00" * (8 - len(b)) + b # pad w/ zeroes
 #    return struct.unpack(">Q", b)[0]
-#    
+#
 #     the snippet above is right, but MySQLdb doesn't process bits,
 #     so we shouldn't either
 convert_bit = through
@@ -343,6 +371,7 @@ encoders = {
     tuple: escape_sequence,
     list: escape_sequence,
     set: escape_sequence,
+    frozenset: escape_sequence,
     dict: escape_dict,
     bytearray: escape_bytes,
     type(None): escape_None,
@@ -385,7 +414,6 @@ decoders = {
 
 
 # for MySQLdb compatibility
-conversions = decoders
-
-def Thing2Literal(obj):
-    return escape_str(str(obj))
+conversions = encoders.copy()
+conversions.update(decoders)
+Thing2Literal = escape_str

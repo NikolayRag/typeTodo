@@ -11,7 +11,7 @@ Blitz
 - Type ``//todo:`` comment right in your code, or use other comment prefix,
 - Fill in the snippet appeared,
 - Check for *[projectName].do* file created in you project's root
-- Run Sublime's ``TypeTodo: Browse for project's repository`` command (*<Alt+D>, <Alt+H>*)
+- Run Sublime's ``TypeTodo: HTTP repository`` command (*<Alt+D>, <Alt+H>*)
 
 
 

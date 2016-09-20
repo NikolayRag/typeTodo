@@ -1,16 +1,16 @@
 [
     {
-        "caption": "TypeTodo: Browse HTTP repository",
+        "caption": "TypeTodo: HTTP repository",
         "command": "typetodo_www"
     },
 
     {
-        "caption": "TypeTodo: Open Projects config",
+        "caption": "TypeTodo: Config",
         "command": "typetodo_cfg_open"
     },
 
     {
-        "caption": "TypeTodo: Open Global config",
+        "caption": "TypeTodo: Global config",
         "command": "typetodo_global_open"
     },
 
@@ -25,7 +25,7 @@
     },
 
     {
-        "caption": "TypeTodo: Find todo",
+        "caption": "TypeTodo: Find Todo",
         "command": "typetodo_find"
     },
 

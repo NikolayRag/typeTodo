@@ -25,6 +25,11 @@
     },
 
     {
+        "caption": "TypeTodo: Jump",
+        "command": "typetodo_jump"
+    },
+
+    {
         "caption": "TypeTodo: Find Todo",
         "command": "typetodo_find"
     },

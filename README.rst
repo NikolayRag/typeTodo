@@ -1,7 +1,7 @@
 typeTodo
 =========
 
-Manage TODO comments, as they're typed anywhere in project code.
+Manage *Todo* comments, as they're typed anywhere in project code.
 
 
 Blitz

@@ -1,3 +1,6 @@
+.. _`public server`: http://www.typetodo.com/
+
+
 Configuring TypeTodo
 ====================
 
@@ -9,19 +12,16 @@ Global *.do* is used as settings template.
 Global *.do* is used one for all doplets when there's NO project used at a moment.
 
 
->All configuration entries found in *.do* counts.
->*.do* file is checked periodically for configuration changes, and they reapplied on fly.
+> All configuration entries found in *.do* counts.
+> *.do* file is checked periodically for configuration changes, and they reapplied on fly.
 
->Default *.do* explicit configuration is HTTP, using `public server`_ as host and newly created database with random name like ``~exwvpaytkfs6``. Also if no external **FILE** is specified, *.do* file itself is implicitly used as database storage.
+> Default *.do* explicit configuration is HTTP, using `public server`_ as host and newly created database with random name like ``~exwvpaytkfs6``. Also if no external **FILE** is specified, *.do* file itself is implicitly used as database storage.
 
 Acceptable configurations are **FILE**, **MYSQL** and **HTTP**
 
 
 .. contents::
 ..
-
-.. _`public server`: http://www.typetodo.com/
-`public server`_
 
 
 1. **FILE** mode

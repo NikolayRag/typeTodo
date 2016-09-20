@@ -1,4 +1,4 @@
-.. _`public server`: http://www.typetodo.com/
+.. _`public server`: http://typetodo.com/
 
 
 Configuring TypeTodo
@@ -9,13 +9,11 @@ Configuring TypeTodo
 *[projectName].do* is automatically created inside the first project's folder if none found. If first folder included in project is ``/myProject``, then ``/myProject/myProject.do`` file will be used as config.
 Global *.do* is used as settings template.
 
-Global *.do* is used one for all doplets when there's NO project used at a moment.
+    *.do* file is checked periodically for configuration changes, and they reapplied on fly.
 
+    Default *.do* explicit configuration is HTTP, using `public server`_ as host and newly created database with random name like ``~exwvpaytkfs6``.
 
-> All configuration entries found in *.do* counts.
-> *.do* file is checked periodically for configuration changes, and they reapplied on fly.
-
-> Default *.do* explicit configuration is HTTP, using `public server`_ as host and newly created database with random name like ``~exwvpaytkfs6``. Also if no external **FILE** is specified, *.do* file itself is implicitly used as database storage.
+    Global *.do* is used one for all doplets when there's NO project used at a moment.
 
 Acceptable configurations are **FILE**, **MYSQL** and **HTTP**
 

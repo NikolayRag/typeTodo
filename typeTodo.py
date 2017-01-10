@@ -1,10 +1,11 @@
 # coding= utf-8
 
 #-todo 1 (interaction, feature) +1: multiline TODO
+#  todo 2131 (interaction, feature) +0: popup todo history
 
 #=todo 232 (feature) +1: introduce sub-todo's that are part of other
-
-
+#  todo 2130 (cleanup) +0: make no-network console messages less annoying
+#  todo 2133 (feature, config) +0: move config to sublime usual place
 
 import sublime, sublime_plugin
 import sys, re
@@ -261,7 +262,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #   Create new todo in db and return string to replace original 'todo:'
 #   Saves first version of task if _postfx supplied, that is used when
 #    creating doplet in mid-line.
-
+# =todo 2128 (general, ux) +0: allow '//todo xxx:' expanding into existing xxx
     def substNew(self, _prefx, _postfx, _region):
         todoId= self.cfgStore(0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 

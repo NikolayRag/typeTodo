@@ -1,5 +1,6 @@
 # coding= utf-8
 
+# =todo 2129 (file) +0: store file maxID in .do config file itself
 import re, os, time, codecs, sys, _strptime
 
 if sys.version < '3':

@@ -106,14 +106,6 @@ class Config():
 
 
 
-    def isWindowExists(self):
-        if sys.version<'3':
-            if self.cWnd.id():
-                return True
-        else:
-            if self.cWnd.project_data():
-                return True
-
 
 
 

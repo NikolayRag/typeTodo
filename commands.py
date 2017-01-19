@@ -154,33 +154,3 @@ class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
         sublime.active_window().open_file(fn, sublime.TRANSIENT)
 
 
-
-
-
-#Reset global config
-#
-class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
-    cDb= None
-
-    def resetCB(self):
-        if not self.cDb:
-            return
-        cDb= self.cDb
-        self.cDb= None
-
-        if not cDb.config.globalInited and not cDb.config.initGlobalDo(True):
-            sublime.message_dialog('TypeTodo error:\n\n\tCannot reset global .do file,\n\tall remain intact.')
-            return
-
-        for iT in cDb.todoA:
-            cDb.todoA[iT].setSaved(SAVE_STATES.FORCE)
-
-        cDb.pushReset(0)
-
-
-    def run(self, _edit):
-        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings.\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tGlobal database content\n\twill be copied to new location.\n\n\tProcceed?'):
-            return
-
-        self.cDb= TodoDb(self.resetCB, Config())
-

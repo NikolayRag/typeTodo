@@ -41,6 +41,7 @@ class Config():
 
     defaultHttpApi= 'typetodo.com'
 
+    headComment= '#To be removed in next version. Configure with "Typetodo: Config" command.'
     defaultHeader= "# Uncomment and configure.\n"\
         +"# file [absolute_path/]filename.ext\n"\
         +"# mysql 127.0.0.1 username password scheme\n"\
@@ -152,9 +153,15 @@ class Config():
             if cfgString=='' or cfgString=='\n':
                 break
             
+#  todo 2149 (clean, config, migration) +0: remove after config migration
+            if cfgString == self.headComment +"\n":
+                continue
+
             headerCollect+= cfgString
             #catch last matched config
             cfgFoundTry= RE_CFG.match(cfgString.rstrip('\n'))
+
+
             if not cfgFoundTry:
                 continue
 
@@ -203,7 +210,7 @@ class Config():
         if not fileSetFound:
             doSetting.engine= 'file'
 
-        doSetting.head= headerCollect
+        doSetting.head= self.headComment +"\n" +headerCollect
                    
 
         return cSettings
@@ -263,7 +270,7 @@ class Config():
         httpCfg= self.initNewHTTP()
         if httpCfg:
             headerCollect+= httpCfg.engine +" " +httpCfg.addr +" " +httpCfg.base +"\n"
-            doSetting.head= headerCollect
+            doSetting.head= self.headComment +"\n" +headerCollect
 
             cSettings.append(httpCfg)
 

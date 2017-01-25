@@ -130,7 +130,7 @@ class TypetodoWwwCommand(sublime_plugin.TextCommand):
         sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
 
 
-
+# -todo 2150 (config) +0: ask to create projects config if none yet
 #Open project's .do
 #
 class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
@@ -143,6 +143,7 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
 
 
 
+# -todo 2151 (config, clean) +0: make command relevant
 #Open global .do
 #
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):

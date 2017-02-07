@@ -50,7 +50,7 @@ class TodoTask():
 
     def setTags(self, _tagsA):
         self.tagsA= []
-        for tagName in _tagsA: self.tagsA.append(tagName.strip())
+        for tagName in _tagsA: self.tagsA.append((tagName or '').strip())
 
     def set(self, _state, _tagsA, _lvl, _fileName, _comment, _editor, _stamp):
         self.setSaved(SAVE_STATES.READY)

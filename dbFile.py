@@ -1,7 +1,6 @@
 # coding= utf-8
 
-# =todo 2129 (file) +0: store file maxID in separate .do.id file
-import re, os, time, codecs, sys, _strptime
+import re, os, time, codecs, sys, json, _strptime
 
 if sys.version < '3':
     from task import *
@@ -64,6 +63,7 @@ class TodoDbFile():
 
                         f.write(curTodo.state +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M:%S', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
 
+
                     f.write('\nReserved: %d' % self.maxId)
 
 
@@ -92,17 +92,23 @@ class TodoDbFile():
 #
 #   Same is true for other engines.
 
+# -todo 2175 (config, feature, cleanup, file) +0: switch to .id files; at .newId() and .releaseId()
     def newId(self, _wantedId=0):
         if _wantedId==self.lastId:
             return self.lastId
 
         self.fetch()
+        self.maxId= max(self.maxId, self.loadId())
 
         self.maxId+= 1
         if _wantedId>self.maxId:
             self.maxId= _wantedId
         
         self.flush()
+
+
+        self.saveId(self.maxId)
+
 
         self.lastId= self.maxId
 
@@ -114,17 +120,46 @@ class TodoDbFile():
 
     def releaseId(self, _atExit=False):
         self.fetch()
+        self.maxId= max(self.maxId, self.loadId())
         
         if self.lastId==self.maxId:
             if _atExit:
                 self.maxId-= 1
                 self.flush()
+
+                self.saveId(self.maxId)
+
+
         else:
             self.maxId= 0
 
         self.lastId= None
 
         return True
+
+
+
+    def saveId(self, _id):
+        f= codecs.open(self.settings.file +'.state', 'w+', 'UTF-8')
+        
+        f.write( json.dumps({'reserved':int(_id)}, indent=4) )
+        
+        f.close()
+
+
+
+    def loadId(self):
+        try:
+            f= codecs.open(self.settings.file +'.state', 'r', 'UTF-8')
+        except:
+            return 0
+
+        stateJson= json.loads( f.read() )
+
+        f.close()
+
+
+        return stateJson['reserved']
 
 
 

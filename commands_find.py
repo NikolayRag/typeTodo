@@ -17,6 +17,8 @@ else:
 
 
 
+#  todo 2167 (command, find) +0: display find results in dropdown
+#  todo 2182 (command, find) +0: dropdown option to display results in view
 class TypetodoFindCommand(sublime_plugin.TextCommand):
     def foundViewShow(self, _header):
         resView= WCache().getResultsView()

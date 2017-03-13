@@ -17,11 +17,8 @@ else:
 
 #  todo 2142 (http, config) +0: allow to specify project name in http config: {site} {rep} [{log} {pass}] [{proj}]
 #  todo 2143 (http, api, config) +0: request id name from server to fill back project name
-# =todo 2135 (config, feature) +0: move global and all local configs to package config
-# =todo 2137 (config, feature) +0: migrate .do configs to package config place and format
-# =todo 2138 (config, feature) +0: allow project name template in configs to use one for all
-# =todo 2136 (config, feature) +0: dont automatically create projects config, use global as fallback
 
+# =todo 2181 (config, feature, migration) +0: copy config to .do.cfg json file
 
 class Setting:
     engine= ''
@@ -44,7 +41,7 @@ class Config():
     defaultHeader= "# Uncomment and configure.\n"\
         +"# file [absolute_path/]filename.ext\n"\
         +"# mysql 127.0.0.1 username password scheme\n"\
-        +"# http typetodo.com repository [username password] [explicit_project]\n"
+        +"# http typetodo.com repository [username password]\n"
 
 
 
@@ -86,6 +83,7 @@ class Config():
         _cfgFile= os.path.join(self.projectRoot, self.projectName +'.do')
 
 
+# -todo 2150 (config) +0: ask to init projects config with global if none yet
         cSettings= self.readCfg(_cfgFile) or self.initGlobalDo()
 
         if cSettings:
@@ -99,7 +97,7 @@ class Config():
 
                 if not os.path.isfile(_cfgFile):
                     print('TypeTodo init: Writing project\'s config.')
-#  todo 2145 (config, feature) +0: create projects config automatically, template only
+
                     try:
                         with codecs.open(_cfgFile, 'w+', 'UTF-8') as f:
                             f.write(self.lastProjectHeader)
@@ -128,7 +126,6 @@ class Config():
 
     '''
     Read specified config file.
-    # =todo 2144 (config, feature) +0: fallback to old-style config (.do)
     '''
     def readCfg(self, _cfgFile, _oldCfg=None):
         try:

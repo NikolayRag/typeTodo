@@ -64,7 +64,7 @@ class TodoDbFile():
                         f.write(curTodo.state +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M:%S', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
 
 
-                    f.write('\nReserved: %d' % self.maxId)
+#                    f.write('\nReserved: %d' % self.maxId)
 
 
             except Exception as e:

@@ -146,7 +146,7 @@ class Config():
 
         while True:
             cfgString= f.readline()
-            if cfgString=='' or cfgString=='\n':
+            if cfgString=='' or cfgString=="\n" or cfgString=="\r\n":
                 break
             
             headerCollect+= cfgString

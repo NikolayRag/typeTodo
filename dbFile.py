@@ -47,9 +47,6 @@ class TodoDbFile():
         if dirty or self.maxIdSaved!=self.maxId:
             try:
                 with codecs.open(self.settings.file, 'w+', 'UTF-8') as f:
-                    f.write(self.settings.head)
-                    f.write("\n")
-
                     for iT in sorted(self.parentDB.todoA):
                         curTodo= self.parentDB.todoA[iT]
                         if curTodo.initial:

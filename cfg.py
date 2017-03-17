@@ -132,6 +132,7 @@ class Config():
             return sorted(cSettings)
 
 
+
     def readLegacy(self, _cfgFile):
         try:
             f= codecs.open(_cfgFile, 'r', 'UTF-8')
@@ -145,8 +146,6 @@ class Config():
         doSetting= Setting()
         cSettings.append(doSetting) #[0] will refer to .do itself; engine should be blank if overriden
 
-        headerCollect= ''
-
         fileSetFound= False
 
         while True:
@@ -154,7 +153,6 @@ class Config():
             if cfgString=='' or cfgString=="\n" or cfgString=="\r\n":
                 break
             
-            headerCollect+= cfgString
             #catch last matched config
             cfgFoundTry= RE_CFG.match(cfgString.rstrip('\n'))
 
@@ -172,7 +170,6 @@ class Config():
                     cSetting.file=  os.path.join(self.projectRoot, curCfg['fname'])
                 else:
                     cSetting.file=  curCfg['fname']
-                cSetting.head=      ''
 
                 if os.path.normcase(cSetting.file)==os.path.normcase(_cfgFile):
                     cSetting= False #prevent explicit .do as 'file'
@@ -207,8 +204,6 @@ class Config():
         if not fileSetFound:
             doSetting.engine= 'file'
 
-        doSetting.head= headerCollect
-                   
 
         return cSettings
 

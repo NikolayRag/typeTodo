@@ -253,11 +253,6 @@ class Config():
         headerCollect= self.defaultHeader
 
 
-#        httpInitFlag= sublime.ok_cancel_dialog('TypeTodo init:\n\n\tStart with new public HTTP storage?')
-
-        #request new random public repository
-#        if httpInitFlag:
-
 
         httpCfg= self.initNewHTTP()
         if httpCfg:

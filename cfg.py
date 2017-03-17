@@ -60,9 +60,6 @@ class Config():
 
     globalInited= False
 
-    lastProjectHeader= None
-    lastCfgFile= None
-
     
     #Called with blank project folder, makes global config
     def __init__(self, _projectFolder=''):
@@ -85,38 +82,29 @@ class Config():
         if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
 
 
-# -todo 2150 (config) +0: ask to init projects config with global if none yet
-        cSettings= self.readCfg(self.projectFileName, self.projectLegacyFn) or self.initGlobalDo()
+        newSettings= self.readCfg(self.projectFileName, self.projectLegacyFn) or self.initGlobalDo()
 
-        if not cSettings:
+        if not newSettings:
             print('TypeTodo error: Config could not be read.')
-            self.lastCfgFile= None
-            self.lastProjectHeader= None
-
+            self.settings= None
+    
             return
 
 
-        if self.lastCfgFile!=self.projectFileName or self.lastProjectHeader!=cSettings[0].head:
-            cSettings[0].file= self.projectFileName #filename need TO save
-            self.lastCfgFile= cSettings[0].file
-            self.lastProjectHeader= cSettings[0].head
-
-            self.settings= cSettings
-
+        if self.settings!=newSettings:
+            self.settings= newSettings
 
             if not os.path.isfile(self.projectFileName):
                 print('TypeTodo init: Writing project\'s config.')
 
                 try:
                     with codecs.open(self.projectFileName, 'w+', 'UTF-8') as f:
-                        f.write(self.lastProjectHeader)
+                        f.write(self.settings)
                         f.write("\n")
                 except:
                     None
 
             return True
-
-
 
 
 
@@ -132,7 +120,19 @@ class Config():
     '''
     Read specified config file.
     '''
-    def readCfg(self, _cfgFile, _oldCfg=None):
+    def readCfg(self, _cfgFile, _oldCfg):
+        #read config
+
+
+        if ...: #legacy fallback
+            cSettings= readLegacy(_oldCfg)
+
+
+        if cSettings:
+            return sorted(cSettings)
+
+
+    def readLegacy(self, _cfgFile):
         try:
             f= codecs.open(_cfgFile, 'r', 'UTF-8')
         except:

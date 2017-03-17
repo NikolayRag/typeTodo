@@ -130,12 +130,11 @@ class TypetodoWwwCommand(sublime_plugin.TextCommand):
         sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
 
 
-# -todo 2150 (config) +0: ask to create projects config if none yet
 #Open project's .do
 #
 class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        fn= WCache().getDB().config.settings[0].file
+        fn= WCache().getDB().config.projectFileName
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\n\tNo projects .do file,\n\tplease restart Sublime')
             return
@@ -143,15 +142,13 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
 
 
 
-# -todo 2151 (config, clean) +0: make command relevant
 #Open global .do
 #
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        fn= Config().settings[0].file
-        if not os.path.isfile(fn):
+        if not os.path.isfile(Config.globalFileName):
             sublime.message_dialog('TypeTodo:\n\n\tNo global .do file,\n\tplease restart Sublime')
             return
-        sublime.active_window().open_file(fn, sublime.TRANSIENT)
+        sublime.active_window().open_file(Config.globalFileName, sublime.TRANSIENT)
 
 

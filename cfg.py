@@ -34,7 +34,10 @@ class Setting:
 Manage config for current project.
 '''
 class Config():
-    sublimeRoot= ''
+    sublimeRoot= os.path.join(sublime.packages_path(), 'User')
+    globalFileName= os.path.join(sublimeRoot, '.do.cfg')
+    globalLegacyFn= os.path.join(sublimeRoot, '.do')
+
 
     defaultHttpApi= 'typetodo.com'
 
@@ -46,8 +49,11 @@ class Config():
 
 
     projectUser= '**Anon'
-    projectRoot= ''
+    #defaults to global
+    projectRoot= sublimeRoot
     projectName= ''
+    projectFileName= globalFileName
+    projectLegacyFn= globalLegacyFn
 
 
     settings= None
@@ -58,15 +64,13 @@ class Config():
     lastCfgFile= None
 
     
+    #Called with blank project folder, makes global config
     def __init__(self, _projectFolder=''):
-        self.sublimeRoot= os.path.join(sublime.packages_path(), 'User')
-
-        self.projectRoot= self.sublimeRoot
-        self.projectName= ''
-
         if _projectFolder!='':
             self.projectRoot= _projectFolder
             self.projectName= os.path.split(_projectFolder)[1]
+            self.projectFileName= os.path.join(self.projectRoot, self.projectName +'.do.cfg')
+            self.projectLegacyFn= os.path.join(self.projectRoot, self.projectName +'.do')
 
         self.update()
 
@@ -75,42 +79,43 @@ class Config():
 
 
     '''
-    (Re)read config from project-related or global config
+    (Re)read config from project-related config, or copy-create it from global
     '''
     def update(self):
         if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
 
-        _cfgFile= os.path.join(self.projectRoot, self.projectName +'.do')
-
 
 # -todo 2150 (config) +0: ask to init projects config with global if none yet
-        cSettings= self.readCfg(_cfgFile) or self.initGlobalDo()
+        cSettings= self.readCfg(self.projectFileName, self.projectLegacyFn) or self.initGlobalDo()
 
-        if cSettings:
-            if self.lastCfgFile!=_cfgFile or self.lastProjectHeader!=cSettings[0].head:
-                cSettings[0].file= _cfgFile #filename need TO save
-                self.lastCfgFile= cSettings[0].file
-                self.lastProjectHeader= cSettings[0].head
+        if not cSettings:
+            print('TypeTodo error: Config could not be read.')
+            self.lastCfgFile= None
+            self.lastProjectHeader= None
 
-                self.settings= cSettings
-
-
-                if not os.path.isfile(_cfgFile):
-                    print('TypeTodo init: Writing project\'s config.')
-
-                    try:
-                        with codecs.open(_cfgFile, 'w+', 'UTF-8') as f:
-                            f.write(self.lastProjectHeader)
-                            f.write("\n")
-                    except:
-                        None
-
-                return True
             return
 
-        print('TypeTodo error: Config could not be read.')
-        self.lastCfgFile= None
-        self.lastProjectHeader= None
+
+        if self.lastCfgFile!=self.projectFileName or self.lastProjectHeader!=cSettings[0].head:
+            cSettings[0].file= self.projectFileName #filename need TO save
+            self.lastCfgFile= cSettings[0].file
+            self.lastProjectHeader= cSettings[0].head
+
+            self.settings= cSettings
+
+
+            if not os.path.isfile(self.projectFileName):
+                print('TypeTodo init: Writing project\'s config.')
+
+                try:
+                    with codecs.open(self.projectFileName, 'w+', 'UTF-8') as f:
+                        f.write(self.lastProjectHeader)
+                        f.write("\n")
+                except:
+                    None
+
+            return True
+
 
 
 
@@ -234,15 +239,13 @@ class Config():
 
 
 
-    def initGlobalDo(self, _force=False):
-        _cfgFile= os.path.join(self.sublimeRoot, '.do')
-
-        if not _force:
-            cCfg= self.readCfg(_cfgFile)
-            if cCfg:
-                return cCfg
+    def initGlobalDo(self):
+        cCfg= self.readCfg(self.globalFileName, self.globalLegacyFn)
+        if cCfg:
+            return cCfg
 
 
+        #create new global config
         self.globalInited= True
 
         cSettings= []
@@ -263,7 +266,7 @@ class Config():
 
 
         try:
-            with codecs.open(_cfgFile, 'w+', 'UTF-8') as f:
+            with codecs.open(self.globalFileName, 'w+', 'UTF-8') as f:
                 f.write(headerCollect)
         except:
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tglobal config cannot be created'), 1000)

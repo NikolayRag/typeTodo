@@ -82,17 +82,10 @@ class Config():
     def update(self):
         if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
 
-
         newSettings= self.readCfg(self.projectFileName, self.projectLegacyFn) or self.initGlobalDo()
 
-        if not newSettings:
-            print('TypeTodo error: Config could not be read.')
-            self.settings= None
     
-            return
-
-
-        if self.settings!=newSettings:
+        if newSettings and self.settings!=newSettings:
             self.settings= newSettings
 
             if not os.path.isfile(self.projectFileName):
@@ -108,6 +101,8 @@ class Config():
             return True
 
 
+        print('TypeTodo error: Config could not be read.')
+        self.settings= None
 
 
 

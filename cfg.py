@@ -58,8 +58,6 @@ class Config():
 
     settings= None
 
-    globalInited= False
-
     
     #Called with blank project folder, makes global config
     def __init__(self, _projectFolder=''):
@@ -244,8 +242,6 @@ class Config():
 
 
         #create new global config
-        self.globalInited= True
-
         cSettings= []
         doSetting= Setting()
         cSettings.append(doSetting)

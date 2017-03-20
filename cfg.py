@@ -134,6 +134,7 @@ class Config():
 
 
 
+    #left only for migration purposes
     def readLegacy(self, _cfgFile):
         try:
             f= codecs.open(_cfgFile, 'r', 'UTF-8')
@@ -144,10 +145,6 @@ class Config():
 
 
         cSettings= []
-        doSetting= Setting()
-        cSettings.append(doSetting) #[0] will refer to .do itself; engine should be blank if overriden
-
-        fileSetFound= False
 
         while True:
             cfgString= f.readline()
@@ -165,20 +162,8 @@ class Config():
 
             curCfg= cfgFoundTry.groupdict()
             if curCfg['enginefile']:
-                fileSetFound= True
                 cSetting.engine=    'file'
-                if os.path.dirname(curCfg['fname'])=='':
-                    cSetting.file=  os.path.join(self.projectRoot, curCfg['fname'])
-                else:
-                    cSetting.file=  curCfg['fname']
-
-                if os.path.normcase(cSetting.file)==os.path.normcase(_cfgFile):
-                    cSetting= False #prevent explicit .do as 'file'
-                    fileSetFound= False
-
-                if not os.path.isfile(cSetting.file):
-                    with codecs.open(cSetting.file, 'w+', 'UTF-8') as fNew:
-                        fNew.write('')   
+                cSetting.file=      curCfg['fname']
 
 
             if curCfg['enginesql']:
@@ -197,13 +182,8 @@ class Config():
                 cSetting.base=      curCfg['baseh']
 
 
-            if cSetting:
-                cSettings.append(cSetting)
+            cSettings.append(cSetting)
 
-
-
-        if not fileSetFound:
-            doSetting.engine= 'file'
 
 
         return cSettings

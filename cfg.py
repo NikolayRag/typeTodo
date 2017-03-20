@@ -69,6 +69,9 @@ class Config():
             self.projectFileName= os.path.join(self.projectRoot, self.projectName +'.do.cfg')
             self.projectLegacyFn= os.path.join(self.projectRoot, self.projectName +'.do')
 
+        #force check globals at start
+        self.initGlobalDo()
+
         self.update()
 
 

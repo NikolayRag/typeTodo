@@ -1,7 +1,7 @@
 # coding= utf-8
 
 import sublime
-import sys, re, os, time, codecs
+import sys, re, os, time, codecs, json
 
 if sys.version < '3':
     import urllib2, urllib
@@ -91,12 +91,7 @@ class Config():
             if not os.path.isfile(self.projectFileName):
                 print('TypeTodo init: Writing project\'s config.')
 
-                try:
-                    with codecs.open(self.projectFileName, 'w+', 'UTF-8') as f:
-                        f.write(self.settings)
-                        f.write("\n")
-                except:
-                    None
+                writeCfg(self.projectFileName, newSettings)
 
             return True
 
@@ -218,26 +213,12 @@ class Config():
 
         #create new global config
         cSettings= []
-        doSetting= Setting()
-        cSettings.append(doSetting)
-        doSetting.engine= 'file'
-
-        headerCollect= self.defaultHeader
-
-
-
         httpCfg= self.initNewHTTP()
         if httpCfg:
-            headerCollect+= httpCfg.engine +" " +httpCfg.addr +" " +httpCfg.base +"\n"
-            doSetting.head= headerCollect
-
             cSettings.append(httpCfg)
 
 
-        try:
-            with codecs.open(self.globalFileName, 'w+', 'UTF-8') as f:
-                f.write(headerCollect)
-        except:
+        if not writeCfg(self.globalFileName, cSettings):
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tglobal config cannot be created'), 1000)
             return
 
@@ -245,3 +226,13 @@ class Config():
         return cSettings
 
 
+
+    def writeCfg(self, _fn, _settings):
+        try:
+            with codecs.open(_fn, 'w+', 'UTF-8') as f:
+                f.write( json.dumps(_settings), indent=4 )
+
+            return True
+
+        except:
+            None

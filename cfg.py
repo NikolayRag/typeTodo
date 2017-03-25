@@ -213,9 +213,32 @@ class Config():
 
         #create new global config
         cSettings= []
+
+        cSetting= Setting()
+        cSetting.engine=    'file'
+        cSetting.file=      ''
+        cSettings.append(cSetting)
+
+        cSetting= Setting()
+        cSetting.engine=    'mysql'
+        cSetting.addr=      ''
+        cSetting.base=      ''
+        cSetting.login=     ''
+        cSetting.passw=     ''
+        cSettings.append(cSetting)
+
+        cSetting= Setting()
+        cSetting.engine=    'http'
+        cSetting.addr=      ''
+        cSetting.login=     ''
+        cSetting.passw=     ''
+        cSetting.base=      ''
+
         httpCfg= self.initNewHTTP()
         if httpCfg:
             cSettings.append(httpCfg)
+        else:
+            cSettings.append(cSetting)
 
 
         if not writeCfg(self.globalFileName, cSettings):

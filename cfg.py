@@ -24,6 +24,43 @@ class Setting:
     engine= ''
 
 
+class SettingFile(Setting):
+    engine=    'file'
+    file=      ''
+
+    def __init__(self, file=''):
+        self.file= file
+
+
+class SettingMysql(Setting):
+    engine=    'mysql'
+    addr=      ''
+    base=      ''
+    login=     ''
+    passw=     ''
+
+    def __init__(self, addr='', base='', login='', passw=''):
+        self.addr= addr
+        self.base= base
+        self.login= login
+        self.passw= passw
+
+
+class SettingHttp(Setting):
+    engine=    'http'
+    addr=      ''
+    login=     ''
+    passw=     ''
+    base=      ''
+
+    def __init__(self, addr='', base='', login='', passw=''):
+        self.addr= addr
+        self.base= base
+        self.login= login
+        self.passw= passw
+
+
+
 
 #check for:
 #   first, subsequent window
@@ -149,32 +186,34 @@ class Config():
             if not cfgFoundTry:
                 continue
 
-            cSetting= Setting()
 
             curCfg= cfgFoundTry.groupdict()
             if curCfg['enginefile']:
-                cSetting.engine=    'file'
-                cSetting.file=      curCfg['fname']
+                cSettings.append(
+                    SettingFile(curCfg['fname'])
+                )
 
 
             if curCfg['enginesql']:
-                cSetting.engine=    'mysql'
-                cSetting.addr=      curCfg['addrs']
-                cSetting.login=     curCfg['logins']
-                cSetting.passw=     curCfg['passws']
-                cSetting.base=      curCfg['bases']
+                cSettings.append(
+                    SettingMysql(
+                        curCfg['addrs'],
+                        curCfg['bases'],
+                        curCfg['logins'],
+                        curCfg['passws']
+                    )
+                )
 
 
             if curCfg['enginehttp']:
-                cSetting.engine=    'http'
-                cSetting.addr=      curCfg['addrh']
-                cSetting.login=     curCfg['loginh']
-                cSetting.passw=     curCfg['passwh']
-                cSetting.base=      curCfg['baseh']
-
-
-            cSettings.append(cSetting)
-
+                cSettings.append(
+                    SettingHttp(
+                        curCfg['addrh'],
+                        curCfg['baseh'],
+                        curCfg['loginh'],
+                        curCfg['passwh']
+                    )
+                )
 
 
         return cSettings
@@ -196,12 +235,7 @@ class Config():
         print("New TypeTodo repository: " +cRep)
         sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
 
-        cSetting= Setting()
-        cSetting.engine= 'http'
-        cSetting.addr= self.defaultHttpApi
-        cSetting.base= cRep
-        cSetting.login= cSetting.passwh= ''
-
+        cSetting= SettingHttp(self.defaultHttpApi, cRep)
         return cSetting
 
 
@@ -215,31 +249,9 @@ class Config():
         #create new global config
         cSettings= []
 
-        cSetting= Setting()
-        cSetting.engine=    'file'
-        cSetting.file=      ''
-        cSettings.append(cSetting)
-
-        cSetting= Setting()
-        cSetting.engine=    'mysql'
-        cSetting.addr=      ''
-        cSetting.base=      ''
-        cSetting.login=     ''
-        cSetting.passw=     ''
-        cSettings.append(cSetting)
-
-        cSetting= Setting()
-        cSetting.engine=    'http'
-        cSetting.addr=      ''
-        cSetting.login=     ''
-        cSetting.passw=     ''
-        cSetting.base=      ''
-
-        httpCfg= self.initNewHTTP()
-        if httpCfg:
-            cSettings.append(httpCfg)
-        else:
-            cSettings.append(cSetting)
+        cSettings.append(SettingFile())
+        cSettings.append(SettingMysql())
+        cSettings.append( self.initNewHTTP() or SettingHttp() )
 
 
         if not self.writeCfg(self.globalFileName, cSettings):

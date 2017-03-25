@@ -41,12 +41,6 @@ class Config():
 
     defaultHttpApi= 'typetodo.com'
 
-    defaultHeader= "# Uncomment and configure.\n"\
-        +"# file [absolute_path/]filename.ext\n"\
-        +"# mysql 127.0.0.1 username password scheme\n"\
-        +"# http typetodo.com repository [username password]\n"
-
-
 
     projectUser= '**Anon'
     #defaults to global

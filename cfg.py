@@ -106,10 +106,17 @@ class Config():
     Read specified config file.
     '''
     def readCfg(self, _cfgFile, _oldCfg):
-        #read config
+        try:
+            f= codecs.open(_cfgFile, 'r', 'UTF-8')
+        except:
+            f= False
+        if not f:
+            return
+
+        cSettings= json.loads( f.read() )
 
 
-        if ...: #legacy fallback
+        if not cSettings: #legacy fallback
             cSettings= readLegacy(_oldCfg)
 
 

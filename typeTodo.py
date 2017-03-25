@@ -66,7 +66,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
             cDb.pushReset()
 
             #set .do synthax for all 'file' databases
-            for cSetting in cDb.config.settings:
+            for cSetting in cDb.config.getSettings():
                 if cSetting.engine=='file':
                     if cSetting.file==_view.file_name() and _view.settings().get('syntax')!='Packages/TypeTodo/typeTodo.tmLanguage':
                         _view.set_syntax_file('Packages/TypeTodo/typeTodo.tmLanguage')

@@ -132,6 +132,45 @@ class Config():
 
 
 
+    def getSettings(self, _name=None):
+        cSettingsA= list(self.settings)
+
+        cFile= None
+        cOut= None
+        for cSetting in cSettingsA:
+            if isinstance(cSetting, SettingFile):
+                cFile= cSetting
+
+            if cSetting.engine==_name:
+                cOut= cSetting
+
+
+        #file is saved anyway
+        if not cFile:
+            cFile= SettingFile()
+            cSettingsA.append(cFile)
+
+            if cSetting.engine=='file':
+                cOut= cFile
+
+
+        fnA= os.path.split(cFile.file)
+
+        if fnA[0]=='':
+            fnA[0]= self.projectRoot
+
+        if fnA[1]=='':
+            fnA[1]= self.projectName +'.txt'
+
+
+        if cOut:
+            return cOut
+
+        return cSettingsA
+
+        
+
+
 ########
 #PRIVATE
 ########

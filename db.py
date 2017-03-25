@@ -105,7 +105,7 @@ class TodoDb():
         dbId= 0
         self.dbA.clear() #new db array
 
-        for cSetting in self.config.settings:
+        for cSetting in self.config.getSettings():
             if cSetting.engine=='file':
                 cEngClass= TodoDbFile
             elif cSetting.engine=='mysql':

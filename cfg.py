@@ -85,7 +85,7 @@ class Config():
             if not os.path.isfile(self.projectFileName):
                 print('TypeTodo init: Writing project\'s config.')
 
-                writeCfg(self.projectFileName, newSettings)
+                self.writeCfg(self.projectFileName, newSettings)
 
             return True
 
@@ -242,7 +242,7 @@ class Config():
             cSettings.append(cSetting)
 
 
-        if not writeCfg(self.globalFileName, cSettings):
+        if not self.writeCfg(self.globalFileName, cSettings):
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tglobal config cannot be created'), 1000)
             return
 

@@ -47,7 +47,6 @@ class SettingMysql(Setting):
 
 
 class SettingHttp(Setting):
-        self.engine=    'http'
     addr=      ''
     login=     ''
     passw=     ''

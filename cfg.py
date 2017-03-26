@@ -119,7 +119,7 @@ class Config():
         newSettings= self.readCfg(self.projectFileName, self.projectLegacyFn) or self.initGlobalDo()
 
     
-        if newSettings and self.settings!=newSettings:
+        if newSettings and self.cfg2dict(self.settings)!=self.cfg2dict(newSettings):
             self.settings= newSettings
 
             if not os.path.isfile(self.projectFileName):
@@ -308,11 +308,9 @@ class Config():
 
 
 
-    def writeCfg(self, _fn, _settings):
-        cDict= []
 
-        for cSetting in _settings:
-            cDict.append( vars(cSetting) )
+    def writeCfg(self, _fn, _settings):
+        cDict= self.cfg2dict(_settings)
 
         try:
             with codecs.open(_fn, 'w+', 'UTF-8') as f:
@@ -322,3 +320,12 @@ class Config():
 
         except:
             None
+
+
+    def cfg2dict(self, _settings):
+        cDict= []
+
+        for cSetting in _settings:
+            cDict.append( vars(cSetting) )
+
+        return sorted(cDict)

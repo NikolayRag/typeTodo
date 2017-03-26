@@ -136,6 +136,9 @@ class Config():
 
 
     def getSettings(self, _name=None):
+        if not self.settings:
+            return
+
         cSettingsA= list(self.settings)
 
         cFile= None
@@ -157,7 +160,7 @@ class Config():
                 cOut= cFile
 
 
-        fnA= os.path.split(cFile.file)
+        fnA= list( os.path.split(cFile.file) )
 
         if fnA[0]=='':
             fnA[0]= self.projectRoot

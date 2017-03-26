@@ -99,7 +99,10 @@ class Config():
             self.projectLegacyFn= os.path.join(self.projectRoot, self.projectName +'.do')
 
         #force check globals at start
-        self.initGlobalDo()
+        newSettings= self.initGlobalDo()
+        #migrate
+        if not os.path.isfile(self.globalFileName):
+            self.writeCfg(self.globalFileName, newSettings)
 
         self.update()
 

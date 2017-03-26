@@ -53,6 +53,7 @@ class SettingHttp(Setting):
     base=      ''
 
     def __init__(self, addr='', base='', login='', passw=''):
+        self.engine=    'http'
         self.addr= addr
         self.base= base
         self.login= login

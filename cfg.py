@@ -25,21 +25,21 @@ class Setting:
 
 
 class SettingFile(Setting):
-    engine=    'file'
     file=      ''
 
     def __init__(self, file=''):
+        self.engine=    'file'
         self.file= file
 
 
 class SettingMysql(Setting):
-    engine=    'mysql'
     addr=      ''
     base=      ''
     login=     ''
     passw=     ''
 
     def __init__(self, addr='', base='', login='', passw=''):
+        self.engine=    'mysql'
         self.addr= addr
         self.base= base
         self.login= login
@@ -47,7 +47,7 @@ class SettingMysql(Setting):
 
 
 class SettingHttp(Setting):
-    engine=    'http'
+        self.engine=    'http'
     addr=      ''
     login=     ''
     passw=     ''
@@ -303,9 +303,14 @@ class Config():
 
 
     def writeCfg(self, _fn, _settings):
+        cDict= []
+
+        for cSetting in _settings:
+            cDict.append( vars(cSetting) )
+
         try:
             with codecs.open(_fn, 'w+', 'UTF-8') as f:
-                f.write( json.dumps(_settings), indent=4 )
+                f.write( json.dumps(cDict, indent=4) )
 
             return True
 

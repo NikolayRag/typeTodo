@@ -165,6 +165,9 @@ class TodoDbFile():
     def fetch(self, _id=False):
         if not os.path.isfile(self.settings.file):
             print("TypeTodo: 'file' db does not exist, should be created.")
+
+            codecs.open(self.settings.file, 'w+', 'UTF-8')
+
             return False
 
 

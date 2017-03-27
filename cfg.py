@@ -156,7 +156,7 @@ class Config():
             cFile= SettingFile()
             cSettingsA.append(cFile)
 
-            if cSetting.engine=='file':
+            if _name=='file':
                 namedOut= cFile
 
 

@@ -142,13 +142,13 @@ class Config():
         cSettingsA= list(self.settings)
 
         cFile= None
-        cOut= None
+        namedOut= None
         for cSetting in cSettingsA:
             if isinstance(cSetting, SettingFile):
                 cFile= cSetting
 
             if cSetting.engine==_name:
-                cOut= cSetting
+                namedOut= cSetting
 
 
         #file is saved anyway
@@ -157,7 +157,7 @@ class Config():
             cSettingsA.append(cFile)
 
             if cSetting.engine=='file':
-                cOut= cFile
+                namedOut= cFile
 
 
         fnA= list( os.path.split(cFile.file) )
@@ -169,8 +169,8 @@ class Config():
             fnA[1]= self.projectName +'.txt'
 
 
-        if cOut:
-            return cOut
+        if namedOut:
+            return namedOut
 
         return cSettingsA
 

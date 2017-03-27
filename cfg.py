@@ -168,6 +168,8 @@ class Config():
         if fnA[1]=='':
             fnA[1]= self.projectName +'.txt'
 
+        cFile.file= os.path.join(*fnA)
+        
 
         if namedOut:
             return namedOut

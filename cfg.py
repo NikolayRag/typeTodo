@@ -354,7 +354,8 @@ class Config():
     def cfg2dict(self, _settings):
         cDict= []
 
-        for cSetting in _settings:
-            cDict.append( vars(cSetting) )
+        if _settings:
+            for cSetting in _settings:
+                cDict.append( vars(cSetting) )
 
         return sorted(cDict)

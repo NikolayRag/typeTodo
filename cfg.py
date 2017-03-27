@@ -119,15 +119,18 @@ class Config():
         newSettings= self.readCfg(self.projectFileName, self.projectLegacyFn) or self.initGlobalDo()
 
     
-        if newSettings and self.cfg2dict(self.settings)!=self.cfg2dict(newSettings):
-            self.settings= newSettings
+        if newSettings:
+            if self.cfg2dict(self.settings)!=self.cfg2dict(newSettings):
+                self.settings= newSettings
 
-            if not os.path.isfile(self.projectFileName):
-                print('TypeTodo init: Writing project\'s config.')
+                if not os.path.isfile(self.projectFileName):
+                    print('TypeTodo init: Writing project\'s config.')
 
-                self.writeCfg(self.projectFileName, newSettings)
+                    self.writeCfg(self.projectFileName, newSettings)
 
-            return True
+                return True
+
+            return
 
 
         print('TypeTodo error: Config could not be read.')
@@ -250,6 +253,7 @@ class Config():
 
         while True:
             cfgString= f.readline()
+
             if cfgString=='' or cfgString=="\n" or cfgString=="\r\n":
                 break
             

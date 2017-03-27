@@ -188,22 +188,49 @@ class Config():
     Read specified config file.
     '''
     def readCfg(self, _cfgFile, _oldCfg):
+        cfg= None
+        
         try:
             f= codecs.open(_cfgFile, 'r', 'UTF-8')
+            cfg= json.loads(f.read())
         except:
-            f= False
-        if not f:
-            return
+            None
 
-        cSettings= json.loads( f.read() )
+        if cfg:
+            cSettings= []
+            for cCfg in cfg:
+                if cCfg['engine']=='file':
+                    cSettings.append(
+                        SettingFile(cCfg['file'])
+                    )
 
 
-        if not cSettings: #legacy fallback
-            cSettings= readLegacy(_oldCfg)
+                if cCfg['engine']=='sql':
+                    cSettings.append(
+                        SettingMysql(
+                            cCfg['addr'],
+                            cCfg['base'],
+                            cCfg['login'],
+                            cCfg['passw']
+                        )
+                    )
 
 
-        if cSettings:
-            return sorted(cSettings)
+                if cCfg['engine']=='http':
+                    cSettings.append(
+                        SettingHttp(
+                            cCfg['addr'],
+                            cCfg['base'],
+                            cCfg['login'],
+                            cCfg['passw']
+                        )
+                    )
+
+            return cSettings
+
+
+        #migrate
+        return self.readLegacy(_oldCfg)
 
 
 

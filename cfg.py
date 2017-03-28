@@ -38,14 +38,14 @@ class SettingFile(Setting):
 
 class SettingMysql(Setting):
     addr=      ''
-    base=      ''
+    scheme=      ''
     login=     ''
     passw=     ''
     engine=    'mysql'
 
-    def __init__(self, addr='', base='', login='', passw=''):
+    def __init__(self, addr='', scheme='', login='', passw=''):
         self.addr= addr
-        self.base= base
+        self.scheme= scheme
         self.login= login
         self.passw= passw
 
@@ -221,7 +221,7 @@ class Config():
                     cSettings.append(
                         SettingMysql(
                             cCfg['addr'],
-                            cCfg['base'],
+                            cCfg['scheme'],
                             cCfg['login'],
                             cCfg['passw']
                         )

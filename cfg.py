@@ -121,7 +121,6 @@ class Config():
         if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
 
         newSettings= self.readCfg(self.projectFileName, self.projectLegacyFn) or self.initGlobalDo()
-
     
         if newSettings:
             if self.cfg2dict(self.settings)!=self.cfg2dict(newSettings):
@@ -138,7 +137,6 @@ class Config():
 
 
         print('TypeTodo error: Config could not be read.')
-        self.settings= None
 
 
 
@@ -241,6 +239,8 @@ class Config():
                     )
 
             return cSettings
+
+        self.settings= None
 
 
         #migrate

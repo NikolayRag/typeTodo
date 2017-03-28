@@ -98,9 +98,9 @@ class TodoDbHttp():
         postData['v']= 1
         postData['todoa']= json.dumps(postTodoA)
         postData['logName']= urllib2.quote(self.parentDB.config.projectUser)
-        if self.settings.login!='' and self.settings.passw!='':
+        if self.settings.login!='' and self.settings.password!='':
             postData['logName']= urllib2.quote(self.settings.login)
-            postData['logPass']= urllib2.quote(self.settings.passw)
+            postData['logPass']= urllib2.quote(self.settings.password)
 
         postData['rep']= self.settings.repository
         postData['project']= urllib2.quote(self.parentDB.config.projectName)
@@ -143,9 +143,9 @@ class TodoDbHttp():
         postData= {}
         postData['wantedId']= _wantedId
         postData['logName']= urllib2.quote(self.parentDB.config.projectUser)
-        if self.settings.login!='' and self.settings.passw!='':
+        if self.settings.login!='' and self.settings.password!='':
             postData['logName']= urllib2.quote(self.settings.login)
-            postData['logPass']= urllib2.quote(self.settings.passw)
+            postData['logPass']= urllib2.quote(self.settings.password)
 
         postData['rep']= self.settings.repository
         postData['project']= urllib2.quote(self.parentDB.config.projectName)
@@ -168,9 +168,9 @@ class TodoDbHttp():
         postData= {}
         postData['wantedId']= self.lastId
         postData['logName']= urllib2.quote(self.parentDB.config.projectUser)
-        if self.settings.login!='' and self.settings.passw!='':
+        if self.settings.login!='' and self.settings.password!='':
             postData['logName']= urllib2.quote(self.settings.login)
-            postData['logPass']= urllib2.quote(self.settings.passw)
+            postData['logPass']= urllib2.quote(self.settings.password)
 
         postData['rep']= self.settings.repository
         postData['project']= urllib2.quote(self.parentDB.config.projectName)
@@ -194,9 +194,9 @@ class TodoDbHttp():
         postData= {}
         postData['rep']= self.settings.repository
         postData['project']= urllib2.quote(self.parentDB.config.projectName)
-        if self.settings.login!='' and self.settings.passw!='':
+        if self.settings.login!='' and self.settings.password!='':
             postData['logName']= urllib2.quote(self.settings.login)
-            postData['logPass']= urllib2.quote(self.settings.passw)
+            postData['logPass']= urllib2.quote(self.settings.password)
 
         response= self.callHTTP('?=fetch_tasks', postData)
         if response==None:

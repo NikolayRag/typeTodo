@@ -40,28 +40,28 @@ class SettingMysql(Setting):
     host=      ''
     scheme=      ''
     login=     ''
-    passw=     ''
+    password=     ''
     engine=    'mysql'
 
-    def __init__(self, host='', scheme='', login='', passw=''):
+    def __init__(self, host='', scheme='', login='', password=''):
         self.host= host
         self.scheme= scheme
         self.login= login
-        self.passw= passw
+        self.password= password
 
 
 class SettingHttp(Setting):
     host=      ''
     login=     ''
-    passw=     ''
+    password=     ''
     repository=      ''
     engine=    'http'
 
-    def __init__(self, host='', repository='', login='', passw=''):
+    def __init__(self, host='', repository='', login='', password=''):
         self.host= host
         self.repository= repository
         self.login= login
-        self.passw= passw
+        self.password= password
 
 
 
@@ -223,7 +223,7 @@ class Config():
                             cCfg['host'],
                             cCfg['scheme'],
                             cCfg['login'],
-                            cCfg['passw']
+                            cCfg['password']
                         )
                     )
 
@@ -234,7 +234,7 @@ class Config():
                             cCfg['host'],
                             cCfg['repository'],
                             cCfg['login'],
-                            cCfg['passw']
+                            cCfg['password']
                         )
                     )
 

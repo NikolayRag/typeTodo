@@ -37,28 +37,28 @@ class SettingFile(Setting):
 
 
 class SettingMysql(Setting):
-    addr=      ''
+    host=      ''
     scheme=      ''
     login=     ''
     passw=     ''
     engine=    'mysql'
 
-    def __init__(self, addr='', scheme='', login='', passw=''):
-        self.addr= addr
+    def __init__(self, host='', scheme='', login='', passw=''):
+        self.host= host
         self.scheme= scheme
         self.login= login
         self.passw= passw
 
 
 class SettingHttp(Setting):
-    addr=      ''
+    host=      ''
     login=     ''
     passw=     ''
     repository=      ''
     engine=    'http'
 
-    def __init__(self, addr='', repository='', login='', passw=''):
-        self.addr= addr
+    def __init__(self, host='', repository='', login='', passw=''):
+        self.host= host
         self.repository= repository
         self.login= login
         self.passw= passw
@@ -220,7 +220,7 @@ class Config():
                 if cCfg['engine']=='sql':
                     cSettings.append(
                         SettingMysql(
-                            cCfg['addr'],
+                            cCfg['host'],
                             cCfg['scheme'],
                             cCfg['login'],
                             cCfg['passw']
@@ -231,7 +231,7 @@ class Config():
                 if cCfg['engine']=='http':
                     cSettings.append(
                         SettingHttp(
-                            cCfg['addr'],
+                            cCfg['host'],
                             cCfg['repository'],
                             cCfg['login'],
                             cCfg['passw']

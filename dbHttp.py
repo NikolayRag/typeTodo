@@ -230,7 +230,7 @@ class TodoDbHttp():
             dict: POST data
     '''
     def callHTTP(self, _url, _post):
-        req= urllib2.Request('http://%s/%s' % (self.settings.addr, _url), str.encode(urllib.urlencode(_post)))
+        req= urllib2.Request('http://%s/%s' % (self.settings.host, _url), str.encode(urllib.urlencode(_post)))
         try:
             response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
         

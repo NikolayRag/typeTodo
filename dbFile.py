@@ -60,8 +60,6 @@ class TodoDbFile():
 
                         f.write(curTodo.state +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M:%S', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
 
-
-
             except Exception as e:
                 print("TypeTodo: 'file' db experienced error while flushing")
                 print(e)
@@ -87,7 +85,6 @@ class TodoDbFile():
 #
 #   Same is true for other engines.
 
-# -todo 2175 (config, feature, cleanup, file) +0: switch to .id files; at .newId() and .releaseId()
     def newId(self, _wantedId=0):
         if _wantedId==self.lastId:
             return self.lastId

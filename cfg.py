@@ -18,7 +18,6 @@ else:
 #  todo 2142 (http, config) +0: allow to specify project name in http config: {site} {rep} [{log} {pass}] [{proj}]
 #  todo 2143 (http, api, config) +0: request id name from server to fill back project name
 
-# =todo 2181 (config, feature, migration) +0: copy config to .do.cfg json file
 
 class Setting:
     engine= ''
@@ -373,6 +372,7 @@ class Config():
 
         except:
             None
+
 
 
     def cfg2dict(self, _settings):

@@ -23,12 +23,17 @@ else:
 class Setting:
     engine= ''
 
+    def dict(self):
+        out= {'enabled':True,'engine':self.engine}
+        out.update(vars(self))
+        return out
+
 
 class SettingFile(Setting):
     file=      ''
+    engine=    'file'
 
     def __init__(self, file=''):
-        self.engine=    'file'
         self.file= file
 
 
@@ -39,7 +44,7 @@ class SettingMysql(Setting):
     passw=     ''
 
     def __init__(self, addr='', base='', login='', passw=''):
-        self.engine=    'mysql'
+    engine=    'mysql'
         self.addr= addr
         self.base= base
         self.login= login
@@ -53,7 +58,7 @@ class SettingHttp(Setting):
     base=      ''
 
     def __init__(self, addr='', base='', login='', passw=''):
-        self.engine=    'http'
+    engine=    'http'
         self.addr= addr
         self.base= base
         self.login= login
@@ -360,6 +365,6 @@ class Config():
 
         if _settings:
             for cSetting in _settings:
-                cDict.append( vars(cSetting) )
+                cDict.append( cSetting.dict() )
 
         return sorted(cDict)

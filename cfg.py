@@ -45,7 +45,6 @@ class SettingMysql(Setting):
     engine=    'mysql'
 
     def __init__(self, addr='', base='', login='', passw=''):
-    engine=    'mysql'
         self.addr= addr
         self.base= base
         self.login= login
@@ -60,7 +59,6 @@ class SettingHttp(Setting):
     engine=    'http'
 
     def __init__(self, addr='', base='', login='', passw=''):
-    engine=    'http'
         self.addr= addr
         self.base= base
         self.login= login

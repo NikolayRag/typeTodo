@@ -54,12 +54,12 @@ class SettingHttp(Setting):
     addr=      ''
     login=     ''
     passw=     ''
-    base=      ''
+    repository=      ''
     engine=    'http'
 
-    def __init__(self, addr='', base='', login='', passw=''):
+    def __init__(self, addr='', repository='', login='', passw=''):
         self.addr= addr
-        self.base= base
+        self.repository= repository
         self.login= login
         self.passw= passw
 
@@ -232,7 +232,7 @@ class Config():
                     cSettings.append(
                         SettingHttp(
                             cCfg['addr'],
-                            cCfg['base'],
+                            cCfg['repository'],
                             cCfg['login'],
                             cCfg['passw']
                         )

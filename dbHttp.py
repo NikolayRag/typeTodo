@@ -102,7 +102,7 @@ class TodoDbHttp():
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.passw)
 
-        postData['rep']= self.settings.base
+        postData['rep']= self.settings.repository
         postData['project']= urllib2.quote(self.parentDB.config.projectName)
 
         response= self.callHTTP('?=flush', postData)
@@ -110,7 +110,7 @@ class TodoDbHttp():
             return False
 
         if response=='':
-            print('TypeTodo: HTTP server returns unexpected result. Repository: ' +self.settings.base)
+            print('TypeTodo: HTTP server returns unexpected result. Repository: ' +self.settings.repository)
             return False
 
         allOk= True
@@ -147,7 +147,7 @@ class TodoDbHttp():
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.passw)
 
-        postData['rep']= self.settings.base
+        postData['rep']= self.settings.repository
         postData['project']= urllib2.quote(self.parentDB.config.projectName)
 
         response= self.callHTTP('?=new_task_id', postData)
@@ -172,7 +172,7 @@ class TodoDbHttp():
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.passw)
 
-        postData['rep']= self.settings.base
+        postData['rep']= self.settings.repository
         postData['project']= urllib2.quote(self.parentDB.config.projectName)
 
         response= self.callHTTP('?=release_task_id', postData)
@@ -192,7 +192,7 @@ class TodoDbHttp():
 
     def fetch(self):
         postData= {}
-        postData['rep']= self.settings.base
+        postData['rep']= self.settings.repository
         postData['project']= urllib2.quote(self.parentDB.config.projectName)
         if self.settings.login!='' and self.settings.passw!='':
             postData['logName']= urllib2.quote(self.settings.login)

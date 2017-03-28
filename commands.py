@@ -125,11 +125,11 @@ class TypetodoWwwCommand(sublime_plugin.TextCommand):
         cDb= WCache().getDB()
         cCfg= cDb.config.getSettings('http')
         
-        if cCfg.addr=='' or cCfg.base=='':
+        if cCfg.addr=='' or cCfg.repository=='':
             sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
             return
                 
-        webbrowser.open_new_tab(cCfg.engine +'://' +cCfg.addr +'/' +cCfg.base +'/' +cDb.config.projectName)
+        webbrowser.open_new_tab(cCfg.engine +'://' +cCfg.addr +'/' +cCfg.repository +'/' +cDb.config.projectName)
 
 
 #Open project's .do

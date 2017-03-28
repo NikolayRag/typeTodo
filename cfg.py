@@ -198,17 +198,22 @@ class Config():
     Read specified config file.
     '''
     def readCfg(self, _cfgFile, _oldCfg):
-        cfg= None
+        cfgA= None
         
         try:
             f= codecs.open(_cfgFile, 'r', 'UTF-8')
-            cfg= json.loads(f.read())
+            cfgA= json.loads(f.read())
         except:
             None
 
-        if cfg:
+        if cfgA:
             cSettings= []
-            for cCfg in cfg:
+
+            for cCfg in cfgA:
+                if not cCfg['enabled']:
+                    continue
+
+
                 if cCfg['engine']=='file':
                     cSettings.append(
                         SettingFile(cCfg['file'])
@@ -330,12 +335,9 @@ class Config():
 
 
         #create new global config
-        cSettings= []
-
-        cSettings.append(SettingFile())
-        cSettings.append(SettingMysql())
-        cSettings.append( self.initNewHTTP() or SettingHttp() )
-
+        cSettings= [self.initNewHTTP()]
+        if cSettings==[False]:
+            cSettings= []
 
         if not self.writeCfg(self.globalFileName, cSettings):
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tglobal config cannot be created'), 1000)
@@ -349,6 +351,19 @@ class Config():
 
     def writeCfg(self, _fn, _settings):
         cDict= self.cfg2dict(_settings)
+
+        #add templates
+        templates= {'file':SettingFile, 'mysql':SettingMysql, 'http':SettingHttp}
+        for cSetting in _settings:
+            if cSetting.engine in templates:
+                del templates[cSetting.engine]
+
+        for cTemp in templates:
+            cSetting= templates[cTemp]().dict()
+            cSetting['enabled']= False
+            
+            cDict.append(cSetting)
+
 
         try:
             with codecs.open(_fn, 'w+', 'UTF-8') as f:

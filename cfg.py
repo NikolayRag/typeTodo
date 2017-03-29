@@ -102,9 +102,9 @@ class SettingHttp(Setting):
 Manage config for current project.
 '''
 class Config():
-    sublimeRoot= os.path.join(sublime.packages_path(), 'User')
-    globalFileName= os.path.join(sublimeRoot, '.do.cfg')
-    globalLegacyFn= os.path.join(sublimeRoot, '.do')
+    sublimeRoot= ''
+    globalFileName= ''
+    globalLegacyFn= ''
 
     #defaults to global
     projectRoot= ''

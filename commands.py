@@ -148,9 +148,10 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
 #
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        if not os.path.isfile(Config.globalFileName):
+        fn= WCache().getDB().config.globalFileName
+        if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\n\tNo global .do file,\n\tplease restart Sublime')
             return
-        sublime.active_window().open_file(Config.globalFileName, sublime.TRANSIENT)
+        sublime.active_window().open_file(fn, sublime.TRANSIENT)
 
 

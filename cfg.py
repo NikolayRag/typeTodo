@@ -106,23 +106,25 @@ class Config():
     globalFileName= os.path.join(sublimeRoot, '.do.cfg')
     globalLegacyFn= os.path.join(sublimeRoot, '.do')
 
+    #defaults to global
+    projectRoot= ''
+    projectFileName= ''
+    projectLegacyFn= ''
+
+    projectName= ''
+    projectUser= '**Anon'
+
 
     defaultHttpApi= 'typetodo.com'
-
-
-    projectUser= '**Anon'
-    #defaults to global
-    projectRoot= sublimeRoot
-    projectName= ''
-    projectFileName= globalFileName
-    projectLegacyFn= globalLegacyFn
-
-
     settings= None
 
     
     #Called with blank project folder, makes global config
     def __init__(self, _projectFolder=''):
+        self.projectRoot= self.sublimeRoot= os.path.join(sublime.packages_path(), 'User')
+        self.projectFileName= self.globalFileName= os.path.join(self.sublimeRoot, '.do.cfg')
+        self.projectLegacyFn= self.globalLegacyFn= os.path.join(self.sublimeRoot, '.do')
+
         if _projectFolder!='':
             self.projectRoot= _projectFolder
             self.projectName= os.path.split(_projectFolder)[1]

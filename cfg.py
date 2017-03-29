@@ -132,7 +132,7 @@ class Config():
         #force check globals at start
         newSettings= self.initGlobalDo()
         #migrate
-        if not os.path.isfile(self.globalFileName):
+        if newSettings and not os.path.isfile(self.globalFileName):
             self.writeCfg(self.globalFileName, newSettings)
 
         self.update()

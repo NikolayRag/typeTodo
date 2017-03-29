@@ -23,7 +23,7 @@ class Setting:
     engine= ''
 
     def dict(self):
-        out= {'enabled':True,'engine':self.engine}
+        out= {'engine':self.engine}
         out.update(vars(self))
         return out
 
@@ -207,7 +207,7 @@ class Config():
             cSettings= []
 
             for cCfg in cfgA:
-                if not cCfg['enabled']:
+                if 'disabled' in cCfg:
                     continue
 
 
@@ -359,7 +359,7 @@ class Config():
 
         for cTemp in templates:
             cSetting= templates[cTemp]().dict()
-            cSetting['enabled']= False
+            cSetting['disabled']= 'remove to enable'
             
             cDict.append(cSetting)
 

@@ -46,7 +46,7 @@ class TodoDbFile():
 
         if dirty or self.maxIdSaved!=self.maxId:
             try:
-                with codecs.open(self.settings.file, 'w+', 'UTF-8') as f:
+                with codecs.open(self.settings.fullName, 'w+', 'UTF-8') as f:
                     for iT in sorted(self.parentDB.todoA):
                         curTodo= self.parentDB.todoA[iT]
                         if curTodo.initial:
@@ -132,7 +132,7 @@ class TodoDbFile():
 
 
     def saveId(self, _id):
-        f= codecs.open(self.settings.file +'.state', 'w+', 'UTF-8')
+        f= codecs.open(self.settings.fullName +'.state', 'w+', 'UTF-8')
         
         f.write( json.dumps({'reserved':int(_id)}, indent=4) )
         
@@ -142,7 +142,7 @@ class TodoDbFile():
 
     def loadId(self):
         try:
-            f= codecs.open(self.settings.file +'.state', 'r', 'UTF-8')
+            f= codecs.open(self.settings.fullName +'.state', 'r', 'UTF-8')
         except:
             return 0
 
@@ -160,17 +160,17 @@ class TodoDbFile():
 #   also set .maxId from tasks and from '.maxid' file
 
     def fetch(self, _id=False):
-        if not os.path.isfile(self.settings.file):
+        if not os.path.isfile(self.settings.fullName):
             print("TypeTodo: 'file' db does not exist, should be created.")
 
-            codecs.open(self.settings.file, 'w+', 'UTF-8')
+            codecs.open(self.settings.fullName, 'w+', 'UTF-8')
 
             return False
 
 
         todoA= {}
         try:
-            with codecs.open(self.settings.file, 'r', 'UTF-8') as f:
+            with codecs.open(self.settings.fullName, 'r', 'UTF-8') as f:
                 ctxTodo= None
                 for ln in f:
                     ln= ln.splitlines()[0]

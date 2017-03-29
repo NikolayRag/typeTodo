@@ -29,11 +29,38 @@ class Setting:
 
 
 class SettingFile(Setting):
+    defaultRoot= ''
+    defaultName= ''
+
     file=      ''
+    fullName= ''
     engine=    'file'
 
-    def __init__(self, file=''):
+    def __init__(self, file='', defaultRoot='', defaultName=''):
         self.file= file
+
+        self.defaultRoot= defaultRoot
+        self.defaultName= defaultName
+
+        self.fullName= self.getFull()
+
+
+    def getFull(self):
+        fnA= list( os.path.split(self.file) )
+
+        if fnA[0]=='':
+            fnA[0]= self.defaultRoot
+
+        if fnA[1]=='':
+            fnA[1]= self.defaultName +'.do'
+
+        return os.path.join(*fnA)
+
+
+    def dict(self):
+        out= {'engine':self.engine, 'file':self.file}
+        return out
+
 
 
 class SettingMysql(Setting):
@@ -158,23 +185,12 @@ class Config():
 
         #file is saved anyway
         if not cFile:
-            cFile= SettingFile()
+            cFile= SettingFile('', self.projectRoot, self.projectName)
             cSettingsA.append(cFile)
 
             if _name=='file':
                 namedOut= cFile
 
-
-        fnA= list( os.path.split(cFile.file) )
-
-        if fnA[0]=='':
-            fnA[0]= self.projectRoot
-
-        if fnA[1]=='':
-            fnA[1]= self.projectName +'.do'
-
-        cFile.file= os.path.join(*fnA)
-        
 
         if namedOut:
             return namedOut
@@ -213,7 +229,7 @@ class Config():
 
                 if cCfg['engine']=='file':
                     cSettings.append(
-                        SettingFile(cCfg['file'])
+                        SettingFile(cCfg['file'], self.projectRoot, self.projectName)
                     )
 
 
@@ -277,7 +293,7 @@ class Config():
             curCfg= cfgFoundTry.groupdict()
             if curCfg['enginefile']:
                 cSettings.append(
-                    SettingFile(curCfg['fname'])
+                    SettingFile(curCfg['fname'], self.projectRoot, self.projectName)
                 )
 
 

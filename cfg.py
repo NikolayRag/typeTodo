@@ -131,6 +131,7 @@ class Config():
             self.projectFileName= os.path.join(self.projectRoot, self.projectName +'.do.cfg')
             self.projectLegacyFn= os.path.join(self.projectRoot, self.projectName +'.do')
 
+
         #force check globals at start
         newSettings= self.initGlobalDo()
         #migrate
@@ -231,28 +232,32 @@ class Config():
 
                 if cCfg['engine']=='file':
                     cSettings.append(
-                        SettingFile(cCfg['file'], self.projectRoot, self.projectName)
-                    )
-
-
-                if cCfg['engine']=='sql':
-                    cSettings.append(
-                        SettingMysql(
-                            cCfg['host'],
-                            cCfg['scheme'],
-                            cCfg['login'],
-                            cCfg['password']
+                        SettingFile(
+                            (('file' in cCfg) and cCfg['file']) or '',
+                            self.projectRoot,
+                            self.projectName
                         )
                     )
 
 
-                if cCfg['engine']=='http':
+                if cCfg['engine']=='sql' and ('host' in cCfg) and ('scheme' in cCfg):
+                    cSettings.append(
+                        SettingMysql(
+                            cCfg['host'],
+                            cCfg['scheme'],
+                            (('login' in cCfg) and cCfg['login']) or '',
+                            (('password' in cCfg) and cCfg['password']) or ''
+                        )
+                    )
+
+
+                if cCfg['engine']=='http' and ('host' in cCfg) and ('repository' in cCfg):
                     cSettings.append(
                         SettingHttp(
                             cCfg['host'],
                             cCfg['repository'],
-                            cCfg['login'],
-                            cCfg['password']
+                            (('login' in cCfg) and cCfg['login']) or '',
+                            (('password' in cCfg) and cCfg['password']) or ''
                         )
                     )
 

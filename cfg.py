@@ -349,7 +349,7 @@ class Config():
 
 
     def writeCfg(self, _fn, _settings):
-        cDict= self.cfg2dict(_settings)
+        dictA= self.cfg2dict(_settings)
 
         #add templates
         templates= {'file':SettingFile, 'mysql':SettingMysql, 'http':SettingHttp}
@@ -361,12 +361,12 @@ class Config():
             cSetting= templates[cTemp]().dict()
             cSetting['disabled']= 'remove to enable'
             
-            cDict.append(cSetting)
+            dictA.append(cSetting)
 
 
         try:
             with codecs.open(_fn, 'w+', 'UTF-8') as f:
-                f.write( json.dumps(cDict, indent=4) )
+                f.write( json.dumps(dictA, indent=4) )
 
             return True
 

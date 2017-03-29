@@ -398,4 +398,3 @@ class Config():
             for cSetting in _settings:
                 cDict.append( cSetting.dict() )
 
-        return sorted(cDict)

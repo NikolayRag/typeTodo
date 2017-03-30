@@ -22,9 +22,14 @@ else:
 class Setting:
     engine= ''
 
+    fields= []
+
+
     def dict(self):
         out= {'engine':self.engine}
-        out.update(vars(self))
+        for cField in self.fields:
+            out[cField]= vars(self)[cField]
+
         return out
 
 
@@ -33,6 +38,7 @@ class SettingFile(Setting):
     fullName= ''
     engine=    'file'
 
+    fields= ['file']
 
 
     def __init__(self, file='', defaultRoot='', defaultName=''):
@@ -58,6 +64,9 @@ class SettingMysql(Setting):
     password=     ''
     engine=    'mysql'
 
+    fields= ['host', 'scheme', 'login', 'password']
+
+
     def __init__(self, host='', scheme='', login='', password=''):
         self.host= host
         self.scheme= scheme
@@ -71,6 +80,9 @@ class SettingHttp(Setting):
     password=     ''
     repository=      ''
     engine=    'http'
+
+    fields= ['host', 'repository', 'login', 'password']
+
 
     def __init__(self, host='', repository='', login='', password=''):
         self.host= host

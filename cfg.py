@@ -15,9 +15,6 @@ else:
     from .c import *
 
 
-#  todo 2142 (http, config) +0: allow to specify project name in http config: {site} {rep} [{log} {pass}] [{proj}]
-#  todo 2143 (http, api, config) +0: request id name from server to fill back project name
-
 
 class Setting:
     engine= ''
@@ -79,16 +76,21 @@ class SettingHttp(Setting):
     login=     ''
     password=     ''
     repository=      ''
+    project=      ''
+    fullProject=      ''
     engine=    'http'
 
-    fields= ['host', 'repository', 'login', 'password']
+    fields= ['host', 'repository', 'login', 'password', 'project']
 
 
-    def __init__(self, host='', repository='', login='', password=''):
+    def __init__(self, host='', repository='', login='', password='', project='', defaultProject=''):
         self.host= host
         self.repository= repository
+        self.project= project
         self.login= login
         self.password= password
+
+        self.fullProject= project if project else defaultProject
 
 
 
@@ -257,7 +259,9 @@ class Config():
                             cCfg['host'],
                             cCfg['repository'],
                             (('login' in cCfg) and cCfg['login']) or '',
-                            (('password' in cCfg) and cCfg['password']) or ''
+                            (('password' in cCfg) and cCfg['password']) or '',
+                            (('project' in cCfg) and cCfg['project']) or '',
+                            self.projectName
                         )
                     )
 
@@ -321,7 +325,9 @@ class Config():
                         curCfg['addrh'],
                         curCfg['baseh'],
                         curCfg['loginh'],
-                        curCfg['passwh']
+                        curCfg['passwh'],
+                        '',
+                        self.projectName
                     )
                 )
 
@@ -333,6 +339,7 @@ class Config():
 
 
 
+# -todo 2143 (http, api, config) +0: request id name from server to fill back project name
     def initNewHTTP(self):
         req = urllib2.Request('http://' +self.defaultHttpApi +'/?=new_rep_public')
         try:
@@ -345,7 +352,7 @@ class Config():
         print("New TypeTodo repository: " +cRep)
         sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
 
-        cSetting= SettingHttp(self.defaultHttpApi, cRep)
+        cSetting= SettingHttp(self.defaultHttpApi, cRep, defaultProject=self.projectName)
         return cSetting
 
 

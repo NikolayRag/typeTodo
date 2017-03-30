@@ -103,7 +103,7 @@ class TodoDbHttp():
             postData['logPass']= urllib2.quote(self.settings.password)
 
         postData['rep']= self.settings.repository
-        postData['project']= urllib2.quote(self.parentDB.config.projectName)
+        postData['project']= urllib2.quote(self.settings.fullProject)
 
         response= self.callHTTP('?=flush', postData)
         if response==None:
@@ -148,7 +148,7 @@ class TodoDbHttp():
             postData['logPass']= urllib2.quote(self.settings.password)
 
         postData['rep']= self.settings.repository
-        postData['project']= urllib2.quote(self.parentDB.config.projectName)
+        postData['project']= urllib2.quote(self.settings.fullProject)
 
         response= self.callHTTP('?=new_task_id', postData)
         if response==None:
@@ -173,7 +173,7 @@ class TodoDbHttp():
             postData['logPass']= urllib2.quote(self.settings.password)
 
         postData['rep']= self.settings.repository
-        postData['project']= urllib2.quote(self.parentDB.config.projectName)
+        postData['project']= urllib2.quote(self.settings.fullProject)
 
         response= self.callHTTP('?=release_task_id', postData)
         if response==None:
@@ -193,7 +193,7 @@ class TodoDbHttp():
     def fetch(self):
         postData= {}
         postData['rep']= self.settings.repository
-        postData['project']= urllib2.quote(self.parentDB.config.projectName)
+        postData['project']= urllib2.quote(self.settings.fullProject)
         if self.settings.login!='' and self.settings.password!='':
             postData['logName']= urllib2.quote(self.settings.login)
             postData['logPass']= urllib2.quote(self.settings.password)

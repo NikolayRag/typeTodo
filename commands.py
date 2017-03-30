@@ -129,7 +129,7 @@ class TypetodoWwwCommand(sublime_plugin.TextCommand):
             sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
             return
                 
-        webbrowser.open_new_tab(cCfg.engine +'://' +cCfg.host +'/' +cCfg.repository +'/' +cDb.config.projectName)
+        webbrowser.open_new_tab(cCfg.engine +'://' +cCfg.host +'/' +cCfg.repository +'/' +cCfg.fullProject)
 
 
 #Open project's .do

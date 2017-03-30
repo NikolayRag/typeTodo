@@ -228,7 +228,7 @@ class Config():
             cSettings= []
 
             for cCfg in cfgA:
-                if 'disabled' in cCfg:
+                if ('disabled' in cCfg) and cCfg['disabled']:
                     continue
 
 

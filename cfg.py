@@ -29,37 +29,25 @@ class Setting:
 
 
 class SettingFile(Setting):
-    defaultRoot= ''
-    defaultName= ''
-
     file=      ''
     fullName= ''
     engine=    'file'
 
+
+
     def __init__(self, file='', defaultRoot='', defaultName=''):
         self.file= file
 
-        self.defaultRoot= defaultRoot
-        self.defaultName= defaultName
 
-        self.fullName= self.getFull()
-
-
-    def getFull(self):
-        fnA= list( os.path.split(self.file) )
+        fnA= list( os.path.split(file) )
 
         if fnA[0]=='':
-            fnA[0]= self.defaultRoot
+            fnA[0]= defaultRoot
 
         if fnA[1]=='':
-            fnA[1]= self.defaultName +'.do'
+            fnA[1]= defaultName +'.do'
 
-        return os.path.join(*fnA)
-
-
-    def dict(self):
-        out= {'engine':self.engine, 'file':self.file}
-        return out
+        self.fullName= os.path.join(*fnA)
 
 
 

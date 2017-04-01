@@ -1,3 +1,7 @@
+v1.10.1
+  sql crashfix
+
+
 v1.10.0
 
   add:

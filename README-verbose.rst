@@ -8,28 +8,35 @@ Verbose TypeTodo description
 1. Todo creation and editing
 ----------------------------
 
-Start with typing ``//todo:`` comment, or use any other comment prefix according to used language.
-As colon ``:`` is typed, rest of line is instantly substituted with snippet, introducing additional fields: ``//todo XXXX (tag) [+-]N: <comment>``.
-XXXX will be instantly assigned with integer ID, unique within project.
+Start with typing ``//todo:`` comment, or use any other comment prefix according to used language.  
+As colon ``:`` is typed, rest of line is instantly substituted with snippet, introducing additional fields: ``//todo XXXX (tag) [+-]N: <comment>``.  
+``XXXX`` will be instantly assigned with integer ID, unique within the project.
        
 Any futher edition of any of that comment field (doplet) will trigger to flush it to database, using XXXX as ID.
-Database is specified in *[projectName].do* text file which is placed inside the first project's folder.
+By default database is *[projectName].do* text file which is placed inside the first project's folder **and** repository at *typetodo.com*.
 
-* If at a moment there's no project used, then global *.do* file is used as a database.
+    If at a moment there's no project used, then database is a *.do* file in Sublime's *Packages/User* folder.
 
 
-Changing doplet to ``// +todo...`` (adding ``+`` sign or pressing <Alt+D>,<Alt+Plus>) changes state to 'done' in database and wipes that comment of the code.
+Changing doplet to ``// +todo...`` (adding ``+`` sign or pressing *<Alt+D>,<Alt+Plus>*) changes state to 'done' in database and wipes that comment of the code.
 
 Full set of states are:
-* ' ' *<Alt+D>,<Alt+Space>* **Pending**, at creation
-* '-' *<Alt+D>,<Alt+Minus>* **Opened**, management state
-* '=' *<Alt+D>,<Alt+=>* **In Progress**, management state
-* '+' *<Alt+D>,<Alt+Plus>* **Closed**, wiped when set
-* '!' *<Alt+D>,<Alt+Del>* **Canceled**; As set, you will be asked for reason of canceling. If specified, that reason replaces doplet's comment in database. Then doplet is wiped.
+
+* ``*blank*`` **<Alt+D>,<Alt+Space>**: 'Pending', at creation
+
+* ``-`` **<Alt+D>,<Alt+Minus>**: 'Opened', management state
+
+* ``=`` **<Alt+D>,<Alt+=>**: 'In Progress', management state
+
+* ``+`` **<Alt+D>,<Alt+Plus>**: 'Closed', wiped when set
+
+* ``!`` **<Alt+D>,<Alt+Del>**: 'Canceled'; As set, you will be asked for reason of canceling. If specified, that reason replaces doplet's comment in database. Then doplet is wiped.
 
 In addition, shortcuts for raising/lowering priority are:
-* *<Alt+D>,<Alt+Up>* **Up**
-* *<Alt+D>,<Alt+Down>* **Down**
+
+* **<Alt+D>,<Alt+Up>**: Up 1
+
+* **<Alt+D>,<Alt+Down>**: Down 1
 
 
 2. Doplet snippet fields
@@ -55,13 +62,13 @@ Doplet is a comment like ``//todo XXXX (tags) [+-]N: comment`` with following fi
        
 While using of TypeTodo is completely implicit, there're some support commands and keyboard shortcuts available:
 
-* **Set State** (<Alt+D>,<Alt+D>)
+* Set State, **<Alt+D>,<Alt+D>**
        Offer list of states to change the state of doplet under cursor.
 
-* **Jump** (<Alt+D>,<Alt+J>)
-       Jump from doplet under cursor to *.do* and back.
+* Jump, **<Alt+D>,<Alt+J>**
+       Jump from doplet under cursor to **FILE** database and back.
 
-* **Find Todo** (<Alt+D>,<Alt+F>)
+* Find Todo, **<Alt+D>,<Alt+F>**
        Performs searching for doplets:
        - by ID
        - by tags, comma-separated. Regexps allowed.
@@ -70,17 +77,14 @@ While using of TypeTodo is completely implicit, there're some support commands a
 
        Placing '-' sign before search string finds all BUT specified doplets.
 
-* **Update Inconsistence** (<Alt+D>,<Alt+I>)
+* Update Inconsistence, **<Alt+D>,<Alt+I>**
        For any doplet within view that differs from database, duplicate that doplet by fetching it's actual content from database.
 
-* **HTTP Repository** (<Alt+D>,<Alt+H>)
+* HTTP Repository, **<Alt+D>,<Alt+H>**
        Used to open current project within HTTP repository in browser. Server and repository to browse are defined in *.do* config.
 
-* **Config** / **Global Config**
+* Config / Global Config
        Command for opening related *.do* file.
-
-* **Reset Global Config**
-       Reinitialise global *.do* config. Mainly reinitialisation means gathering of new public HTTP repository, while old one will remain forgotten on web-server.
 
 
 .. _`Configuring TypeTodo`: https://github.com/NikolayRag/typeTodo/blob/working/README-config.rst

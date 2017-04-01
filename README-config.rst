@@ -4,16 +4,16 @@
 Configuring TypeTodo
 ====================
 
-TypeTodo is configured using first lines in *[projectName].do* file, which is used both as configuration and default database storage.
+TypeTodo is configured using *.do.cfg* JSON file in the first project's folder.
 
-    *[projectName].do* is automatically created in the first project's folder if none found:
-    if first folder included in project is ``/myProject``, then ``/myProject/myProject.do`` file will be used as config.
+    *.do.cfg* is automatically created if not found.
 
-    Global *.do* is used as settings template.
+    Global *.do.cfg* in *Packages/User* folder is used as template and is also created if none.  
+    Global config is used when there's NO folders in project at a moment.
 
-    Default *.do* configuration is **HTTP**, using `public server`_ as host and newly created repository with random name like ``~exwvpaytkfs6``.
+    Default configuration is **HTTP**, using `public server`_ as host and newly created repository with random name, like ``~exwvpaytkfs6``.  
+    Also **FILE** is always used, even if not specified.
 
-    Global *.do* is used one for all doplets when there's NO project used at a moment.
 
 
 Acceptable configurations are **FILE**, **MYSQL** and **HTTP**
@@ -26,10 +26,11 @@ Acceptable configurations are **FILE**, **MYSQL** and **HTTP**
 1. **FILE** mode
 ----------------
 
-Specified by ``file <path/filename.ext>`` line.
+Specified by ``"engine": "file"`` block.  
+``"file": `` defines path and/or file  to be used as database.  
 Path can be absolute or relative to *[projectName].do* itself.
 
-If no explicit **FILE** database is defined, then *[projectName].do* is used as database storage.
+If no explicit **FILE** database is defined or ``"file":`` value is blank, then *[projectName].do* is used as database storage.
 
 
 File used for this mode (*[projectName].do* itself or external) holds tasks using following format:
@@ -61,18 +62,17 @@ where fields are:
 2. **HTTP** mode
 ----------------
 
-Specified by ``http <host> <repository>`` or ``http <host> <repository> <user> <pass>`` line.
-
-If ``<user> <pass>`` logon credentials are specified, repository is treated as **personal**, otherwise it is **public**.
+Specified by ``"engine": "http"`` block.  
+**Personal** repository requires ``"login":`` and ``"password":`` to be specified.
 
 Repository is accessible at `public server`_/<repository>
 
 * public repository
-       Is created at first run or can be recreated using *TypeTodo: Reset Global config* command. It is free to read and write by everyone who knows it's name.
-       Public repository name looks like ``~exwvpaytkfs6``
+  Is created at first run using name like ``~exwvpaytkfs6``.  
+  It is free to read and write by everyone who knows it's name.  
 
 * personal repository
-       Have same name as user registered at http://typetodo.com. It is readable by everyone (yet) but can be written only by providing logon username and pass. Using site service, you can grant write access for particular project to specified site user.
+  Have same name as user registered at http://typetodo.com. It is readable by everyone but can be written only if login/password provided. Using site service, write access to particular project can be grant to specified user.
        
 All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved (not yet displayed on site).
 
@@ -80,7 +80,7 @@ All changes done to TODO comment are accumulated and flushed with incremented ve
 3. **MySQL** mode
 -----------------
 
-Specified by ``mysql <host> <user> <pass> <scheme>`` line.
+Specified by ``"engine": "mysql"`` block.  
 
 *<scheme>* specified MUST exist at server.
 

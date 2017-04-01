@@ -247,7 +247,7 @@ class Config():
                     )
 
 
-                if cCfg['engine']=='sql' and ('host' in cCfg) and ('scheme' in cCfg):
+                if cCfg['engine']=='mysql' and ('host' in cCfg) and ('scheme' in cCfg):
                     cSettings.append(
                         SettingMysql(
                             cCfg['host'],

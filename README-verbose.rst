@@ -72,7 +72,6 @@ While using of TypeTodo is completely implicit, there're some support commands a
        Jump from doplet under cursor to **FILE** database and back.
 
 * Find Todo, **<Alt+D>,<Alt+F>**
-       Performs searching for doplets:
        - by ID
        - by tags, comma-separated. Regexps allowed.
        - by '*', meaning all doplets,

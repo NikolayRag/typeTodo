@@ -130,7 +130,7 @@ class Config():
         if _projectFolder!='':
             self.projectRoot= _projectFolder
             self.projectName= os.path.split(_projectFolder)[1]
-            self.projectFileName= os.path.join(self.projectRoot, self.projectName +'.do.cfg')
+            self.projectFileName= os.path.join(self.projectRoot, '.do.cfg')
             self.projectLegacyFn= os.path.join(self.projectRoot, self.projectName +'.do')
 
 

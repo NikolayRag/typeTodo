@@ -1,324 +1,344 @@
+v1.10.0
+
+  add:
+  - HTTP config accepts explicitly specified 'project' (for new JSON configs).
+  - Global config and Project config commands are placed
+    into 'Preferences/Package settings' menu.
+
+  change:
+  - config is moved to .do.cfg JSON file from *.do file database,
+    as it was meant to be at very beginning.
+    Migration is performed silently as needed.
+  - 'File' runtime maxID stored in single .do.state file.
+
+  remove:
+  - Reset Database command considered useless and unsafe. Delete global .do.cfg instead.
+
+  fix:
+  - tags sometime failed in SQL
+
+
 v1.9.1
 
-add:
-- 'Pending' default state with ' ' prefix
-- todo search is non-blocking for st3
-- jump command:
-  to code from .do file and from search results
-  to .do file from code
-- doubleclick to jumps from .do to code
+  add:
+  - 'Pending' default state with ' ' prefix
+  - todo search is non-blocking for st3
+  - jump command:
+    to code from .do file and from search results
+    to .do file from code
+  - doubleclick to jumps from .do to code
 
-change:
-- canceling todo can be interrupted by ESC leaving todo intact
-- 'Opened' state got '-' prefix
-- force init HTTP at first run
-- all key bindings moved to Alt+D,Alt+<key>:
-    alt+d - Set new todo state
-    alt+f - Find todo by id or tag command
-    alt+j - Jump to/from todo
-    alt+i - Show inconsistent todos
-    alt+h - Open HTTP repository
+  change:
+  - canceling todo can be interrupted by ESC leaving todo intact
+  - 'Opened' state got '-' prefix
+  - force init HTTP at first run
+  - all key bindings moved to Alt+D,Alt+<key>:
+      alt+d - Set new todo state
+      alt+f - Find todo by id or tag command
+      alt+j - Jump to/from todo
+      alt+i - Show inconsistent todos
+      alt+h - Open HTTP repository
 
-    alt+up - Raise priority
-    alt+down - Lower priority
+      alt+up - Raise priority
+      alt+down - Lower priority
 
-    alt+space     - Set state to ' ', 'Pending'
-    alt+minus     - Set state to '-', 'Opened'
-    alt+plus      - Set state to '+', 'Closed'
-    alt+=         - Set state to '=', 'Progress'
-    alt+backspace
-    alt+del       - Set state to '!', 'Canceled'
+      alt+space     - Set state to ' ', 'Pending'
+      alt+minus     - Set state to '-', 'Opened'
+      alt+plus      - Set state to '+', 'Closed'
+      alt+=         - Set state to '=', 'Progress'
+      alt+backspace
+      alt+del       - Set state to '!', 'Canceled'
 
-- Set State menu shows all states in fixed order
-- Todo Find simplified
-- Todo Find optimised for non-opened files - long lines skipped (>1000 chars)
-- README is split
-- internal command names changed:
-  typetodo_set_state to typetodo_set
+  - Set State menu shows all states in fixed order
+  - Todo Find simplified
+  - Todo Find optimised for non-opened files - long lines skipped (>1000 chars)
+  - README is split
+  - internal command names changed:
+    typetodo_set_state to typetodo_set
 
 
-remove:
-- Toggle Colorize command
+  remove:
+  - Toggle Colorize command
 
 
 v1.9.0
 
-fix:
-- test template for redmine caused error in dozen setups. That was a regrettable fault caused with no need. Complete package review is going to be made.
+  fix:
+  - test template for redmine caused error in dozen setups. That was a regrettable fault caused with no need. Complete package review is going to be made.
 
-new:
-- mouse context menu added
-- more todo comment prefixes added. Full list is:
-  //    C, Javascript
-  #     Unix shell, Python, Ruby
-  %     Prolog, Erlang
-  '     Vbasic
-  ;     Lisp, Asm
-  !     Fortran
-  <!--  HTML
-  --    SQL, Ada, Haskell
+  new:
+  - mouse context menu added
+  - more todo comment prefixes added. Full list is:
+    //    C, Javascript
+    #     Unix shell, Python, Ruby
+    %     Prolog, Erlang
+    '     Vbasic
+    ;     Lisp, Asm
+    !     Fortran
+    <!--  HTML
+    --    SQL, Ada, Haskell
 
 
 v1.8.11
 
-new:
-- seconds are stored in 'File', thus making 'apparently new/old' message obsolete
-- 'File' stores reserved Id, so its now ok to have File-only database for collaborative use
+  new:
+  - seconds are stored in 'File', thus making 'apparently new/old' message obsolete
+  - 'File' stores reserved Id, so its now ok to have File-only database for collaborative use
 
 
 v1.8.10
 
-fix:
-- database synchronisation fixed for multidbs: tasks were resaved with same stamp at startup (at least); live-edited db redefinitions now synchronised as well.
-- new explicitely defined 'file' database was not created
-- reserved ID was wrongly reset when switching all (even if one) databases onfly
-- concurrent fetch() and flush() detected and removed
-- jumping from search result for duplicated doplets started new search, not issue no more
+  fix:
+  - database synchronisation fixed for multidbs: tasks were resaved with same stamp at startup (at least); live-edited db redefinitions now synchronised as well.
+  - new explicitely defined 'file' database was not created
+  - reserved ID was wrongly reset when switching all (even if one) databases onfly
+  - concurrent fetch() and flush() detected and removed
+  - jumping from search result for duplicated doplets started new search, not issue no more
 
-change:
-- reuse id for immediately canceled task
-- engines internal error handling reviewed
+  change:
+  - reuse id for immediately canceled task
+  - engines internal error handling reviewed
 
-issue:
-- some missynchronisations detected when databases are continuosly added/deleted while changing doplets. But since this plugin was not intended to be heavily synchronising tool, such behavior is accepted.
-  No data loss noticed. Anyway everything should be nicely synchronised when all neccessary databases are in place.
+  issue:
+  - some missynchronisations detected when databases are continuosly added/deleted while changing doplets. But since this plugin was not intended to be heavily synchronising tool, such behavior is accepted.
+    No data loss noticed. Anyway everything should be nicely synchronised when all neccessary databases are in place.
 
 
 v1.8.9
 
-new:
-- unused database ID is released oh Sublime exit. No more continuos ID incrementing as a result of several Sublime restarts.
+  new:
+  - unused database ID is released oh Sublime exit. No more continuos ID incrementing as a result of several Sublime restarts.
 
-fix/change:
-- resaving on filename change was performed at wrong time, leading to unwanted tasks resavings. Taking that resaving is not surely needed, it was removed at all.
+  fix/change:
+  - resaving on filename change was performed at wrong time, leading to unwanted tasks resavings. Taking that resaving is not surely needed, it was removed at all.
 
 
 v1.8.8
 
-change:
-- made autocompletion list in form of "tag: ..."
+  change:
+  - made autocompletion list in form of "tag: ..."
 
-fix:
-- flushing with error removed tasks from being saved further, no more issue, tasks will be surely resaved on errors.
-- 'Flush error' message is less annoyig, it will be shown only first time till flush complete totally ok.
+  fix:
+  - flushing with error removed tasks from being saved further, no more issue, tasks will be surely resaved on errors.
+  - 'Flush error' message is less annoyig, it will be shown only first time till flush complete totally ok.
 
 
 
 v1.8.7
 
-fix:
-- switching project in window results in mixed database; that was nasty untested behavior ever, sorry to all who step into.
-- sql made more stable; v1.8.6 sql issue removed
+  fix:
+  - switching project in window results in mixed database; that was nasty untested behavior ever, sorry to all who step into.
+  - sql made more stable; v1.8.6 sql issue removed
 
-change:
-- 'search' skips TEMP folder
-- 'Update inconsistence' command renamed to 'Show inconsistence'
+  change:
+  - 'search' skips TEMP folder
+  - 'Update inconsistence' command renamed to 'Show inconsistence'
 
-issues:
-- switching project in window is not considered as bugless since there's no strict Sublime event applied at the time. Anyway, previous mixing database is fixed, and in worst case you should restart Sublime if TypeTodo will throw Flush error.
+  issues:
+  - switching project in window is not considered as bugless since there's no strict Sublime event applied at the time. Anyway, previous mixing database is fixed, and in worst case you should restart Sublime if TypeTodo will throw Flush error.
 
 
 v1.8.6
 
-fix:
-- (workaround) Sql crash localized, issue to fix further
+  fix:
+  - (workaround) Sql crash localized, issue to fix further
 
 
 v1.8.5
 
-new:
-- resave doplets at filename change, basically for new unsaved files
-  (removed in v1.8.9)
+  new:
+  - resave doplets at filename change, basically for new unsaved files
+    (removed in v1.8.9)
 
-fix:
-- flush/fetch freeze removed (was accidentally brought in with v1.7.1)
+  fix:
+  - flush/fetch freeze removed (was accidentally brought in with v1.7.1)
 
 
 v1.8.4
 
-change:
-- 'find' with tag should show results view for one match
+  change:
+  - 'find' with tag should show results view for one match
 
-fix:
-- 'browse' command didnt work
-- 'search' with blank field (in-view) failed
-- reviewed loose code that potentially skips saving of canceled doplets. Issue will have more observation.
+  fix:
+  - 'browse' command didnt work
+  - 'search' with blank field (in-view) failed
+  - reviewed loose code that potentially skips saving of canceled doplets. Issue will have more observation.
 
 
 v1.8.3
-Crashfix
+  Crashfix
 
 
 v1.8.2
 
-new:
-- 'Update inconsistence' tool for in-view replacing outdated doplets with actual ones
-- fetch and synchronize db periodically, not only at start and at .do change
-- jump from search results by mouse doubleclick
-- 'Search todo' allow exclusive search by prefixing search string with '-': only doplets that are NOT tagged as any of listed tags will match.
+  new:
+  - 'Update inconsistence' tool for in-view replacing outdated doplets with actual ones
+  - fetch and synchronize db periodically, not only at start and at .do change
+  - jump from search results by mouse doubleclick
+  - 'Search todo' allow exclusive search by prefixing search string with '-': only doplets that are NOT tagged as any of listed tags will match.
 
-fix:
-- autocompletion was wasted after doplet's tag
+  fix:
+  - autocompletion was wasted after doplet's tag
 
 
 v1.8.1
 
-change:
-- 'file' base now holds only last Editor and Timestamp, without Creator and Creation stamp anymore: it is job for sql/http storage.
-- save only doplets with actual changes; changing doplet and then undoing will not reset stamp in sql/http
-- 'Search todo' will skip files listed in sublime config
-- 'Search todo' will skip files greater than ~500k
+  change:
+  - 'file' base now holds only last Editor and Timestamp, without Creator and Creation stamp anymore: it is job for sql/http storage.
+  - save only doplets with actual changes; changing doplet and then undoing will not reset stamp in sql/http
+  - 'Search todo' will skip files listed in sublime config
+  - 'Search todo' will skip files greater than ~500k
 
-fix:
-- 'Search todo' by tags now ignores case
-- 'Search todo' didnt jump to external 'file'
-- set '.do' syntax automatically to all files which are used for 'file' base
-- 'file' saved only if any of doplets are changed; previous 'file' was saved at any db reset, say at ST unfocus.
-- canceling 'Search todo' with blank input (within view) caused jump somewhere; fixed
+  fix:
+  - 'Search todo' by tags now ignores case
+  - 'Search todo' didnt jump to external 'file'
+  - set '.do' syntax automatically to all files which are used for 'file' base
+  - 'file' saved only if any of doplets are changed; previous 'file' was saved at any db reset, say at ST unfocus.
+  - canceling 'Search todo' with blank input (within view) caused jump somewhere; fixed
 
 
 v1.8.0
 
-new:
-- 'file' base filename can be explicitly defined with 'file [path/]file.ext' in .do to store doplets instead of .do itself; Used to separate 'http'/'sql' credentials.
-- EVERY base defined in .do will be used even if several SQL's, HTTP's are in place; No big use, mainly added to make available 'sql' or 'http' base together with external 'file'
+  new:
+  - 'file' base filename can be explicitly defined with 'file [path/]file.ext' in .do to store doplets instead of .do itself; Used to separate 'http'/'sql' credentials.
+  - EVERY base defined in .do will be used even if several SQL's, HTTP's are in place; No big use, mainly added to make available 'sql' or 'http' base together with external 'file'
 
 
 v1.7.4
 
-new:
-- 'Search todo' with blank input will list current view's doplets
-- allow to skip HTTP when global config created
+  new:
+  - 'Search todo' with blank input will list current view's doplets
+  - allow to skip HTTP when global config created
 
-fix:
-- 'Set State' command restricted in 'Search todo' results view
-- 'Search todo' now skip ordinary 'Find' results view
-- cursor was currupted with different-colorized doplets on one screen
-- If searching doplets within 'Search todo' results, source doplet is focused instead of .do
+  fix:
+  - 'Set State' command restricted in 'Search todo' results view
+  - 'Search todo' now skip ordinary 'Find' results view
+  - cursor was currupted with different-colorized doplets on one screen
+  - If searching doplets within 'Search todo' results, source doplet is focused instead of .do
 
 
 v1.7.3
 
-new:
-- tags autocomplete added. Issue: autocomplete also will show snippets
+  new:
+  - tags autocomplete added. Issue: autocomplete also will show snippets
 
-fix:
-- 'Search todo' command returned duplicates for multi-tag match, fixed
+  fix:
+  - 'Search todo' command returned duplicates for multi-tag match, fixed
 
 
 v1.7.2
 
-changed:
-- config moved to class, technical issue, maybe some untested issues dealing with .do
+  changed:
+  - config moved to class, technical issue, maybe some untested issues dealing with .do
 
-new:
-- skipped some known file extentions at 'Find todo' command
-- 'Find todo' command accepts '*' as synonim for '.*' tagged search
-- (+/-) key shortcuts changed with (shift+plus/minus)
-- (shift+plus/minus) key shortcuts as well as 'Set state' command (alt+d) triggers everywhere in doplet
-+ set state by pressing corresponding key (alt+shift+[-+=!]) 
+  new:
+  - skipped some known file extentions at 'Find todo' command
+  - 'Find todo' command accepts '*' as synonim for '.*' tagged search
+  - (+/-) key shortcuts changed with (shift+plus/minus)
+  - (shift+plus/minus) key shortcuts as well as 'Set state' command (alt+d) triggers everywhere in doplet
+  + set state by pressing corresponding key (alt+shift+[-+=!]) 
 
-fix:
-- .do is saved being sorted by ID
-- new doplet ID could be not synchronized when more than 1 db was used, fixed.
+  fix:
+  - .do is saved being sorted by ID
+  - new doplet ID could be not synchronized when more than 1 db was used, fixed.
 
 
 v1.7.1
 
-new:
-- 'Find Todo' command now accept comma-separated text for searching by tags, regexp accepted.
-- 'Find Todo' command searches for all matches.
+  new:
+  - 'Find Todo' command now accept comma-separated text for searching by tags, regexp accepted.
+  - 'Find Todo' command searches for all matches.
 
-fix:
-- fix unstable consistency check
+  fix:
+  - fix unstable consistency check
 
 
 v1.7.0
 
-new:
-- Doplet highlighting in code. Could slow down if lot of doplets in one file, issue to be fixed.
-- Basic consistency check at startup: doplets that are not equal to those in dbase are highlited red. NOTHING is changed in code, its all up to user. '.do' file contain dbase-version of record, so you can hop using (alt+shift+d) to see differense.
-  Notice, that any edit of inconsistent doplet will overwrite new version into dbase.
-- 'Toggle Colorize' command added which stores it state.
+  new:
+  - Doplet highlighting in code. Could slow down if lot of doplets in one file, issue to be fixed.
+  - Basic consistency check at startup: doplets that are not equal to those in dbase are highlited red. NOTHING is changed in code, its all up to user. '.do' file contain dbase-version of record, so you can hop using (alt+shift+d) to see differense.
+    Notice, that any edit of inconsistent doplet will overwrite new version into dbase.
+  - 'Toggle Colorize' command added which stores it state.
 
-fix:
-- Fixed unstable focusing at 'Find todo' command.
-- Canceling doplets with reason failed. Fixed.
-- (alt-d) shortcut more strictly restricted to doplet
-- Entering blank reason when calceling leave doplet comment unchanged
+  fix:
+  - Fixed unstable focusing at 'Find todo' command.
+  - Canceling doplets with reason failed. Fixed.
+  - (alt-d) shortcut more strictly restricted to doplet
+  - Entering blank reason when calceling leave doplet comment unchanged
 
-change:
-- No more deleting line itself when calceling doplet, only content is removed.
+  change:
+  - No more deleting line itself when calceling doplet, only content is removed.
 
 
 v1.6.5
 
-new:
-- Doplet is created as snippets with 3 tabs: Tag, Priority and Comment.
-- Restrict doplet editing if selection range is other than Tags, Priority and Comment blocks.
-- Added "+/-" shortcut when over Priority to change it
+  new:
+  - Doplet is created as snippets with 3 tabs: Tag, Priority and Comment.
+  - Restrict doplet editing if selection range is other than Tags, Priority and Comment blocks.
+  - Added "+/-" shortcut when over Priority to change it
 
-fix:
-- Previously Undo was implicitly altered so it took in account every changed character instead of word. This is no more issue.
+  fix:
+  - Previously Undo was implicitly altered so it took in account every changed character instead of word. This is no more issue.
 
 
 v1.6.3
 
-new:
-- 'Find todo' command added and binded to <alt+shift+d>. It is used to navigate through Todos, acting flexible depending on context:
-  * When cursor is at Todo line, then '.do' file is searched for record and it gets focus;
-  * When cursor is over Todo in '.do' file, project files are searched for that Todo and it gets focus;
-  * If neither, text input is offered to find Todo by its number.
+  new:
+  - 'Find todo' command added and binded to <alt+shift+d>. It is used to navigate through Todos, acting flexible depending on context:
+    * When cursor is at Todo line, then '.do' file is searched for record and it gets focus;
+    * When cursor is over Todo in '.do' file, project files are searched for that Todo and it gets focus;
+    * If neither, text input is offered to find Todo by its number.
 
 
 v1.6.2
 
-new:
-- SetState (alt+d) default state depends on current state (open > inprogress > close)
+  new:
+  - SetState (alt+d) default state depends on current state (open > inprogress > close)
 
-fix:
-- Patched 'idna' encoding error sometimes shown up
-- Colorize: '!' sign for canceled tasks is dedicated; Some color altered
+  fix:
+  - Patched 'idna' encoding error sometimes shown up
+  - Colorize: '!' sign for canceled tasks is dedicated; Some color altered
 
 
 v1.6.1
 
-fix:
-- concurrent todos could skip saving with SQL and especially HTTP; no more issue
+  fix:
+  - concurrent todos could skip saving with SQL and especially HTTP; no more issue
 
 
 v1.6.0
 
-new:
-- Added HTTP ID prefetch; Fully async HTTP from now, tho it can hang for a while sometimes when todo's are added rapidly (faster than HTTP request).
+  new:
+  - Added HTTP ID prefetch; Fully async HTTP from now, tho it can hang for a while sometimes when todo's are added rapidly (faster than HTTP request).
 
 
 v1.5.9
 
-new:
-- Database reset made asyncronous, so it should not hang ST
-    
-fix:
-- Editing of .do updates config onfly (feature is back)
+  new:
+  - Database reset made asyncronous, so it should not hang ST
+      
+  fix:
+  - Editing of .do updates config onfly (feature is back)
 
 
 v1.5.8
 
-new:
-- Ask the reason for 'Cancel' (may be omited)
-    
-fix:
-- Fixed 'setState' command (alt+d) for ST3
-- Changed state order for setState command
-- undo/redo of todo-containing line were not flushing
-- 'reset global' was flushing only FILE db
-- flushing todos in the file that is placed under different drive than project crashed
-- urllib2 was missing at cfg.py; subject for 'resetGlobal' command
+  new:
+  - Ask the reason for 'Cancel' (may be omited)
+      
+  fix:
+  - Fixed 'setState' command (alt+d) for ST3
+  - Changed state order for setState command
+  - undo/redo of todo-containing line were not flushing
+  - 'reset global' was flushing only FILE db
+  - flushing todos in the file that is placed under different drive than project crashed
+  - urllib2 was missing at cfg.py; subject for 'resetGlobal' command
 
 
-change:
-- Db flushing retries are no more infinite
-- save stuff on view deactivated
+  change:
+  - Db flushing retries are no more infinite
+  - save stuff on view deactivated
 
 
 v1.5.6 - 1.5.7 are crashfix
@@ -326,136 +346,136 @@ v1.5.6 - 1.5.7 are crashfix
 
 v1.5.5
 
-new:
-- Category for one todo can be enumerated by comma and now realised as 'tags'
+  new:
+  - Category for one todo can be enumerated by comma and now realised as 'tags'
 
-issues:
-- MySql db is affected most by adding 'tag2task' link table; Changes are up to be done automatically, as well as new todo's will be saved in new format. 'tasks'.'id_category' will remain and points to first tag of list.
+  issues:
+  - MySql db is affected most by adding 'tag2task' link table; Changes are up to be done automatically, as well as new todo's will be saved in new format. 'tasks'.'id_category' will remain and points to first tag of list.
 
 
 v1.5.4
 
-new:
-- Todo's states expanded and up to grow more
-- Added 'Cancel' and 'Progress' states for '!' and '=' prefixes respectively
-- Triggering to 'Cancel' state also wipes todo from code, as 'Close' do
-- Added SetState command; It duplicates changing states by entering symbol, and mostly added for those who dont want to remember prefixes
-- Added <alt+d> binding to SetState command
+  new:
+  - Todo's states expanded and up to grow more
+  - Added 'Cancel' and 'Progress' states for '!' and '=' prefixes respectively
+  - Triggering to 'Cancel' state also wipes todo from code, as 'Close' do
+  - Added SetState command; It duplicates changing states by entering symbol, and mostly added for those who dont want to remember prefixes
+  - Added <alt+d> binding to SetState command
 
-issues:
-- External DB states will now be 'Open' and 'Close' with newly created id's, and state name migration is done at first access to every one project by saving all tasks with +1 version and refering to new id_state. Old names ('True' and 'False') are remained with their id's. So if you're using SQL db, you may want to check id_state reassignment for all tasks within project.
+  issues:
+  - External DB states will now be 'Open' and 'Close' with newly created id's, and state name migration is done at first access to every one project by saving all tasks with +1 version and refering to new id_state. Old names ('True' and 'False') are remained with their id's. So if you're using SQL db, you may want to check id_state reassignment for all tasks within project.
 
 
 v1.5.3
 
-new:
-- middle-line todo; '#todo:' can be inserted anywhere, making remaining part of string a saved comment
+  new:
+  - middle-line todo; '#todo:' can be inserted anywhere, making remaining part of string a saved comment
 
-fix:
-- aggressive HTTP flushing removed; it is only done at start and at exit of last ST window
-- detected limit for count of tasks synchronised (about 200); fixed
-- better comparison for most up-to-date corresponding multidb todo at db.fetch()
-- removed back 60sec gap while comparing multidb todo's, due to saving stamps from same time value
+  fix:
+  - aggressive HTTP flushing removed; it is only done at start and at exit of last ST window
+  - detected limit for count of tasks synchronised (about 200); fixed
+  - better comparison for most up-to-date corresponding multidb todo at db.fetch()
+  - removed back 60sec gap while comparing multidb todo's, due to saving stamps from same time value
 
 
 v1.5.2
 
-crash fix:
-- HTTP newId() was returning wrong value
+  crash fix:
+  - HTTP newId() was returning wrong value
 
 
 v1.5.1
 
-fix:
-- updated changelog, merely
+  fix:
+  - updated changelog, merely
 
 
 v1.5.0
 
-new:
-- Multiple DB allowed. Task will be saved to all specified DB's at one time.
-- 'File' mode DB is always on and dont have any explicit settings.
-- Specified DB's are synchronized at ST start and at flush points.
+  new:
+  - Multiple DB allowed. Task will be saved to all specified DB's at one time.
+  - 'File' mode DB is always on and dont have any explicit settings.
+  - Specified DB's are synchronized at ST start and at flush points.
 
-change:
-- 'Transfer' command is obsolete and removed, due to ability to set multiple synchronized DB's.
+  change:
+  - 'Transfer' command is obsolete and removed, due to ability to set multiple synchronized DB's.
 
-fix:
-- HTTP is now fetched/synchronized.
+  fix:
+  - HTTP is now fetched/synchronized.
 
-issue:
-- At the moment only one external DB (in addition fo 'File') is allowed; It is defined by last config string, as before. Removing this limitation is low-priority, tho all code preparations are done.
-- Synchronizing only last version of each task is desired behaviour from now.
+  issue:
+  - At the moment only one external DB (in addition fo 'File') is allowed; It is defined by last config string, as before. Removing this limitation is low-priority, tho all code preparations are done.
+  - Synchronizing only last version of each task is desired behaviour from now.
 
 
 v1.4.0
 
-new:
-- HTTP engine introduced and become default. http://typetodo.com is used as default server
-- HTTP anonymous and registered repositories are supported
-- added command to open current project's HTTP repository in browser, if any
-- added command to open current project's and global .do config files
-- added command to reset global .do config to default.
-  That will be HTTP with new public repository.
-  Existing global tasks will attempt to move to that new repository
-- added command to reset project's .do config.
-  New database settings will be copied from global .do,
-  and project's tasks will attempt to move to new location.
-  
-changes:
-- verbose and dialog messages changed
+  new:
+  - HTTP engine introduced and become default. http://typetodo.com is used as default server
+  - HTTP anonymous and registered repositories are supported
+  - added command to open current project's HTTP repository in browser, if any
+  - added command to open current project's and global .do config files
+  - added command to reset global .do config to default.
+    That will be HTTP with new public repository.
+    Existing global tasks will attempt to move to that new repository
+  - added command to reset project's .do config.
+    New database settings will be copied from global .do,
+    and project's tasks will attempt to move to new location.
+    
+  changes:
+  - verbose and dialog messages changed
 
-fix:
-- Strange code preventing SQL table creation is changed to working one.
+  fix:
+  - Strange code preventing SQL table creation is changed to working one.
 
-known issues:
-- Global reset and project's transfer will NOT work if original database is HTTP.
-  Only File or SQL are supported as source yet.
-  Also if transfering from SQL, ONLY LAST task's version will be copied.
-- Synchronysing changes from database is still not working. It is the issue of next version.
-  Also http://typetodo.com doesn't have any 'modify' tools yet. Be patient.
-  
+  known issues:
+  - Global reset and project's transfer will NOT work if original database is HTTP.
+    Only File or SQL are supported as source yet.
+    Also if transfering from SQL, ONLY LAST task's version will be copied.
+  - Synchronysing changes from database is still not working. It is the issue of next version.
+    Also http://typetodo.com doesn't have any 'modify' tools yet. Be patient.
+    
 
 v1.3.1
 
-fixes:
-- all changes are flushed at exit (and at changing window)
-- as flush-at-exit fixed, flushing delay raised to 5 sec's
+  fixes:
+  - all changes are flushed at exit (and at changing window)
+  - as flush-at-exit fixed, flushing delay raised to 5 sec's
 
 
 v1.3.0
 
-new:
-- internal: TodoTask are managed now from TodoDb. Step toward buffered flush and consistency check.
-- buffered flush introduced; all changes are flushed after 2 seconds of idle
-- as a result of buffered flush, SQL stores full history of TODO changes. No SQL table definitions affected.
+  new:
+  - internal: TodoTask are managed now from TodoDb. Step toward buffered flush and consistency check.
+  - buffered flush introduced; all changes are flushed after 2 seconds of idle
+  - as a result of buffered flush, SQL stores full history of TODO changes. No SQL table definitions affected.
 
-fixes:
-- idented doplets doesnt seems to be saved as edited; Now they do
+  fixes:
+  - idented doplets doesnt seems to be saved as edited; Now they do
 
-known issues:
-- (fixed in v1.3.1) changes flushed in 2 seconds of idle, so they will be lost if ST is exited in that time.
+  known issues:
+  - (fixed in v1.3.1) changes flushed in 2 seconds of idle, so they will be lost if ST is exited in that time.
 
 
 v1.2.6
 
-- fixed bug with creating .do for blank projects
-- fixed bug with undoing done (+) doplets
-- .todo files renamed to .do
-- .do color markup added
-- bugfixes
+  - fixed bug with creating .do for blank projects
+  - fixed bug with undoing done (+) doplets
+  - .todo files renamed to .do
+  - .do color markup added
+  - bugfixes
 
 
 v1.2.0
 
-- ST3 supported
+  - ST3 supported
 
 
 v1.1.0
 
-- MySQL support added
+  - MySQL support added
 
 
 v1.0.0
-- basic #todo recognising and editing
-- .todo database
+  - basic #todo recognising and editing
+  - .todo database

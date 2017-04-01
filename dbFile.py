@@ -1,6 +1,6 @@
 # coding= utf-8
 
-import re, os, time, codecs, sys, _strptime
+import re, os, time, codecs, sys, json, _strptime
 
 if sys.version < '3':
     from task import *
@@ -46,10 +46,7 @@ class TodoDbFile():
 
         if dirty or self.maxIdSaved!=self.maxId:
             try:
-                with codecs.open(self.settings.file, 'w+', 'UTF-8') as f:
-                    f.write(self.settings.head)
-                    f.write("\n")
-
+                with codecs.open(self.settings.fullName, 'w+', 'UTF-8') as f:
                     for iT in sorted(self.parentDB.todoA):
                         curTodo= self.parentDB.todoA[iT]
                         if curTodo.initial:
@@ -62,9 +59,6 @@ class TodoDbFile():
                         gmtTime= time.localtime(curTodo.stamp)
 
                         f.write(curTodo.state +', '.join(curTodo.tagsA) +' ' +str(curTodo.id)+ ': ' +' '.join([str(lvl), '"'+curTodo.fileName+'"', curTodo.editor, time.strftime('%y/%m/%d %H:%M:%S', gmtTime)]) +"\n\t" +curTodo.comment +"\n\n")
-
-                    f.write('\nReserved: %d' % self.maxId)
-
 
             except Exception as e:
                 print("TypeTodo: 'file' db experienced error while flushing")
@@ -96,12 +90,17 @@ class TodoDbFile():
             return self.lastId
 
         self.fetch()
+        self.maxId= max(self.maxId, self.loadId())
 
         self.maxId+= 1
         if _wantedId>self.maxId:
             self.maxId= _wantedId
         
         self.flush()
+
+
+        self.saveId(self.maxId)
+
 
         self.lastId= self.maxId
 
@@ -113,11 +112,16 @@ class TodoDbFile():
 
     def releaseId(self, _atExit=False):
         self.fetch()
+        self.maxId= max(self.maxId, self.loadId())
         
         if self.lastId==self.maxId:
             if _atExit:
                 self.maxId-= 1
                 self.flush()
+
+                self.saveId(self.maxId)
+
+
         else:
             self.maxId= 0
 
@@ -127,19 +131,62 @@ class TodoDbFile():
 
 
 
+    def saveId(self, _id):
+        stateFn= os.path.join(self.settings.fullRoot,'.do.state')
+
+        stateJson= {}
+        if os.path.isfile(stateFn):
+            try:
+                with codecs.open(stateFn, 'r', 'UTF-8') as f:
+                    stateJson= json.loads( f.read() )
+            except:
+                print('TypeTodo: error while saving \'file\' state')
+
+        stateJson[self.settings.fullFile]= int(_id)
+
+        try:
+            with codecs.open(stateFn, 'w+', 'UTF-8') as f:
+                f.write( json.dumps(stateJson, indent=4) )
+        except:
+            print('TypeTodo: error while saving \'file\' state')
+
+
+
+    def loadId(self):
+        stateFn= os.path.join(self.settings.fullRoot,'.do.state')
+
+
+        stateJson= {}
+
+        try:
+            with codecs.open(stateFn, 'r', 'UTF-8') as f:
+                stateJson= json.loads( f.read() )
+
+        except:
+            print('TypeTodo: error while reading \'file\' state')
+            return 0
+
+
+        return stateJson[self.settings.fullFile] if (self.settings.fullFile in stateJson) else 0
+
+
+
 
 #   fetch all tasks from file
 #   also set .maxId from tasks and from '.maxid' file
 
     def fetch(self, _id=False):
-        if not os.path.isfile(self.settings.file):
+        if not os.path.isfile(self.settings.fullName):
             print("TypeTodo: 'file' db does not exist, should be created.")
+
+            codecs.open(self.settings.fullName, 'w+', 'UTF-8')
+
             return False
 
 
         todoA= {}
         try:
-            with codecs.open(self.settings.file, 'r', 'UTF-8') as f:
+            with codecs.open(self.settings.fullName, 'r', 'UTF-8') as f:
                 ctxTodo= None
                 for ln in f:
                     ln= ln.splitlines()[0]

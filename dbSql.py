@@ -158,7 +158,7 @@ class TodoDbSql():
 
     def reconnect(self):
         try:
-            cConnection= pymysql.connect(host=self.settings.addr, port=3306, user=self.settings.login, passwd=self.settings.passw, db=self.settings.base, use_unicode=True, charset="utf8")
+            cConnection= pymysql.connect(host=self.settings.host, port=3306, user=self.settings.login, passwd=self.settings.password, db=self.settings.scheme, use_unicode=True, charset="utf8")
             cConnection.autocommit(True)
         except Exception as e:
             print('TypeTodo: MySQL error, Sql connection cannot be established, check MySQL settings:')

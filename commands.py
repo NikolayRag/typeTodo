@@ -123,19 +123,20 @@ class TypetodoSetCommand(sublime_plugin.TextCommand):
 class TypetodoWwwCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         cDb= WCache().getDB()
-        for cCfg in cDb.config.settings:
-            if (cCfg.engine=='http' or cCfg.engine=='https') and cCfg.addr!='' and cCfg.base!='':
-                webbrowser.open_new_tab(cCfg.engine +'://' +cCfg.addr +'/' +cCfg.base +'/' +cDb.config.projectName)
-                return
-        sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
-
+        cCfg= cDb.config.getSettings('http')
+        
+        if cCfg.host=='' or cCfg.repository=='':
+            sublime.error_message('TypeTodo:\n\n\tProject is not configured for HTTP')
+            return
+                
+        webbrowser.open_new_tab(cCfg.engine +'://' +cCfg.host +'/' +cCfg.repository +'/' +cCfg.fullProject)
 
 
 #Open project's .do
 #
 class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        fn= WCache().getDB().config.settings[0].file
+        fn= WCache().getDB().config.projectFileName
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\n\tNo projects .do file,\n\tplease restart Sublime')
             return
@@ -147,40 +148,10 @@ class TypetodoCfgOpenCommand(sublime_plugin.TextCommand):
 #
 class TypetodoGlobalOpenCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        fn= Config().settings[0].file
+        fn= WCache().getDB().config.globalFileName
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo:\n\n\tNo global .do file,\n\tplease restart Sublime')
             return
         sublime.active_window().open_file(fn, sublime.TRANSIENT)
 
-
-
-
-
-#Reset global config
-#
-class TypetodoGlobalResetCommand(sublime_plugin.TextCommand):
-    cDb= None
-
-    def resetCB(self):
-        if not self.cDb:
-            return
-        cDb= self.cDb
-        self.cDb= None
-
-        if not cDb.config.globalInited and not cDb.config.initGlobalDo(True):
-            sublime.message_dialog('TypeTodo error:\n\n\tCannot reset global .do file,\n\tall remain intact.')
-            return
-
-        for iT in cDb.todoA:
-            cDb.todoA[iT].setSaved(SAVE_STATES.FORCE)
-
-        cDb.pushReset(0)
-
-
-    def run(self, _edit):
-        if not sublime.ok_cancel_dialog('TypeTodo WARNING:\n\n\tGlobal .do file will be DELETED\n\tand created back with default settings.\n\n\tIt may contain unsaved database\n\tconnection settings, such as login, pass\n\tor public repository name.\n\n\tGlobal database content\n\twill be copied to new location.\n\n\tProcceed?'):
-            return
-
-        self.cDb= TodoDb(self.resetCB, Config())
 

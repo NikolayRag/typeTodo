@@ -1,7 +1,7 @@
 # coding= utf-8
 
 import sublime
-import sys, re, os, time, codecs
+import sys, re, os, time, codecs, json
 
 if sys.version < '3':
     import urllib2, urllib
@@ -15,8 +15,88 @@ else:
     from .c import *
 
 
+
 class Setting:
     engine= ''
+
+    fields= []
+
+
+    def dict(self):
+        out= {'engine':self.engine}
+        for cField in self.fields:
+            out[cField]= vars(self)[cField]
+
+        return out
+
+
+class SettingFile(Setting):
+    file=      ''
+    fullName= ''
+    fullRoot=    ''
+    fullFile=    ''
+    engine=    'file'
+
+    fields= ['file']
+
+
+    def __init__(self, file='', defaultRoot='', defaultName=''):
+        self.file= file
+
+
+        fnA= list( os.path.split(file) )
+
+        if fnA[0]=='':
+            fnA[0]= defaultRoot
+
+        if fnA[1]=='':
+            fnA[1]= defaultName +'.do'
+
+        self.fullName= os.path.join(*fnA)
+
+        self.fullRoot= fnA[0]
+        self.fullFile= fnA[1]
+
+
+
+class SettingMysql(Setting):
+    host=      ''
+    scheme=      ''
+    login=     ''
+    password=     ''
+    engine=    'mysql'
+
+    fields= ['host', 'scheme', 'login', 'password']
+
+
+    def __init__(self, host='', scheme='', login='', password=''):
+        self.host= host
+        self.scheme= scheme
+        self.login= login
+        self.password= password
+
+
+class SettingHttp(Setting):
+    host=      ''
+    login=     ''
+    password=     ''
+    repository=      ''
+    project=      ''
+    fullProject=      ''
+    engine=    'http'
+
+    fields= ['host', 'repository', 'login', 'password', 'project']
+
+
+    def __init__(self, host='', repository='', login='', password='', project='', defaultProject=''):
+        self.host= host
+        self.repository= repository
+        self.project= project
+        self.login= login
+        self.password= password
+
+        self.fullProject= project if project else defaultProject
+
 
 
 
@@ -25,43 +105,45 @@ class Setting:
 #   open existing, unexistent
 #   local, global, global unexistent
 #   
-
+'''
+Manage config for current project.
+'''
 class Config():
     sublimeRoot= ''
+    globalFileName= ''
+    globalLegacyFn= ''
 
-    cWnd= None
-    defaultHttpApi= 'typetodo.com'
-
-    defaultHeader= "# Uncomment and configure.\n"\
-        +"# file [absolute_path/]filename.ext\n"\
-        +"# mysql 127.0.0.1 username password scheme\n"\
-        +"# http typetodo.com repository [username password]\n"
-
-
-
-    projectUser= '**Anon'
+    #defaults to global
     projectRoot= ''
+    projectFileName= ''
+    projectLegacyFn= ''
+
     projectName= ''
+    projectUser= '**Anon'
 
 
+    defaultHttpApi= 'typetodo.com'
     settings= None
 
-    globalInited= False
-
-    lastProjectHeader= None
-    lastCfgFile= None
-
     
+    #Called with blank project folder, makes global config
     def __init__(self, _projectFolder=''):
-        self.cWnd= sublime.active_window()
-        self.sublimeRoot= os.path.join(sublime.packages_path(), 'User')
-
-        self.projectRoot= self.sublimeRoot
-        self.projectName= ''
+        self.projectRoot= self.sublimeRoot= os.path.join(sublime.packages_path(), 'User')
+        self.projectFileName= self.globalFileName= os.path.join(self.sublimeRoot, '.do.cfg')
+        self.projectLegacyFn= self.globalLegacyFn= os.path.join(self.sublimeRoot, '.do')
 
         if _projectFolder!='':
             self.projectRoot= _projectFolder
             self.projectName= os.path.split(_projectFolder)[1]
+            self.projectFileName= os.path.join(self.projectRoot, '.do.cfg')
+            self.projectLegacyFn= os.path.join(self.projectRoot, self.projectName +'.do')
+
+
+        #force check globals at start
+        newSettings= self.initGlobalDo()
+        #migrate
+        if newSettings and not os.path.isfile(self.globalFileName):
+            self.writeCfg(self.globalFileName, newSettings)
 
         self.update()
 
@@ -69,59 +151,137 @@ class Config():
 
 
 
-
+    '''
+    (Re)read config from project-related config, or copy-create it from global
+    '''
     def update(self):
         if 'USERNAME' in os.environ: self.projectUser= os.environ['USERNAME']
 
-        _cfgFile= os.path.join(self.projectRoot, self.projectName +'.do')
+        newSettings= self.readCfg(self.projectFileName, self.projectLegacyFn) or self.initGlobalDo()
+    
+        if newSettings:
+            if self.cfg2dict(self.settings)!=self.cfg2dict(newSettings):
+                self.settings= newSettings
 
-
-        cSettings= self.readCfg(_cfgFile) or self.initGlobalDo()
-
-        if cSettings:
-            if self.lastCfgFile!=_cfgFile or self.lastProjectHeader!=cSettings[0].head:
-                cSettings[0].file= _cfgFile #filename need TO save
-                self.lastCfgFile= cSettings[0].file
-                self.lastProjectHeader= cSettings[0].head
-
-                self.settings= cSettings
-
-
-                if not os.path.isfile(_cfgFile):
+                if not os.path.isfile(self.projectFileName):
                     print('TypeTodo init: Writing project\'s config.')
-                    try:
-                        with codecs.open(_cfgFile, 'w+', 'UTF-8') as f:
-                            f.write(self.lastProjectHeader)
-                            f.write("\n")
-                    except:
-                        None
+
+                    self.writeCfg(self.projectFileName, newSettings)
 
                 return True
+
             return
 
+
         print('TypeTodo error: Config could not be read.')
-        self.lastCfgFile= None
-        self.lastProjectHeader= None
+
+
+
+    def getSettings(self, _name=None):
+        if not self.settings:
+            return
+
+        cSettingsA= list(self.settings)
+
+        cFile= None
+        namedOut= None
+        for cSetting in cSettingsA:
+            if isinstance(cSetting, SettingFile):
+                cFile= cSetting
+
+            if cSetting.engine==_name:
+                namedOut= cSetting
+
+
+        #file is saved anyway
+        if not cFile:
+            cFile= SettingFile('', self.projectRoot, self.projectName)
+            cSettingsA.append(cFile)
+
+            if _name=='file':
+                namedOut= cFile
+
+
+        if namedOut:
+            return namedOut
+
+        return cSettingsA
+
+        
+
+
+########
+#PRIVATE
+########
 
 
 
 
-    def isWindowExists(self):
-        if sys.version<'3':
-            if self.cWnd.id():
-                return True
-        else:
-            if self.cWnd.project_data():
-                return True
+    '''
+    Read specified config file.
+    '''
+    def readCfg(self, _cfgFile, _oldCfg):
+        cfgA= None
+        
+        try:
+            f= codecs.open(_cfgFile, 'r', 'UTF-8')
+            cfgA= json.loads(f.read())
+        except:
+            None
+
+        if cfgA:
+            cSettings= []
+
+            for cCfg in cfgA:
+                if ('disabled' in cCfg) and cCfg['disabled']:
+                    continue
+
+
+                if cCfg['engine']=='file':
+                    cSettings.append(
+                        SettingFile(
+                            (('file' in cCfg) and cCfg['file']) or '',
+                            self.projectRoot,
+                            self.projectName
+                        )
+                    )
+
+
+                if cCfg['engine']=='sql' and ('host' in cCfg) and ('scheme' in cCfg):
+                    cSettings.append(
+                        SettingMysql(
+                            cCfg['host'],
+                            cCfg['scheme'],
+                            (('login' in cCfg) and cCfg['login']) or '',
+                            (('password' in cCfg) and cCfg['password']) or ''
+                        )
+                    )
+
+
+                if cCfg['engine']=='http' and ('host' in cCfg) and ('repository' in cCfg):
+                    cSettings.append(
+                        SettingHttp(
+                            cCfg['host'],
+                            cCfg['repository'],
+                            (('login' in cCfg) and cCfg['login']) or '',
+                            (('password' in cCfg) and cCfg['password']) or '',
+                            (('project' in cCfg) and cCfg['project']) or '',
+                            self.projectName
+                        )
+                    )
+
+            return cSettings
+
+        self.settings= None
+
+
+        #migrate
+        return self.readLegacy(_oldCfg)
 
 
 
-
-
-
-
-
-    def readCfg(self, _cfgFile):
+    #left only for migration purposes
+    def readLegacy(self, _cfgFile):
         try:
             f= codecs.open(_cfgFile, 'r', 'UTF-8')
         except:
@@ -131,71 +291,51 @@ class Config():
 
 
         cSettings= []
-        doSetting= Setting()
-        cSettings.append(doSetting) #[0] will refer to .do itself; engine should be blank if overriden
-
-        headerCollect= ''
-
-        fileSetFound= False
 
         while True:
             cfgString= f.readline()
-            if cfgString=='' or cfgString=='\n':
+
+            if cfgString=='' or cfgString=="\n" or cfgString=="\r\n":
                 break
             
-            headerCollect+= cfgString
             #catch last matched config
             cfgFoundTry= RE_CFG.match(cfgString.rstrip('\n'))
+
+
             if not cfgFoundTry:
                 continue
 
-            cSetting= Setting()
 
             curCfg= cfgFoundTry.groupdict()
             if curCfg['enginefile']:
-                fileSetFound= True
-                cSetting.engine=    'file'
-                if os.path.dirname(curCfg['fname'])=='':
-                    cSetting.file=  os.path.join(self.projectRoot, curCfg['fname'])
-                else:
-                    cSetting.file=  curCfg['fname']
-                cSetting.head=      ''
-
-                if os.path.normcase(cSetting.file)==os.path.normcase(_cfgFile):
-                    cSetting= False #prevent explicit .do as 'file'
-                    fileSetFound= False
-
-                if not os.path.isfile(cSetting.file):
-                    with codecs.open(cSetting.file, 'w+', 'UTF-8') as fNew:
-                        fNew.write('')   
+                cSettings.append(
+                    SettingFile(curCfg['fname'], self.projectRoot, self.projectName)
+                )
 
 
             if curCfg['enginesql']:
-                cSetting.engine=    'mysql'
-                cSetting.addr=      curCfg['addrs']
-                cSetting.login=     curCfg['logins']
-                cSetting.passw=     curCfg['passws']
-                cSetting.base=      curCfg['bases']
+                cSettings.append(
+                    SettingMysql(
+                        curCfg['addrs'],
+                        curCfg['bases'],
+                        curCfg['logins'],
+                        curCfg['passws']
+                    )
+                )
 
 
             if curCfg['enginehttp']:
-                cSetting.engine=    'http'
-                cSetting.addr=      curCfg['addrh']
-                cSetting.login=     curCfg['loginh']
-                cSetting.passw=     curCfg['passwh']
-                cSetting.base=      curCfg['baseh']
+                cSettings.append(
+                    SettingHttp(
+                        curCfg['addrh'],
+                        curCfg['baseh'],
+                        curCfg['loginh'],
+                        curCfg['passwh'],
+                        '',
+                        self.projectName
+                    )
+                )
 
-
-            if cSetting:
-                cSettings.append(cSetting)
-
-
-
-        if not fileSetFound:
-            doSetting.engine= 'file'
-
-        doSetting.head= headerCollect
-                   
 
         return cSettings
 
@@ -204,6 +344,7 @@ class Config():
 
 
 
+# -todo 2143 (http, api, config) +0: request id name from server to fill back project name
     def initNewHTTP(self):
         req = urllib2.Request('http://' +self.defaultHttpApi +'/?=new_rep_public')
         try:
@@ -216,53 +357,23 @@ class Config():
         print("New TypeTodo repository: " +cRep)
         sublime.set_timeout(lambda: sublime.status_message('New TypeTodo repository initialized'), 1000)
 
-        cSetting= Setting()
-        cSetting.engine= 'http'
-        cSetting.addr= self.defaultHttpApi
-        cSetting.base= cRep
-        cSetting.login= cSetting.passwh= ''
-
+        cSetting= SettingHttp(self.defaultHttpApi, cRep, defaultProject=self.projectName)
         return cSetting
 
 
 
-    def initGlobalDo(self, _force=False):
-        _cfgFile= os.path.join(self.sublimeRoot, '.do')
-
-        if not _force:
-            cCfg= self.readCfg(_cfgFile)
-            if cCfg:
-                return cCfg
+    def initGlobalDo(self):
+        cCfg= self.readCfg(self.globalFileName, self.globalLegacyFn)
+        if cCfg:
+            return cCfg
 
 
-        self.globalInited= True
+        #create new global config
+        cSettings= [self.initNewHTTP()]
+        if cSettings==[False]:
+            cSettings= []
 
-        cSettings= []
-        doSetting= Setting()
-        cSettings.append(doSetting)
-        doSetting.engine= 'file'
-
-        headerCollect= self.defaultHeader
-
-
-#        httpInitFlag= sublime.ok_cancel_dialog('TypeTodo init:\n\n\tStart with new public HTTP storage?')
-
-        #request new random public repository
-#        if httpInitFlag:
-
-
-        httpCfg= self.initNewHTTP()
-        if httpCfg:
-            headerCollect+= httpCfg.engine +" " +httpCfg.addr +" " +httpCfg.base +"\n"
-            doSetting.head= headerCollect
-
-            cSettings.append(httpCfg)
-
-
-        try:
-            with codecs.open(_cfgFile, 'w+', 'UTF-8') as f:
-                f.write(headerCollect)
-        except:
+        if not self.writeCfg(self.globalFileName, cSettings):
             sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tglobal config cannot be created'), 1000)
             return
 
@@ -270,3 +381,40 @@ class Config():
         return cSettings
 
 
+
+
+    def writeCfg(self, _fn, _settings):
+        dictA= self.cfg2dict(_settings)
+
+        #add templates
+        templates= {'file':SettingFile, 'mysql':SettingMysql, 'http':SettingHttp}
+        for cSetting in _settings:
+            if cSetting.engine in templates:
+                del templates[cSetting.engine]
+
+        for cTemp in templates:
+            cSetting= templates[cTemp]().dict()
+            cSetting['disabled']= 'remove to enable'
+            
+            dictA.append(cSetting)
+
+
+        try:
+            with codecs.open(_fn, 'w+', 'UTF-8') as f:
+                f.write( json.dumps(dictA, indent=4) )
+
+            return True
+
+        except:
+            None
+
+
+
+    def cfg2dict(self, _settings):
+        cDict= []
+
+        if _settings:
+            for cSetting in _settings:
+                cDict.append( cSetting.dict() )
+
+        return cDict

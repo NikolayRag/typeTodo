@@ -98,22 +98,19 @@ class TodoDbHttp():
         postData['v']= 1
         postData['todoa']= json.dumps(postTodoA)
         postData['logName']= urllib2.quote(self.parentDB.config.projectUser)
-        if self.settings.login!='' and self.settings.passw!='':
+        if self.settings.login!='' and self.settings.password!='':
             postData['logName']= urllib2.quote(self.settings.login)
-            postData['logPass']= urllib2.quote(self.settings.passw)
+            postData['logPass']= urllib2.quote(self.settings.password)
 
-        postData['rep']= self.settings.base
-        postData['project']= urllib2.quote(self.parentDB.config.projectName)
+        postData['rep']= self.settings.repository
+        postData['project']= urllib2.quote(self.settings.fullProject)
 
-        req = urllib2.Request('http://' +self.settings.addr +'/?=flush', str.encode(urllib.urlencode(postData)))
-        try:
-            response = bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
-        except Exception as e:
-            print('TypeTodo: HTTP server error while flushing. Repository: ' +self.settings.base)
-            print(e)
+        response= self.callHTTP('?=flush', postData)
+        if response==None:
             return False
+
         if response=='':
-            print('TypeTodo: HTTP server flushing returns unexpected result. Repository: ' +self.settings.base)
+            print('TypeTodo: HTTP server returns unexpected result. Repository: ' +self.settings.repository)
             return False
 
         allOk= True
@@ -146,19 +143,15 @@ class TodoDbHttp():
         postData= {}
         postData['wantedId']= _wantedId
         postData['logName']= urllib2.quote(self.parentDB.config.projectUser)
-        if self.settings.login!='' and self.settings.passw!='':
+        if self.settings.login!='' and self.settings.password!='':
             postData['logName']= urllib2.quote(self.settings.login)
-            postData['logPass']= urllib2.quote(self.settings.passw)
+            postData['logPass']= urllib2.quote(self.settings.password)
 
-        postData['rep']= self.settings.base
-        postData['project']= urllib2.quote(self.parentDB.config.projectName)
+        postData['rep']= self.settings.repository
+        postData['project']= urllib2.quote(self.settings.fullProject)
 
-        req = urllib2.Request('http://' +self.settings.addr +'/?=new_task_id', str.encode(urllib.urlencode(postData)))
-        try:
-            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
-        except Exception as e:
-            print('TypeTodo: HTTP server error creating todo')
-            print(e)
+        response= self.callHTTP('?=new_task_id', postData)
+        if response==None:
             return False
 
         if str(int(response)) != response:
@@ -175,22 +168,19 @@ class TodoDbHttp():
         postData= {}
         postData['wantedId']= self.lastId
         postData['logName']= urllib2.quote(self.parentDB.config.projectUser)
-        if self.settings.login!='' and self.settings.passw!='':
+        if self.settings.login!='' and self.settings.password!='':
             postData['logName']= urllib2.quote(self.settings.login)
-            postData['logPass']= urllib2.quote(self.settings.passw)
+            postData['logPass']= urllib2.quote(self.settings.password)
 
-        postData['rep']= self.settings.base
-        postData['project']= urllib2.quote(self.parentDB.config.projectName)
+        postData['rep']= self.settings.repository
+        postData['project']= urllib2.quote(self.settings.fullProject)
 
-        req = urllib2.Request('http://' +self.settings.addr +'/?=release_task_id', str.encode(urllib.urlencode(postData)))
-        try:
-            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() ) or 0
-            self.lastId= None
-        except Exception as e:
-            print('TypeTodo: HTTP server error releasing todo')
-            print(e)
+        response= self.callHTTP('?=release_task_id', postData)
+        if response==None:
             return False
-            
+
+        response= response or 0
+
         if str(int(response)) != response:
             print('TypeTodo: HTTP server fails releasing todo')
             response= False
@@ -202,17 +192,14 @@ class TodoDbHttp():
 
     def fetch(self):
         postData= {}
-        postData['rep']= self.settings.base
-        postData['project']= urllib2.quote(self.parentDB.config.projectName)
-        if self.settings.login!='' and self.settings.passw!='':
+        postData['rep']= self.settings.repository
+        postData['project']= urllib2.quote(self.settings.fullProject)
+        if self.settings.login!='' and self.settings.password!='':
             postData['logName']= urllib2.quote(self.settings.login)
-            postData['logPass']= urllib2.quote(self.settings.passw)
-        req = urllib2.Request('http://' +self.settings.addr +'/?=fetch_tasks', str.encode(urllib.urlencode(postData)))
-        try:
-            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
-        except Exception as e:
-            print('TypeTodo: cant fetch http')
-            print(e)
+            postData['logPass']= urllib2.quote(self.settings.password)
+
+        response= self.callHTTP('?=fetch_tasks', postData)
+        if response==None:
             return False
 
         todoA= {}
@@ -232,3 +219,31 @@ class TodoDbHttp():
                 todoA[__id].set((cState or STATE_DEFAULT)[0], tags, task['priority'], task['namefile'], task['comment'], task['nameuser'], int(task['ustamp']))
 
         return todoA
+
+
+
+    lastServerState= True #assuming
+    '''
+        _url
+            str: path from root
+        _post
+            dict: POST data
+    '''
+    def callHTTP(self, _url, _post):
+        req= urllib2.Request('http://%s/%s' % (self.settings.host, _url), str.encode(urllib.urlencode(_post)))
+        try:
+            response= bytes.decode( urllib2.urlopen(req, None, self.timeout).read() )
+        
+        except Exception as e:
+            if self.lastServerState:
+                print('TypeTodo: HTTP connection unavailable.')
+            self.lastServerState= False
+            
+            return
+
+
+        if not self.lastServerState:
+            print('TypeTodo: HTTP connection restored.')
+        self.lastServerState= True
+
+        return response

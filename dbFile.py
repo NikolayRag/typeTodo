@@ -135,16 +135,20 @@ class TodoDbFile():
         stateFn= os.path.join(self.settings.fullRoot,'.do.state')
 
         stateJson= {}
-        try:
-            with codecs.open(stateFn, 'r', 'UTF-8') as f:
-                stateJson= json.loads( f.read() )
-        except:
-            None
+        if os.path.isfile(self.globalFileName):
+            try:
+                with codecs.open(stateFn, 'r', 'UTF-8') as f:
+                    stateJson= json.loads( f.read() )
+            except:
+                print('TypeTodo: error while saving \'file\' state')
 
         stateJson[self.settings.fullFile]= int(_id)
 
-        with codecs.open(stateFn, 'w+', 'UTF-8') as f:
-            f.write( json.dumps(stateJson, indent=4) )
+        try:
+            with codecs.open(stateFn, 'w+', 'UTF-8') as f:
+                f.write( json.dumps(stateJson, indent=4) )
+        except:
+            print('TypeTodo: error while saving \'file\' state')
 
 
 
@@ -159,6 +163,7 @@ class TodoDbFile():
                 stateJson= json.loads( f.read() )
 
         except:
+            print('TypeTodo: error while reading \'file\' state')
             return 0
 
 

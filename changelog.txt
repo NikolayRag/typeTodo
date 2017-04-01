@@ -1,3 +1,23 @@
+v1.10.0
+
+  add:
+  - HTTP config accepts explicitly specified 'project' (for new JSON configs).
+  - Global config and Project config commands are placed
+    into 'Preferences/Package settings' menu.
+
+  change:
+  - config is moved to .do.cfg JSON file from *.do file database,
+    as it was meant to be at very beginning.
+    Migration is performed silently as needed.
+  - 'File' runtime maxID stored in single .do.state file.
+
+  remove:
+  - Reset Database command considered useless and unsafe. Delete global .do.cfg instead.
+
+  fix:
+  - tags sometime failed in SQL
+
+
 v1.9.1
 
 add:

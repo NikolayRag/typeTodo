@@ -27,8 +27,8 @@ Key features
 * Database can be **File** (by default), **HTTP** or **MySQL**.
 
       
-.. _`Verbose TypeTodo description`: https://github.com/NikolayRag/typeTodo/blob/working/README-verbose.rst
+.. _`Verbose TypeTodo description`: https://github.com/NikolayRag/typeTodo/blob/master/README-verbose.rst
 `Verbose TypeTodo description`_
 
-.. _`Configuring TypeTodo`: https://github.com/NikolayRag/typeTodo/blob/working/README-config.rst
+.. _`Configuring TypeTodo`: https://github.com/NikolayRag/typeTodo/blob/master/README-config.rst
 `Configuring TypeTodo`_

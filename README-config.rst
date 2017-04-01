@@ -9,10 +9,11 @@ TypeTodo is configured using *.do.cfg* JSON file in the first project's folder.
     *.do.cfg* is automatically created if not found.
 
     Global *.do.cfg* in *Packages/User* folder is used as template and is also created if none.  
-    Global config is used when there's NO folders in project at a moment.
+    Global config is used when there's no folders added to project at a moment.
 
     Default configuration is **HTTP**, using `public server`_ as host and newly created repository with random name, like ``~exwvpaytkfs6``.  
-    Also **FILE** is always used, even if not specified.
+
+    **FILE** database is always used, even if not specified.
 
 
 
@@ -27,7 +28,8 @@ Acceptable configurations are **FILE**, **MYSQL** and **HTTP**
 ----------------
 
 Specified by ``"engine": "file"`` block.  
-``"file": `` defines path and/or file  to be used as database.  
+
+``"file":`` defines path/file to be used as database.  
 Path can be absolute or relative to *[projectName].do* itself.
 
 If no explicit **FILE** database is defined or ``"file":`` value is blank, then *[projectName].do* is used as database storage.
@@ -68,11 +70,11 @@ Specified by ``"engine": "http"`` block.
 Repository is accessible at `public server`_/<repository>
 
 * public repository
-  Is created at first run using name like ``~exwvpaytkfs6``.  
-  It is free to read and write by everyone who knows it's name.  
+    Is created at first run using name like ``~exwvpaytkfs6``.  
+    It is free to read and write by everyone who knows it's name.  
 
 * personal repository
-  Have same name as user registered at http://typetodo.com. It is readable by everyone but can be written only if login/password provided. Using site service, write access to particular project can be grant to specified user.
+    Have same name as user registered at http://typetodo.com. It is readable by everyone but can be written only if login/password provided. Using site service, write access to particular project can be grant to specified user.
        
 All changes done to TODO comment are accumulated and flushed with incremented version and same ID. So all changes history is saved (not yet displayed on site).
 

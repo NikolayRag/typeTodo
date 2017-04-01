@@ -9,28 +9,31 @@ Verbose TypeTodo description
 ----------------------------
 
 Start with typing ``//todo:`` comment, or use any other comment prefix according to used language.  
+
 As colon ``:`` is typed, rest of line is instantly substituted with snippet, introducing additional fields: ``//todo XXXX (tag) [+-]N: <comment>``.  
+
 ``XXXX`` will be instantly assigned with integer ID, unique within the project.
        
 Any futher edition of any of that comment field (doplet) will trigger to flush it to database, using XXXX as ID.
+
 By default database is *[projectName].do* text file which is placed inside the first project's folder **and** repository at *typetodo.com*.
 
     If at a moment there's no project used, then database is a *.do* file in Sublime's *Packages/User* folder.
 
 
-Changing doplet to ``// +todo...`` (adding ``+`` sign or pressing *<Alt+D>,<Alt+Plus>*) changes state to 'done' in database and wipes that comment of the code.
+Changing doplet to ``// +todo...`` (adding ``'+'`` sign or pressing *<Alt+D>,<Alt+Plus>*) changes state to 'done' in database and wipes that comment of the code.
 
 Full set of states are:
 
-* ``*blank*`` **<Alt+D>,<Alt+Space>**: 'Pending', at creation
+* ``' '`` **<Alt+D>,<Alt+Space>**: 'Pending', at creation
 
-* ``-`` **<Alt+D>,<Alt+Minus>**: 'Opened', management state
+* ``'-'`` **<Alt+D>,<Alt+Minus>**: 'Opened', management state
 
-* ``=`` **<Alt+D>,<Alt+=>**: 'In Progress', management state
+* ``'='`` **<Alt+D>,<Alt+=>**: 'In Progress', management state
 
-* ``+`` **<Alt+D>,<Alt+Plus>**: 'Closed', wiped when set
+* ``'+'`` **<Alt+D>,<Alt+Plus>**: 'Closed', wiped when set
 
-* ``!`` **<Alt+D>,<Alt+Del>**: 'Canceled'; As set, you will be asked for reason of canceling. If specified, that reason replaces doplet's comment in database. Then doplet is wiped.
+* ``'!'`` **<Alt+D>,<Alt+Del>**: 'Canceled'; As set, you will be asked for reason of canceling. If specified, that reason replaces doplet's comment in database. Then doplet is wiped.
 
 In addition, shortcuts for raising/lowering priority are:
 
@@ -87,7 +90,7 @@ While using of TypeTodo is completely implicit, there're some support commands a
        Command for opening related *.do* file.
 
 
-.. _`Configuring TypeTodo`: https://github.com/NikolayRag/typeTodo/blob/working/README-config.rst
+.. _`Configuring TypeTodo`: https://github.com/NikolayRag/typeTodo/blob/master/README-config.rst
 `Configuring TypeTodo`_
 
 

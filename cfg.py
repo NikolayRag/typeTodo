@@ -33,6 +33,8 @@ class Setting:
 class SettingFile(Setting):
     file=      ''
     fullName= ''
+    fullRoot=    ''
+    fullFile=    ''
     engine=    'file'
 
     fields= ['file']
@@ -51,6 +53,9 @@ class SettingFile(Setting):
             fnA[1]= defaultName +'.do'
 
         self.fullName= os.path.join(*fnA)
+
+        self.fullRoot= fnA[0]
+        self.fullFile= fnA[1]
 
 
 

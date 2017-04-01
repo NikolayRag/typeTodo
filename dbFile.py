@@ -132,26 +132,37 @@ class TodoDbFile():
 
 
     def saveId(self, _id):
-        f= codecs.open(self.settings.fullName +'.state', 'w+', 'UTF-8')
-        
-        f.write( json.dumps({'reserved':int(_id)}, indent=4) )
-        
-        f.close()
+        stateFn= os.path.join(self.settings.fullRoot,'.do.state')
+
+        stateJson= {}
+        try:
+            with codecs.open(stateFn, 'r', 'UTF-8') as f:
+                stateJson= json.loads( f.read() )
+        except:
+            None
+
+        stateJson[self.settings.fullFile]= int(_id)
+
+        with codecs.open(stateFn, 'w+', 'UTF-8') as f:
+            f.write( json.dumps(stateJson, indent=4) )
 
 
 
     def loadId(self):
+        stateFn= os.path.join(self.settings.fullRoot,'.do.state')
+
+
+        stateJson= {}
+
         try:
-            f= codecs.open(self.settings.fullName +'.state', 'r', 'UTF-8')
+            with codecs.open(stateFn, 'r', 'UTF-8') as f:
+                stateJson= json.loads( f.read() )
+
         except:
             return 0
 
-        stateJson= json.loads( f.read() )
 
-        f.close()
-
-
-        return stateJson['reserved']
+        return stateJson[self.settings.fullFile] if (self.settings.fullFile in stateJson) else 0
 
 
 

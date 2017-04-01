@@ -353,7 +353,7 @@ class TypetodoJumpCommand(sublime_plugin.TextCommand):
 
     def jumpToDo(self, _todoRegexp):
         cDb= WCache().getDB()
-        fn= cDb.config.getSettings('file').file
+        fn= cDb.config.getSettings('file').fullName
 
         if not os.path.isfile(fn):
             sublime.message_dialog('TypeTodo error:\n\n\tCannot find projects .do file')

@@ -135,7 +135,7 @@ class TodoDbFile():
         stateFn= os.path.join(self.settings.fullRoot,'.do.state')
 
         stateJson= {}
-        if os.path.isfile(self.globalFileName):
+        if os.path.isfile(stateFn):
             try:
                 with codecs.open(stateFn, 'r', 'UTF-8') as f:
                     stateJson= json.loads( f.read() )

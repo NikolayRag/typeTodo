@@ -1,10 +1,10 @@
 # coding= utf-8
 
-# todo 1 (interaction, feature) +1: multiline TODO
-#  todo 2131 (interaction, feature) +0: popup todo history
+#  todo 1 (interaction, feature) +1: multiline TODO
+#  todo 2131 (interaction, feature, unsure) +0: popup todo history
 
-# todo 232 (feature) +1: introduce sub-todo's that are part of other, todo yyy: becomes xxx/yyy
-#  todo 2141 (feature) +0: 232, create sub-todo's with inherited state and priority
+# =todo 232 (feature) +1: introduce sub-todo's that are part of other, //todo /yyy: becomes xxx/yyy
+# =todo 2141 (feature) +0: 232, create sub-todo's with inherited state and priority
 
 
 import sublime, sublime_plugin
@@ -43,7 +43,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #   React on switching project in window.
 
     def on_deactivated(self, _view):
-#  todo 1783 (cleanup, uncertain) -1: switching project in window not clearly fixed, need review
+#  todo 1783 (cleanup, uncertain, issue) -1: switching project in window not clearly fixed, need review
         sublime.set_timeout(lambda: self.on_activated(_view), 200) #spike to catch switching project in existing window
 
         sublime.set_timeout(WCache().exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
@@ -224,7 +224,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
             #protect fields
             self.view.set_read_only(self.todoCursorPlace=='todo')
 
-# todo 1239 (interaction, unsolved) +0: get rid of snippets for tags autocomplete
+#  todo 1239 (interaction, unsolved, issue) +0: get rid of snippets for tags autocomplete
             #toggle default autocomplete to avoid exceeding entries for doplet
             self.view.settings().erase('auto_complete_selector')
             if self.todoCursorPlace=='tags':
@@ -262,7 +262,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #   Create new todo in db and return string to replace original 'todo:'
 #   Saves first version of task if _postfx supplied, that is used when
 #    creating doplet in mid-line.
-#  todo 2128 (general, ux) +0: allow '//todo xxx:' expanding into existing xxx
+# =todo 2128 (general, ux) +0: allow '//todo xxx:' expanding into existing xxx
     def substNew(self, _prefx, _postfx, _region):
         todoId= self.cfgStore(0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 

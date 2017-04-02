@@ -16,7 +16,7 @@ else:
     from .dbHttp import *
     from .task import *
 
-#  todo 44 (config, db, feature, unsolved) -1: handle saving project - existing and blank; transfer db for involved files
+#  todo 44 (config, db, feature, unsolved, unsure) -1: handle saving project - existing and blank; transfer db for involved files
 
 #  todo 89 (db, feature) +1: save context (+-2 strings of code) with task
 

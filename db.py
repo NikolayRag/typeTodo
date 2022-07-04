@@ -286,11 +286,11 @@ class TodoDb():
             return
 
 
-        if self.flushLastResult:
-            self.flushLastResult= False
-            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tcannot flush todo\'s.  Will retry later'), 0)
-        else:
-            sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry later'), 0)
+#        if self.flushLastResult:
+#            self.flushLastResult= False
+#            sublime.set_timeout(lambda: sublime.error_message('TypeTodo error:\n\n\tcannot flush todo\'s.  Will retry later'), 0)
+
+        sublime.set_timeout(lambda: sublime.status_message('TypeTodo error: cannot flush todo\'s.  Will retry later'), 0)
 
 
         self.pushReset(self.flushTimeout)

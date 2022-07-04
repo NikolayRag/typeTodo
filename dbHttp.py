@@ -201,6 +201,7 @@ class TodoDbHttp():
         response= self.callHTTP('?=fetch_tasks', postData)
         if response==None:
             return False
+        print('TypeTodo: HTTP fetched')
 
         todoA= {}
         for task in json.loads(response):

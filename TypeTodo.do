@@ -2086,3 +2086,39 @@
 =general 2328: +10 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:37:26
 	Split Sublime 2 version out of maintainance 
 
+=v1.11 2358: +0 "typeTodo.py" Ki 22/07/10 22:42:39
+	review config
+
+=v1.11 2359: +0 "typeTodo.py" Ki 22/07/10 22:42:42
+	review .do.state
+
+=v1.11 2360: +0 "typeTodo.py" Ki 22/07/10 22:42:43
+	remove http by default, leave as optional experement feature
+
+=v1.11 2361: +0 "typeTodo.py" Ki 22/07/10 22:42:44
+	review search, to be done by any todo part
+
+=v1.11 2362: +0 "typeTodo.py" Ki 22/07/10 22:42:45
+	fix and review default cfg
+
+=v1.11, internal 2363: +0 "typeTodo.py" Ki 22/07/10 22:42:46
+	review todo's
+
+=v1.11 2364: +0 "typeTodo.py" Ki 22/07/10 22:42:47
+	expand - review all live interaction
+
+=v1.11 2365: +1 "typeTodo.py" Ki 22/07/10 22:42:48
+	split sublime v3 from v2
+
+=v1.11 2366: +0 "typeTodo.py" Ki 22/07/10 22:42:49
+	test for sublime 4
+
+=v1.11, future 2367: +0 "typeTodo.py" Ki 22/07/10 22:42:50
+	think of storing history within regular text db
+
+=v1.11, future 2368: +0 "typeTodo.py" Ki 22/07/10 22:42:51
+	think of telegram-bot driver
+
+=v1.11 2370: +0 "typeTodo.py" Ki 22/07/10 22:42:53
+	review redme/doc
+

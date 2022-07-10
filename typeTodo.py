@@ -1,4 +1,18 @@
 # coding= utf-8
+# =todo 2358 (v1.11) +0: review config
+# =todo 2359 (v1.11) +0: review .do.state
+# =todo 2360 (v1.11) +0: remove http by default, leave as optional experement feature
+# =todo 2361 (v1.11) +0: review search, to be done by any todo part
+# =todo 2362 (v1.11) +0: fix and review default cfg
+# =todo 2363 (v1.11, internal) +0: review todo's
+# =todo 2364 (v1.11) +0: expand - review all live interaction
+# =todo 2365 (v1.11) +1: split sublime v3 from v2
+# =todo 2366 (v1.11) +0: test for sublime 4
+# =todo 2367 (v1.11, future) +0: think of storing history within regular text db
+# =todo 2368 (v1.11, future) +0: think of telegram-bot driver
+# =todo 2370 (v1.11) +0: review redme/doc
+
+
 
 #  todo 1 (feature) +1: multiline TODO
 #  todo 2131 (interaction, feature, unsure) +0: popup todo history

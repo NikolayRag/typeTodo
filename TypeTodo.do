@@ -1,4 +1,4 @@
- interaction, feature 1: +1 "typeTodo.py" ki 17/04/02 04:30:57
+ feature 1: +1 "typeTodo.py" kii 21/07/28 06:37:43
 	multiline TODO
 
 +interaction 2: +1 "typeTodo.py" kii 15/05/11 02:28:31
@@ -118,7 +118,7 @@
 +errata 43: +0 "typeTodo.py" kii 14/12/25 10:01:00
 	.todo file comment corrected 
 
- config, db, feature, unsolved, unsure 44: -1 "db.py" ki 17/04/02 04:42:25
+ config, db, feature, unsolved 44: -1 "db.py" kii 21/07/28 06:23:58
 	handle saving project - existing and blank; transfer db for involved files
 
 +obsolete 46: +0 "cache.py" kii 15/01/21 00:14:00
@@ -568,7 +568,7 @@
 !general 231: +0 "typeTodo.py" kii 15/04/24 23:16:25
 	duplicate, done
 
-=feature 232: +1 "typeTodo.py" ki 17/04/02 04:41:29
+=feature 232: +1 "typeTodo.py" kii 17/04/02 04:41:29
 	introduce sub-todo's that are part of other, //todo /yyy: becomes xxx/yyy
 
 +fix 233: +0 "typeTodo.py" kii 15/01/20 21:10:00
@@ -1123,7 +1123,7 @@
 !xxx 1238: +0 "" kii 15/05/13 16:27:44
 	ytq
 
- interaction, unsolved, issue 1239: +0 "typeTodo.py" ki 17/04/02 04:38:49
+ interaction, unsolved, issue 1239: +0 "typeTodo.py" kii 17/04/02 04:38:49
 	get rid of snippets for tags autocomplete
 
 !xxx 1248: +0 "" kii 15/05/15 05:48:18
@@ -1423,7 +1423,7 @@
 !xxx 1781: +0 "typeTodo.py" kii 15/07/03 06:24:05
 	
 
- cleanup, uncertain, issue 1783: -1 "typeTodo.py" ki 17/04/02 04:38:55
+ cleanup, uncertain, issue 1783: -1 "typeTodo.py" kii 17/04/02 04:38:55
 	switching project in window not clearly fixed, need review
 
 !xxx 1786: +0 "commands_maintain.py" kii 15/07/03 06:33:58
@@ -1915,7 +1915,7 @@
 !xxx 2111: +0 "typeTodo.py" kii 16/09/17 20:02:52
 	ok
 
- command, api 2112: +0 "" ki 17/04/02 04:42:12
+ command, api 2112: +0 "" kii 17/04/02 04:42:12
 	allow changing one line, inline; use in substRestore()
 
 !xxx 2113: +0 "typeTodo.py" kii 16/09/17 20:04:45
@@ -1954,7 +1954,7 @@
 !bug 2127: +0 "" kii 17/02/13 03:42:27
 	bug: 1. add task, 2. add task on http, 3. change task on http; wrong file Reserved ID
 
-=general, ux 2128: +0 "typeTodo.py" ki 17/04/02 04:41:21
+=general, ux 2128: +0 "typeTodo.py" kii 17/04/02 04:41:21
 	allow '//todo xxx:' expanding into existing xxx
 
 +file 2129: +0 "dbFile.py" kii 17/02/13 04:38:59
@@ -1963,7 +1963,7 @@
 +cleanup 2130: +0 "typeTodo.py" kii 17/01/15 19:35:31
 	make no-network console messages less annoying
 
- interaction, feature, unsure 2131: +0 "typeTodo.py" ki 17/04/02 04:27:54
+ interaction, feature, unsure 2131: +0 "typeTodo.py" kii 17/04/02 04:27:54
 	popup todo history
 
 !cleanup 2132: +0 "typeTodo.py" kii 17/01/10 04:55:34
@@ -1987,13 +1987,13 @@
 +cleanup 2140: +0 "commands.py" kii 17/01/19 04:17:29
 	remove "Reset" command, make http's 'New Public Rep'
 
-=feature 2141: +0 "typeTodo.py" ki 17/04/02 04:41:40
+=feature 2141: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:24:26
 	232, create sub-todo's with inherited state and priority
 
 +http, config 2142: +0 "cfg.py" kii 17/03/30 13:38:27
 	allow to specify project name in http config: "project": ""
 
--http, api, config 2143: +0 "cfg.py" ki 17/04/02 04:33:03
+-http, api, config 2143: +0 "cfg.py" kii 17/04/02 04:33:03
 	request id name from server to fill back project name
 
 !config, feature 2144: +0 "" kii 17/03/09 03:46:29
@@ -2049,4 +2049,40 @@
 
 +org, config 2306: +0 "cfg.py" kii 17/04/01 19:13:14
 	establish config and 'file' names
+
+! 2310: +0 "" kii 18/01/26 19:15:58
+	Dyhjds
+
+ tag 2318: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:26:10
+	sort tags by use
+
+ site 2319: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:26:38
+	add notification
+
+=ux, feature 2320: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:28:01
+	allow 'dd' type
+
+=site 2321: +1 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:28:49
+	use sequrity key instead of log-pass
+
+=feature, ux, keyboard 2322: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:30:09
+	allow alt-d-d for all commands even on ordinary rows
+
+=feature, ux, keyboard 2323: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:33:04
+	Create New from within alt-d-d
+
+ feature, ux, keyboard 2324: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:33:28
+	Create New Child with altdd over exicsting
+
+ feature, ux, keyboard 2325: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:34:52
+	Create Parent with altdd over existing
+
+ feature, ux, keyboard 2326: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:34:58
+	Create Parent for selected with altdd
+
+ feature, ux, keyboard, unsure 2327: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:36:11
+	Set Parent for current todo
+
+=general 2328: +10 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:37:26
+	Split Sublime 2 version out of maintainance 
 

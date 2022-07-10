@@ -1,10 +1,22 @@
 # coding= utf-8
 
-#  todo 1 (interaction, feature) +1: multiline TODO
+#  todo 1 (feature) +1: multiline TODO
 #  todo 2131 (interaction, feature, unsure) +0: popup todo history
 
 # =todo 232 (feature) +1: introduce sub-todo's that are part of other, //todo /yyy: becomes xxx/yyy
 # =todo 2141 (feature) +0: 232, create sub-todo's with inherited state and priority
+#  todo 2318 (tag) +0: sort tags by use
+#  todo 2319 (site) +0: add notification
+# =todo 2320 (ux, feature) +0: allow 'dd' type
+# =todo 2321 (site) +1: use sequrity key instead of log-pass
+# =todo 2322 (feature, ux, keyboard) +0: allow alt-d-d for all commands even on ordinary rows
+# =todo 2323 (feature, ux, keyboard) +0: Create New from within alt-d-d
+#  todo 2324 (feature, ux, keyboard) +0: Create New Child with altdd over exicsting
+#  todo 2325 (feature, ux, keyboard) +0: Create Parent with altdd over existing
+#  todo 2326 (feature, ux, keyboard) +0: Create Parent for selected with altdd
+#  todo 2327 (feature, ux, keyboard, unsure) +0: Set Parent for current todo
+
+# =todo 2328 (general) +10: Split Sublime 2 version out of maintainance 
 
 
 import sublime, sublime_plugin

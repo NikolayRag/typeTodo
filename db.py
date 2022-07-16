@@ -16,11 +16,9 @@ else:
     from .dbHttp import *
     from .task import *
 
-#  todo 44 (config, db, feature, unsolved) -1: handle saving project - existing and blank; transfer db for involved files
+# =todo 44 (config, db, issue) +0: Review saving project from non-project state
 
-#  todo 89 (db, feature) +1: save context (+-2 strings of code) with task
-
-# todo 2045 (db, issue, fix) +0: New Id sync warning when having 2 http noticed
+#=todo 2045 (db, issue, fix) +0: New Id sync warning when having 2 http noticed
 #
 #   Manages .todoA[] task collection within .dbA[] databases.
 #   Uses supplied .config to locate '.do' config file.
@@ -193,7 +191,7 @@ class TodoDb():
 #   Release database's unused reserved ID
 #   Called at the Sublime's exit and config reset.
 
-# todo 1984 (db, issue, fix) +0: some db's are skipped at exit if *some* dbs configured (tested 3 other than File)
+#=todo 1984 (db, issue, fix) +0: some db's are skipped at exit if *some* dbs configured (tested 3 other than File)
     def releaseId(self, _atExit=False):
         self.reservedId-= 1 #used to continue id when all db's changed at once
         for db in self.dbA:
@@ -319,7 +317,7 @@ class TodoDb():
 #           1.2.3. equal
 #       1.3. all remaining tasks are marked to be saved as unexistent
 
-# todo 1818 (db) +0: make compairing inconsistencies by versions where they available (not file atm)
+#=todo 1818 (db) +0: review DB sync
     def fetch(self, _resetDb=False):
         self.todoAInited= False #lock, mainly for file newId/resetId consistence
 

@@ -1,4 +1,6 @@
 # coding= utf-8
+# =todo 2374 (v1.11) +0: review idea
+
 # =todo 2358 (v1.11) +0: review config
 # =todo 2359 (v1.11) +0: review .do.state
 # =todo 2360 (v1.11) +0: remove http by default, leave as optional experement feature
@@ -6,7 +8,7 @@
 # =todo 2362 (v1.11) +0: fix and review default cfg
 # =todo 2363 (v1.11, internal) +0: review todo's
 # =todo 2364 (v1.11) +0: expand - review all live interaction
-# =todo 2365 (v1.11) +1: split sublime v3 from v2
+# =todo 2328 (v1.11) +0: Split Sublime 2 and 3 versions
 # =todo 2366 (v1.11) +0: test for sublime 4
 # =todo 2367 (v1.11, future) +0: think of storing history within regular text db
 # =todo 2368 (v1.11, future) +0: think of telegram-bot driver
@@ -14,23 +16,20 @@
 
 
 
-#  todo 1 (feature) +1: multiline TODO
-#  todo 2131 (interaction, feature, unsure) +0: popup todo history
+# -todo 2375 (feature, ui) +0: highlight tags with different colors 
+# -todo 1 (feature) +1: multiline TODO using subsequent comments
+# -todo 2131 (interaction, feature) +0: popup todo history
+# -todo 232 (feature) +1: introduce Todo relations by tagging
+# -todo 2141 (feature) +0: 232, create sub-todo's with inherited state and priority
+# -todo 2320 (ux, feature) +0: allow different todo creation prefixes
+# -todo 2323 (feature, ux, keyboard) +0: Create New from within alt-d-d
+#  todo 2325 (feature, ux, referencing) +0: Introduce referencing
+#  todo 2376 (feature) +0: Edit Todo at DB view
+#  todo 89 (db, feature) +0: save context (+-2 strings of code) with task
 
-# =todo 232 (feature) +1: introduce sub-todo's that are part of other, //todo /yyy: becomes xxx/yyy
-# =todo 2141 (feature) +0: 232, create sub-todo's with inherited state and priority
+
 #  todo 2318 (tag) +0: sort tags by use
-#  todo 2319 (site) +0: add notification
-# =todo 2320 (ux, feature) +0: allow 'dd' type
-# =todo 2321 (site) +1: use sequrity key instead of log-pass
-# =todo 2322 (feature, ux, keyboard) +0: allow alt-d-d for all commands even on ordinary rows
-# =todo 2323 (feature, ux, keyboard) +0: Create New from within alt-d-d
-#  todo 2324 (feature, ux, keyboard) +0: Create New Child with altdd over exicsting
-#  todo 2325 (feature, ux, keyboard) +0: Create Parent with altdd over existing
-#  todo 2326 (feature, ux, keyboard) +0: Create Parent for selected with altdd
-#  todo 2327 (feature, ux, keyboard, unsure) +0: Set Parent for current todo
-
-# =todo 2328 (general) +10: Split Sublime 2 version out of maintainance 
+#  todo 2321 (http) +1: review/MAKE http api
 
 
 import sublime, sublime_plugin
@@ -69,7 +68,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #   React on switching project in window.
 
     def on_deactivated(self, _view):
-#  todo 1783 (cleanup, uncertain, issue) -1: switching project in window not clearly fixed, need review
+# =todo 1783 (cleanup, uncertain, issue) -1: switching project in window not clearly fixed, need review
         sublime.set_timeout(lambda: self.on_activated(_view), 200) #spike to catch switching project in existing window
 
         sublime.set_timeout(WCache().exitHandler, 0) #sublime's timeout is needed to let sublime.windows() be [] at exit
@@ -250,7 +249,7 @@ class TypetodoEvent(sublime_plugin.EventListener):
             #protect fields
             self.view.set_read_only(self.todoCursorPlace=='todo')
 
-#  todo 1239 (interaction, unsolved, issue) +0: get rid of snippets for tags autocomplete
+# =todo 1239 (interaction, unsolved, issue) +0: get rid of snippets for tags autocomplete
             #toggle default autocomplete to avoid exceeding entries for doplet
             self.view.settings().erase('auto_complete_selector')
             if self.todoCursorPlace=='tags':
@@ -288,7 +287,6 @@ class TypetodoEvent(sublime_plugin.EventListener):
 #   Create new todo in db and return string to replace original 'todo:'
 #   Saves first version of task if _postfx supplied, that is used when
 #    creating doplet in mid-line.
-# =todo 2128 (general, ux) +0: allow '//todo xxx:' expanding into existing xxx
     def substNew(self, _prefx, _postfx, _region):
         todoId= self.cfgStore(0, '', self.lastCat[0], self.lastLvl, self.view.file_name(), '')
 

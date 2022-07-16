@@ -344,7 +344,7 @@ class Config():
 
 
 
-# -todo 2143 (http, api, config) +0: request id name from server to fill back project name
+#  todo 2143 (http, api, config) +0: request id name from server to fill back project name
     def initNewHTTP(self):
         req = urllib2.Request('http://' +self.defaultHttpApi +'/?=new_rep_public')
         try:

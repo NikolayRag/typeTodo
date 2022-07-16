@@ -1,5 +1,5 @@
- feature 1: +1 "typeTodo.py" kii 21/07/28 06:37:43
-	multiline TODO
+-feature 1: +1 "typeTodo.py" Ki 22/07/16 16:39:13
+	multiline TODO using subsequent comments
 
 +interaction 2: +1 "typeTodo.py" kii 15/05/11 02:28:31
 	midline TODO
@@ -118,8 +118,8 @@
 +errata 43: +0 "typeTodo.py" kii 14/12/25 10:01:00
 	.todo file comment corrected 
 
- config, db, feature, unsolved 44: -1 "db.py" kii 21/07/28 06:23:58
-	handle saving project - existing and blank; transfer db for involved files
+=config, db, issue 44: +0 "db.py" Ki 22/07/16 21:54:44
+	Review saving project from non-project state
 
 +obsolete 46: +0 "cache.py" kii 15/01/21 00:14:00
 	is .window() a sufficient condition?
@@ -187,7 +187,7 @@
 +fix 86: +0 "typeTodo.py" kii 15/01/21 00:05:00
 	db init doesn't run if 2nd sublime window opened with other unconfigured project
 
- db, feature 89: +1 "db.py" kii 17/01/24 20:00:46
+ db, feature 89: +0 "typeTodo.py" Ki 22/07/16 21:51:00
 	save context (+-2 strings of code) with task
 
 +flush 92: +0 "db.py" kii 15/01/19 05:03:00
@@ -568,8 +568,8 @@
 !general 231: +0 "typeTodo.py" kii 15/04/24 23:16:25
 	duplicate, done
 
-=feature 232: +1 "typeTodo.py" kii 17/04/02 04:41:29
-	introduce sub-todo's that are part of other, //todo /yyy: becomes xxx/yyy
+-feature 232: +1 "typeTodo.py" Ki 22/07/16 21:39:53
+	introduce Todo relations by tagging
 
 +fix 233: +0 "typeTodo.py" kii 15/01/20 21:10:00
 	un/re-doing text entering doesnt trigger typetodo saving
@@ -1123,7 +1123,7 @@
 !xxx 1238: +0 "" kii 15/05/13 16:27:44
 	ytq
 
- interaction, unsolved, issue 1239: +0 "typeTodo.py" kii 17/04/02 04:38:49
+=interaction, unsolved, issue 1239: +0 "typeTodo.py" Ki 22/07/16 16:43:57
 	get rid of snippets for tags autocomplete
 
 !xxx 1248: +0 "" kii 15/05/15 05:48:18
@@ -1423,7 +1423,7 @@
 !xxx 1781: +0 "typeTodo.py" kii 15/07/03 06:24:05
 	
 
- cleanup, uncertain, issue 1783: -1 "typeTodo.py" kii 17/04/02 04:38:55
+=cleanup, uncertain, issue 1783: -1 "typeTodo.py" Ki 22/07/16 16:43:18
 	switching project in window not clearly fixed, need review
 
 !xxx 1786: +0 "commands_maintain.py" kii 15/07/03 06:33:58
@@ -1459,8 +1459,8 @@
 !xxx 1815: +0 "typeTodo.py" kii 15/07/06 04:37:04
 	
 
- db 1818: +0 "db.py" kii 17/04/02 04:40:05
-	make compairing inconsistencies by versions where they available (not file atm)
+=db 1818: +0 "db.py" Ki 22/07/16 21:47:35
+	review DB sync
 
 +db, flush, fix 1833: +5 "db.py" kii 15/07/08 04:19:52
 	flushing with error resets tasks 'saved' flag
@@ -1699,7 +1699,7 @@
 +change, file 1982: +0 "dbFile.py" kii 15/08/18 20:43:55
 	store seconds in file
 
- db, issue, fix 1984: +0 "db.py" kii 17/01/24 20:01:02
+=db, issue, fix 1984: +0 "db.py" Ki 22/07/16 21:46:05
 	some db's are skipped at exit if *some* dbs configured (tested 3 other than File)
 
 !xxx 1988: +0 "dbFile.py" kii 15/08/19 02:41:48
@@ -1780,7 +1780,7 @@
 !issue 2042: +0 "" kii 15/09/28 15:30:46
 	fghfgh
 
- db, issue, fix 2045: +0 "db.py" kii 17/01/24 20:00:50
+=db, issue, fix 2045: +0 "db.py" Ki 22/07/16 21:54:11
 	New Id sync warning when having 2 http noticed
 
 +interaction 2053: +0 "typeTodo.py" kii 15/11/08 22:11:11
@@ -1915,8 +1915,8 @@
 !xxx 2111: +0 "typeTodo.py" kii 16/09/17 20:02:52
 	ok
 
- command, api 2112: +0 "" kii 17/04/02 04:42:12
-	allow changing one line, inline; use in substRestore()
+!command, api 2112: +0 "commands_maintain.py" Ki 22/07/16 19:31:48
+	dup
 
 !xxx 2113: +0 "typeTodo.py" kii 16/09/17 20:04:45
 	test
@@ -1954,8 +1954,8 @@
 !bug 2127: +0 "" kii 17/02/13 03:42:27
 	bug: 1. add task, 2. add task on http, 3. change task on http; wrong file Reserved ID
 
-=general, ux 2128: +0 "typeTodo.py" kii 17/04/02 04:41:21
-	allow '//todo xxx:' expanding into existing xxx
+!general, ux 2128: +0 "typeTodo.py" Ki 22/07/16 16:41:23
+	wrong idea
 
 +file 2129: +0 "dbFile.py" kii 17/02/13 04:38:59
 	store file's maxID in separate .do.id file
@@ -1963,7 +1963,7 @@
 +cleanup 2130: +0 "typeTodo.py" kii 17/01/15 19:35:31
 	make no-network console messages less annoying
 
- interaction, feature, unsure 2131: +0 "typeTodo.py" kii 17/04/02 04:27:54
+-interaction, feature 2131: +0 "typeTodo.py" Ki 22/07/16 16:16:50
 	popup todo history
 
 !cleanup 2132: +0 "typeTodo.py" kii 17/01/10 04:55:34
@@ -1987,13 +1987,13 @@
 +cleanup 2140: +0 "commands.py" kii 17/01/19 04:17:29
 	remove "Reset" command, make http's 'New Public Rep'
 
-=feature 2141: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:24:26
+-feature 2141: +0 "typeTodo.py" Ki 22/07/16 16:19:39
 	232, create sub-todo's with inherited state and priority
 
 +http, config 2142: +0 "cfg.py" kii 17/03/30 13:38:27
 	allow to specify project name in http config: "project": ""
 
--http, api, config 2143: +0 "cfg.py" kii 17/04/02 04:33:03
+ http, api, config 2143: +0 "cfg.py" Ki 22/07/16 16:45:02
 	request id name from server to fill back project name
 
 !config, feature 2144: +0 "" kii 17/03/09 03:46:29
@@ -2017,8 +2017,8 @@
 +config, clean 2151: +0 "commands.py" kii 17/03/17 06:40:57
 	make command relevant
 
- command, find 2167: +0 "commands_find.py" kii 17/02/13 06:58:40
-	display find results in dropdown
+=command, find, feature 2167: +0 "commands_find.py" Ki 22/07/16 18:53:01
+	review find results window, use dynamically updated DB view
 
 !xxx 2173: +0 "task.py" kii 17/02/07 10:48:51
 	test
@@ -2035,8 +2035,8 @@
 +config, feature, migration 2181: +0 "cfg.py" kii 17/03/27 18:12:21
 	copy config to .do.cfg json file
 
- command, find 2182: +0 "commands_find.py" kii 17/02/13 06:59:14
-	dropdown option to display results in view
+!command, find 2182: +0 "" Ki 22/07/16 16:45:46
+	dup
 
 +config 2267: +0 "cfg.py" kii 17/03/30 13:41:08
 	fill missing template entries
@@ -2053,40 +2053,40 @@
 ! 2310: +0 "" kii 18/01/26 19:15:58
 	Dyhjds
 
- tag 2318: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:26:10
+ tag 2318: +0 "typeTodo.py" Ki 22/07/16 16:29:43
 	sort tags by use
 
- site 2319: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:26:38
+!site 2319: +0 "typeTodo.py" Ki 22/07/16 16:20:17
 	add notification
 
-=ux, feature 2320: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:28:01
-	allow 'dd' type
+-ux, feature 2320: +0 "typeTodo.py" Ki 22/07/16 16:29:20
+	allow different todo creation prefixes
 
-=site 2321: +1 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:28:49
-	use sequrity key instead of log-pass
+ http 2321: +1 "typeTodo.py" Ki 22/07/16 16:30:41
+	review/MAKE http api
 
-=feature, ux, keyboard 2322: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:30:09
-	allow alt-d-d for all commands even on ordinary rows
+!feature, ux, keyboard 2322: +0 "" Ki 22/07/16 16:34:17
+	dup
 
-=feature, ux, keyboard 2323: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:33:04
+-feature, ux, keyboard 2323: +0 "typeTodo.py" Ki 22/07/16 16:34:24
 	Create New from within alt-d-d
 
- feature, ux, keyboard 2324: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:33:28
-	Create New Child with altdd over exicsting
+!feature, ux, keyboard 2324: +0 "" Ki 22/07/16 16:35:24
+	dup
 
- feature, ux, keyboard 2325: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:34:52
-	Create Parent with altdd over existing
+ feature, ux, referencing 2325: +0 "typeTodo.py" Ki 22/07/16 16:37:21
+	Introduce referencing
 
- feature, ux, keyboard 2326: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:34:58
+!feature, ux, keyboard 2326: +0 "" Ki 22/07/16 16:35:58
 	Create Parent for selected with altdd
 
- feature, ux, keyboard, unsure 2327: +0 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:36:11
+!feature, ux, keyboard, unsure 2327: +0 "typeTodo.py" Ki 22/07/16 16:36:04
 	Set Parent for current todo
 
-=general 2328: +10 "..\..\..\Sublime Text 3\Packages\TypeTodo\typeTodo.py" kii 21/07/28 06:37:26
-	Split Sublime 2 version out of maintainance 
+=v1.11 2328: +0 "typeTodo.py" Ki 22/07/16 16:32:22
+	Split Sublime 2 and 3 versions
 
-=v1.11 2358: +0 "typeTodo.py" Ki 22/07/10 22:42:39
+=v1.11 2358: +0 "typeTodo.py" Ki 22/07/16 16:15:17
 	review config
 
 =v1.11 2359: +0 "typeTodo.py" Ki 22/07/10 22:42:42
@@ -2101,16 +2101,16 @@
 =v1.11 2362: +0 "typeTodo.py" Ki 22/07/10 22:42:45
 	fix and review default cfg
 
-=v1.11, internal 2363: +0 "typeTodo.py" Ki 22/07/10 22:42:46
+=v1.11, internal 2363: +0 "typeTodo.py" Ki 22/07/13 20:40:02
 	review todo's
 
-=v1.11 2364: +0 "typeTodo.py" Ki 22/07/10 22:42:47
+=v1.11 2364: +0 "typeTodo.py" Ki 22/07/10 22:43:43
 	expand - review all live interaction
 
-=v1.11 2365: +1 "typeTodo.py" Ki 22/07/10 22:42:48
-	split sublime v3 from v2
+!v1.11 2365: +1 "" Ki 22/07/16 16:31:41
+	dup
 
-=v1.11 2366: +0 "typeTodo.py" Ki 22/07/10 22:42:49
+=v1.11 2366: +0 "typeTodo.py" Ki 22/07/16 16:31:42
 	test for sublime 4
 
 =v1.11, future 2367: +0 "typeTodo.py" Ki 22/07/10 22:42:50
@@ -2119,6 +2119,21 @@
 =v1.11, future 2368: +0 "typeTodo.py" Ki 22/07/10 22:42:51
 	think of telegram-bot driver
 
-=v1.11 2370: +0 "typeTodo.py" Ki 22/07/10 22:42:53
+=v1.11 2370: +0 "typeTodo.py" Ki 22/07/16 16:16:13
 	review redme/doc
+
+!general 2371: +0 "typeTodo.py" Ki 22/07/13 21:51:39
+	
+
+!general 2372: +0 "typeTodo.py" Ki 22/07/13 21:52:42
+	1
+
+=v1.11 2374: +0 "typeTodo.py" Ki 22/07/16 16:15:52
+	review idea
+
+-feature, ui 2375: +0 "typeTodo.py" Ki 22/07/16 21:54:07
+	highlight tags with different colors 
+
+ feature 2376: +0 "typeTodo.py" Ki 22/07/16 21:36:55
+	Edit Todo at DB view
 
